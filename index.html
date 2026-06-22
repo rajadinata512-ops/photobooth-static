@@ -441,22 +441,82 @@
     .countdown{
       position:absolute;inset:14px;
       display:none;place-items:center;
-      background:rgba(0,0,0,.34);
-      backdrop-filter:blur(5px);
+      background:rgba(0,0,0,.52);
+      backdrop-filter:blur(8px);
       border-radius:18px;
       z-index:4;
     }
-    .countdown div{
-      font-size:120px;font-weight:800;
+    .countdown-inner{
+      display:flex;flex-direction:column;align-items:center;gap:6px;
+      user-select:none;
+    }
+    .countdown-label{
+      font-size:13px;font-weight:800;
+      color:var(--gold2);
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      opacity:.9;
+      background:rgba(200,150,62,.12);
+      border:1px solid rgba(200,150,62,.28);
+      padding:6px 16px;border-radius:999px;
+    }
+    .countdown-num{
+      font-size:128px;font-weight:800;
       color:#fff;
-      text-shadow:0 16px 50px rgba(200,150,62,.42);
+      line-height:1;
+      text-shadow:0 0 60px rgba(200,150,62,.5), 0 16px 50px rgba(0,0,0,.6);
       font-family:"Plus Jakarta Sans",sans-serif;
+      animation:countPulse .92s ease-out;
+    }
+    @keyframes countPulse{
+      0%{transform:scale(1.32);opacity:.4}
+      60%{transform:scale(.97);opacity:1}
+      100%{transform:scale(1);opacity:1}
+    }
+    .countdown-num.snap{
+      animation:snapFlash .22s ease-out forwards;
+    }
+    @keyframes snapFlash{
+      0%{transform:scale(1.2);opacity:1}
+      100%{transform:scale(0.8);opacity:0}
+    }
+    .countdown-sub{
+      font-size:13px;color:var(--muted);
+      letter-spacing:.04em;
+      margin-top:4px;
+    }
+    .flash-overlay{
+      position:absolute;inset:14px;border-radius:18px;
+      background:#fff;
+      opacity:0;
+      pointer-events:none;
+      z-index:5;
+      transition:opacity .06s ease;
+    }
+    .flash-overlay.flash{
+      opacity:.85;
     }
     .camera-controls{
       display:flex;align-items:center;justify-content:center;gap:14px;
-      padding:16px 16px 18px;
+      padding:16px 16px 10px;
       border-top:1px solid rgba(255,255,255,.08);
       background:rgba(255,255,255,.02);
+    }
+    .camera-hint{
+      text-align:center;
+      padding:0 16px 14px;
+      font-size:11.5px;
+      color:var(--muted);
+      background:rgba(255,255,255,.02);
+      letter-spacing:.02em;
+    }
+    kbd{
+      display:inline-block;
+      padding:2px 7px;border-radius:6px;
+      background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.12);
+      font-family:inherit;font-size:10.5px;
+      color:var(--text);
     }
     .shutter{
       width:72px;height:72px;border-radius:50%;
@@ -472,6 +532,17 @@
       box-shadow:0 0 0 1px rgba(0,0,0,.08);
     }
     .shutter:hover{transform:scale(1.06);box-shadow:0 0 0 12px rgba(200,150,62,.1)}
+    .shutter:disabled{
+      opacity:.45;cursor:not-allowed;transform:none !important;
+      box-shadow:0 0 0 8px rgba(200,150,62,.04) !important;
+    }
+    .shutter.shooting{
+      animation:shutterPulse 1s ease-in-out infinite;
+    }
+    @keyframes shutterPulse{
+      0%,100%{box-shadow:0 0 0 8px rgba(200,150,62,.08)}
+      50%{box-shadow:0 0 0 16px rgba(200,150,62,.18)}
+    }
     .mini-row{
       display:grid;grid-template-columns:repeat(auto-fit, minmax(60px, 1fr));gap:10px;
       margin-top:14px;
@@ -1353,7 +1424,14 @@
               <div class="video-stage">
                 <video id="video" autoplay playsinline muted></video>
                 <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
-                <div class="countdown" id="countdown"><div id="countdownNum">3</div></div>
+                <div class="countdown" id="countdown">
+                  <div class="countdown-inner">
+                    <div class="countdown-label" id="countdownLabel">Foto 1 / 3</div>
+                    <div class="countdown-num" id="countdownNum">3</div>
+                    <div class="countdown-sub" id="countdownSub">bersiap…</div>
+                  </div>
+                </div>
+                <div class="flash-overlay" id="flashOverlay"></div>
               </div>
 
               <div class="camera-controls">
@@ -1361,6 +1439,7 @@
                 <button class="shutter" id="shutterBtn" aria-label="Ambil foto"></button>
                 <button class="btn btn-outline" id="stopBtn">Matikan</button>
               </div>
+              <div class="camera-hint" id="cameraHint">Tekan <kbd>Enter</kbd> untuk jepret · <kbd>ESC</kbd> untuk batal</div>
             </div>
 
             <div class="mini-row" id="miniShots">
@@ -1426,6 +1505,9 @@
       captureCanvas: document.getElementById('captureCanvas'),
       countdown: document.getElementById('countdown'),
       countdownNum: document.getElementById('countdownNum'),
+      countdownLabel: document.getElementById('countdownLabel'),
+      countdownSub: document.getElementById('countdownSub'),
+      flashOverlay: document.getElementById('flashOverlay'),
       shutterBtn: document.getElementById('shutterBtn'),
       restartBtn: document.getElementById('restartBtn'),
       stopBtn: document.getElementById('stopBtn'),
@@ -2065,27 +2147,63 @@
       updateShotBadge();
       renderAll();
       state.shooting = true;
-      els.countdown.style.display = 'grid';
-      for (let n = state.timer; n >= 1; n--) {
-        els.countdownNum.textContent = n;
-        await sleep(1000);
-      }
-      els.countdownNum.textContent = '📸';
-      await sleep(260);
-      els.countdown.style.display = 'none';
+      els.shutterBtn.disabled = true;
+      els.shutterBtn.classList.add('shooting');
 
       const total = state.layout;
+
       for (let i = 0; i < total; i++) {
-        updateStatus(`Mengambil foto ${i + 1} dari ${total}`);
+        if (!state.shooting) break; // ESC cancelled
+
+        // Update label for this photo
+        els.countdownLabel.textContent = `Foto ${i + 1} / ${total}`;
+        els.countdownSub.textContent = 'bersiap…';
+        els.countdownNum.classList.remove('snap');
+        els.countdown.style.display = 'grid';
+
+        // Count down using selected timer
+        for (let n = state.timer; n >= 1; n--) {
+          if (!state.shooting) break;
+          // Re-trigger pulse animation each tick
+          els.countdownNum.textContent = n;
+          els.countdownNum.style.animation = 'none';
+          els.countdownNum.offsetHeight; // reflow to restart animation
+          els.countdownNum.style.animation = '';
+          els.countdownSub.textContent = n === 1 ? 'senyum! 😊' : n === 2 ? 'siap…' : 'bersiap…';
+          await sleep(1000);
+        }
+
+        if (!state.shooting) { els.countdown.style.display = 'none'; break; }
+
+        // Snap moment
+        els.countdownNum.textContent = '📸';
+        els.countdownNum.classList.add('snap');
+        els.countdownSub.textContent = 'jepret!';
+        await sleep(180);
+        els.countdown.style.display = 'none';
+
+        // White flash
+        els.flashOverlay.classList.add('flash');
+        await sleep(80);
+        els.flashOverlay.classList.remove('flash');
+
+        updateStatus(`Mengambil foto ${i + 1} dari ${total}…`);
         state.photos.push(await captureFrame());
         updateShotBadge();
         renderAll();
-        if (i < total - 1) await sleep(3000);
       }
+
       state.shooting = false;
+      els.shutterBtn.disabled = false;
+      els.shutterBtn.classList.remove('shooting');
+      els.countdown.style.display = 'none';
       updateShotBadge();
       renderAll();
-      updateStatus('Sesi selesai. Preview sudah siap.');
+      if (state.photos.length === total) {
+        updateStatus(`Sesi selesai ✓  ${total} foto siap diunduh.`);
+      } else {
+        updateStatus('Sesi dibatalkan.');
+      }
     }
 
     function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
@@ -2195,8 +2313,11 @@
       if (els.modalBackdrop.classList.contains('show')) return;
       if (e.key === 'Escape' && state.shooting) {
         state.shooting = false;
+        els.shutterBtn.disabled = false;
+        els.shutterBtn.classList.remove('shooting');
         els.countdown.style.display = 'none';
-        updateStatus('Pengambilan dibatalkan.');
+        els.flashOverlay.classList.remove('flash');
+        updateStatus('Pengambilan dibatalkan. Tekan shutter untuk mulai ulang.');
       }
       if (e.key === 'Enter' && document.getElementById('boothSection').classList.contains('active')) {
         if (!state.shooting) runCountdown();
