@@ -473,7 +473,7 @@
     }
     .shutter:hover{transform:scale(1.06);box-shadow:0 0 0 12px rgba(200,150,62,.1)}
     .mini-row{
-      display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+      display:grid;grid-template-columns:repeat(auto-fit, minmax(60px, 1fr));gap:10px;
       margin-top:14px;
     }
     .mini-shot{
@@ -542,10 +542,22 @@
       color:#110d16;
       box-shadow:0 18px 40px rgba(200,150,62,.18);
     }
+    .download-btn:disabled{
+      background:rgba(255,255,255,.06);
+      color:var(--muted);
+      box-shadow:none;
+      cursor:not-allowed;
+      transform:none !important;
+    }
     .retake-btn{
       background:rgba(255,255,255,.03);
       border:1px solid rgba(255,255,255,.08);
       color:var(--text);
+    }
+    .retake-btn:disabled{
+      opacity:.4;
+      cursor:not-allowed;
+      transform:none !important;
     }
     .sticker-chips{
       display:flex;flex-wrap:wrap;gap:8px;margin-top:8px
@@ -1081,7 +1093,7 @@
             </div>
             <div class="hero-actions">
               <button class="btn btn-gold" id="startBtn">Mulai Sesi</button>
-              <a class="btn btn-ghost" href="#boothSection">Lihat Booth</a>
+              <a class="btn btn-ghost" href="#boothSection">Lihat Showcase</a>
             </div>
           </div>
 
@@ -1096,6 +1108,18 @@
 
 
 <section id="showcaseSection" class="section showcase-section">
+  <div class="nav">
+    <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:18px;">
+      <div class="brand">
+        <div class="brand-badge">SB</div>
+        Studio<em>Booth</em>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn btn-ghost" style="font-size:13px;padding:10px 16px;" onclick="showSection('landingSection')">← Beranda</button>
+        <button class="btn btn-gold" style="font-size:13px;padding:10px 18px;" id="showcaseNavStartBtn">Mulai Sesi</button>
+      </div>
+    </div>
+  </div>
   <div class="wrap">
 
     <div class="showcase-head">
@@ -1236,7 +1260,7 @@
     </div>
 
     <div class="showcase-cta">
-      <button class="btn btn-gold" onclick="showSection('boothSection')">
+      <button class="btn btn-gold" id="showcaseStartBtn">
         Mulai Photobooth →
       </button>
     </div>
@@ -1248,11 +1272,14 @@
     <section id="boothSection" class="section">
       <div class="nav">
         <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:18px;">
-          <div class="brand">
+          <div class="brand" style="cursor:pointer;" id="boothBrandBtn">
             <div class="brand-badge">SB</div>
             Studio<em>Booth</em>
           </div>
-          <div class="pill" id="sessionStatus">Siap memulai sesi foto</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="pill" id="sessionStatus">Siap memulai sesi foto</div>
+            <button class="btn btn-ghost" style="font-size:12px;padding:9px 14px;" id="boothBackBtn">← Beranda</button>
+          </div>
         </div>
       </div>
 
@@ -1340,7 +1367,6 @@
               <div class="mini-shot">Shot 1</div>
               <div class="mini-shot">Shot 2</div>
               <div class="mini-shot">Shot 3</div>
-              <div class="mini-shot">Shot 4</div>
             </div>
           </main>
 
@@ -1362,8 +1388,8 @@
             </div>
 
             <div class="action-row">
-              <button class="btn download-btn" id="downloadBtn">Download</button>
-              <button class="btn retake-btn" id="retakeBtn">Ambil Ulang</button>
+              <button class="btn download-btn" id="downloadBtn" disabled>Download</button>
+              <button class="btn retake-btn" id="retakeBtn" disabled>Ambil Ulang</button>
             </div>
 
             <div class="sticker-chips" id="selectedStickerChips"></div>
@@ -1611,7 +1637,7 @@
           if (state.photos.length && state.photos.length !== state.layout) {
             // Keep it smooth and predictable: reset the session when layout changes after shots exist.
             state.photos = [];
-            updateMiniShots();
+            rebuildMiniShots();
             updateStatus(`Layout diubah ke ${state.layout} foto. Sesi foto direset agar hasil tetap rapi.`);
           }
           setTool('layout');
@@ -1929,6 +1955,17 @@
         : `<span class="sticker-chip">Belum ada stiker dipilih</span>`;
     }
 
+    function rebuildMiniShots(){
+      // Rebuild mini-shot slots to match current layout count
+      els.miniShots.innerHTML = '';
+      for (let i = 0; i < state.layout; i++) {
+        const div = document.createElement('div');
+        div.className = 'mini-shot';
+        div.textContent = `Shot ${i + 1}`;
+        els.miniShots.appendChild(div);
+      }
+    }
+
     function updateShotBadge(){
       const remain = Math.max(0, state.layout - state.photos.length);
       els.shotBadge.textContent = state.shooting
@@ -1941,6 +1978,9 @@
         : state.photos.length
           ? `Sesi selesai. ${state.photos.length} foto siap diunduh.`
           : `Siap memulai sesi foto`;
+      // Sync mini-shot slot count with current layout
+      const currentSlots = els.miniShots.children.length;
+      if (currentSlots !== state.layout) rebuildMiniShots();
       const slots = [...els.miniShots.children];
       slots.forEach((box, i) => {
         box.innerHTML = '';
@@ -1953,6 +1993,10 @@
           box.textContent = `Shot ${i + 1}`;
         }
       });
+      // Enable/disable action buttons based on photo state
+      const hasPhotos = state.photos.length > 0;
+      els.downloadBtn.disabled = !hasPhotos;
+      els.retakeBtn.disabled = !hasPhotos;
     }
 
     function setTimer(sec){
@@ -2057,6 +2101,15 @@
       a.download = `studiobooth-${state.layout}foto-${Date.now()}.png`;
       a.href = canvas.toDataURL('image/png');
       a.click();
+      // Show download success feedback
+      const btn = els.downloadBtn;
+      const originalText = btn.textContent;
+      btn.textContent = '✓ Tersimpan!';
+      btn.style.background = 'linear-gradient(180deg, #4ade80, #22c55e)';
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.background = '';
+      }, 2200);
     }
 
     function retake(){
@@ -2070,6 +2123,35 @@
     function alertMessage(text){
       return openModal('Perhatian', text, {ok:'Mengerti', cancel:'Tutup'});
     }
+
+    function goHome(){
+      stopCamera();
+      showSection('landingSection');
+    }
+    document.getElementById('boothBackBtn').addEventListener('click', goHome);
+    document.getElementById('boothBrandBtn').addEventListener('click', goHome);
+
+    document.getElementById('showcaseNavStartBtn').addEventListener('click', async () => {
+      showSection('boothSection');
+      setTool('layout');
+      updateShotBadge();
+      await startCamera();
+      renderAll();
+    });
+
+    document.getElementById('showcaseStartBtn').addEventListener('click', async () => {
+      showSection('boothSection');
+      setTool('layout');
+      updateShotBadge();
+      await startCamera();
+      renderAll();
+    });
+
+    // Expose to global scope for inline onclick handlers
+    window.showSection = showSection;
+    window.setTool = setTool;
+    window.startCamera = startCamera;
+    window.renderAll = renderAll;
 
     // Event bindings
     document.getElementById('startBtn').addEventListener('click', async () => {
