@@ -617,447 +617,432 @@
       .video-stage{padding:10px}
     }
 
-    .showcase-grid{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:24px;
-      margin-bottom:34px;
-    }
+    .showcase-section{
+  padding: 36px 0 40px;
+}
 
-    .showcase-card{
-      position:relative;
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(200,150,62,.18);
-      border-radius:28px;
-      overflow:hidden;
-      transition:.35s ease;
-      box-shadow:0 14px 36px rgba(0,0,0,.18);
-    }
+.showcase-head{
+  text-align:center;
+  margin-bottom: 44px;
+  position:relative;
+}
 
-    .showcase-card:hover{
-      transform:translateY(-8px);
-      border-color:rgba(200,150,62,.52);
-      box-shadow:
-        0 20px 50px rgba(0,0,0,.45),
-        0 0 30px rgba(200,150,62,.15);
-    }
+.showcase-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 18px;
+  border-radius:999px;
+  border:1px solid rgba(200,150,62,.28);
+  background:rgba(200,150,62,.08);
+  color:var(--gold2);
+  font-size:13px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  box-shadow:0 0 0 1px rgba(255,255,255,.02) inset;
+}
 
-    .showcase-card::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.58) 100%);
-      pointer-events:none;
-      z-index:1;
-    }
+.showcase-title{
+  margin-top:18px;
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(44px,6vw,76px);
+  line-height:.96;
+  font-weight:600;
+  color:#fff;
+  letter-spacing:-1px;
+}
 
-    .showcase-card img{
-      display:block;
-      width:100%;
-      height:280px;
-      object-fit:cover;
-      filter:saturate(1.02) contrast(1.04) brightness(.95);
-    }
+.showcase-title span{
+  background:linear-gradient(135deg,#F7E7B4 0%,#C8963E 38%,#FFE8A3 68%,#B77A1C 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  text-shadow:0 0 22px rgba(200,150,62,.10);
+}
 
-    .layout-badge{
-        position:absolute;
-        top:16px;
-        left:16px;
-        z-index:5;
+.showcase-desc{
+  margin:16px auto 0;
+  max-width:760px;
+  color:var(--muted);
+  font-size:18px;
+  line-height:1.8;
+}
 
-        padding:10px 18px;
-        border-radius:999px;
+.showcase-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:22px;
+  margin-bottom:28px;
+}
 
-        backdrop-filter:blur(20px);
+.showcase-card{
+  position:relative;
+  overflow:hidden;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(200,150,62,.16);
+  border-radius:28px;
+  transition:.35s ease;
+  box-shadow:0 18px 38px rgba(0,0,0,.22);
+}
 
-        font-size:13px;
-        font-weight:600;
-    }
+.showcase-card:hover{
+  transform:translateY(-8px);
+  border-color:rgba(200,150,62,.56);
+  box-shadow:0 22px 52px rgba(0,0,0,.42), 0 0 34px rgba(200,150,62,.12);
+}
 
-    .signature{
-        color:#F7E7B4;
-        background:rgba(20,20,20,.75);
-        border:1px solid rgba(200,150,62,.35);
-    }
+.showcase-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.34) 100%);
+  pointer-events:none;
+  z-index:1;
+}
 
-    .popular{
-        color:#FFD76A;
-        background:rgba(90,25,0,.75);
-        border:1px solid rgba(255,180,60,.45);
-    }
+.showcase-card-featured{
+  box-shadow:0 0 0 1px rgba(200,150,62,.22), 0 18px 40px rgba(0,0,0,.28);
+}
 
-    .party{
-        color:#FFE5A3;
-        background:rgba(15,15,25,.8);
-        border:1px solid rgba(255,215,100,.35);
-    }
+.showcase-image{
+  height: 250px;
+  overflow:hidden;
+  background:linear-gradient(135deg, rgba(255,255,255,.04), rgba(0,0,0,.12));
+}
 
-    .layout-badge::before{
-      content:"✦";
-      color:var(--gold2);
-      font-size:12px;
-      opacity:.95;
-    }
+.showcase-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
 
-    .card-index{
-      position:absolute;
-      right:16px;
-      bottom:14px;
-      z-index:3;
-      font-family:"Cormorant Garamond",serif;
-      font-style:italic;
-      font-size:34px;
-      line-height:1;
-      color:var(--gold2);
-      text-shadow:0 0 18px rgba(200,150,62,.3);
-      opacity:.95;
-    }
+.layout-badge{
+  position:absolute;
+  top:16px;
+  left:16px;
+  z-index:3;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 14px;
+  border-radius:999px;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.4px;
+  border:1px solid rgba(255,255,255,.08);
+}
 
-    .showcase-card h3{
-      position:relative;
-      z-index:2;
-      padding:18px 20px 6px;
-      font-family:"Cormorant Garamond",serif;
-      font-style:italic;
-      font-size:30px;
-      font-weight:600;
-      color:var(--gold2);
-      letter-spacing:-.4px;
-    }
+.layout-badge.signature{
+  background:rgba(12,12,12,.72);
+  color:#F7E7B4;
+  border-color:rgba(200,150,62,.34);
+}
 
-    .showcase-card p{
-      position:relative;
-      z-index:2;
-      padding:0 20px 22px;
-      color:#cfc8d8;
-      font-size:14px;
-      line-height:1.7;
-      max-width:280px;
-    }
+.layout-badge.popular{
+  background:rgba(90,25,0,.72);
+  color:#FFD76A;
+  border-color:rgba(255,180,60,.44);
+}
 
-    .showcase-card-featured{
-      border-color:rgba(200,150,62,.45);
-      box-shadow:
-        0 0 0 1px rgba(200,150,62,.08),
-        0 22px 50px rgba(0,0,0,.42),
-        0 0 24px rgba(200,150,62,.10);
-      transform:translateY(-2px);
-    }
+.layout-badge.party{
+  background:rgba(15,15,25,.75);
+  color:#FFE5A3;
+  border-color:rgba(255,215,100,.35);
+}
 
-    .showcase-card-featured:hover{
-      transform:translateY(-10px);
-    }
+.showcase-content{
+  position:relative;
+  z-index:2;
+  padding:18px 20px 20px;
+  min-height:132px;
+}
 
-    .showcase-card-featured::after{
-      content:"";
-      position:absolute;
-      inset:auto 12px 12px auto;
-      width:86px;
-      height:86px;
-      border-radius:50%;
-      background:radial-gradient(circle, rgba(200,150,62,.18), transparent 68%);
-      filter:blur(2px);
-      pointer-events:none;
-      z-index:1;
-    }
+.showcase-meta{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:8px;
+}
 
-    .feature-preview{
-      display:grid;
-      grid-template-columns:repeat(5,minmax(0,1fr));
-      gap:18px;
-      margin-top:26px;
-    }
+.showcase-meta h3{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:28px;
+  color:#F2E4D0;
+  line-height:1;
+}
 
-    .feature-box{
-      position:relative;
-      padding:28px 18px 24px;
-      text-align:center;
-      border-radius:28px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
-      border:1px solid rgba(200,150,62,.12);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.02);
-      overflow:hidden;
-      transition:.35s ease;
-    }
+.showcase-meta span{
+  font-family:'Cormorant Garamond',serif;
+  font-size:28px;
+  color:var(--gold2);
+  opacity:.95;
+}
 
-    .feature-box::before{
-      content:"✦";
-      position:absolute;
-      top:16px;
-      left:16px;
-      color:rgba(200,150,62,.78);
-      font-size:13px;
-      z-index:1;
-    }
+.showcase-content p{
+  color:#CFCFCF;
+  font-size:14px;
+  line-height:1.65;
+}
 
-    .feature-box::after{
-      content:"✦";
-      position:absolute;
-      top:16px;
-      right:16px;
-      color:rgba(200,150,62,.78);
-      font-size:13px;
-      z-index:1;
-    }
+.feature-panel{
+  display:grid;
+  grid-template-columns:.95fr 1.1fr;
+  gap:22px;
+  margin-bottom:26px;
+}
 
-    .feature-box:hover{
-      transform:translateY(-8px);
-      border-color:rgba(200,150,62,.45);
-      box-shadow:
-        0 20px 44px rgba(0,0,0,.38),
-        0 0 28px rgba(200,150,62,.12);
-    }
+.feature-lead{
+  position:relative;
+  padding:34px 30px 28px;
+  border-radius:28px;
+  background:
+    radial-gradient(circle at 85% -10%, rgba(200,150,62,.20), transparent 55%),
+    linear-gradient(165deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+  border:1px solid rgba(200,150,62,.24);
+  overflow:hidden;
+}
 
-    .feature-box-highlight{
-      background:linear-gradient(180deg, rgba(200,150,62,.09), rgba(255,255,255,.02));
-      border-color:rgba(200,150,62,.28);
-    }
+.feature-lead-tag{
+  display:inline-flex;
+  align-items:center;
+  padding-left:12px;
+  border-left:2px solid var(--gold);
+  color:var(--gold2);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  margin-bottom:18px;
+}
 
-    .feature-circle{
-      width:96px;
-      height:96px;
-      margin:8px auto 20px;
-      border-radius:50%;
-      display:grid;
-      place-items:center;
-      position:relative;
-      background:
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,.18), rgba(255,255,255,.03) 55%, rgba(0,0,0,.08) 100%);
-      border:1px solid rgba(200,150,62,.5);
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.03),
-        0 0 28px rgba(200,150,62,.08);
-    }
+.feature-lead h4{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:40px;
+  line-height:1.05;
+  color:#F7E7B4;
+  margin-bottom:12px;
+  letter-spacing:-.5px;
+}
 
-    .feature-circle::before{
-      content:"";
-      position:absolute;
-      inset:12px;
-      border-radius:50%;
-      border:1px solid rgba(200,150,62,.14);
-    }
+.feature-lead p{
+  color:var(--muted);
+  line-height:1.75;
+  font-size:14.5px;
+  max-width:340px;
+  margin-bottom:24px;
+}
 
-    .feature-circle span{
-      font-size:42px;
-      filter:drop-shadow(0 8px 14px rgba(0,0,0,.28));
-    }
+.swatch-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
 
-    .feature-box h4{
-      font-family:"Cormorant Garamond",serif;
-      font-style:italic;
-      font-size:32px;
-      line-height:1;
-      color:var(--gold2);
-      margin-bottom:10px;
-    }
+.swatch-row span{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 4px 14px rgba(0,0,0,.3);
+  display:block;
+}
 
-    .feature-box p{
-      color:#ccc5d7;
-      font-size:14px;
-      line-height:1.7;
-    }
+.swatch-more{
+  width:auto !important;
+  height:auto !important;
+  border-radius:999px !important;
+  padding:6px 11px;
+  font-size:12px;
+  font-weight:700;
+  color:var(--gold2);
+  background:rgba(200,150,62,.1) !important;
+  border:1px solid rgba(200,150,62,.3) !important;
+  box-shadow:none !important;
+}
 
-    .showcase-head{
-      position:relative;
-      text-align:center;
-      margin-bottom:52px;
-      padding-top:10px;
-    }
+.feature-mini-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
 
-    .showcase-head::before,
-    .showcase-head::after{
-      content:"";
-      position:absolute;
-      top:32px;
-      width:120px;
-      height:1px;
-      background:linear-gradient(90deg, transparent, rgba(200,150,62,.66), transparent);
-    }
+.feature-mini{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  padding:20px;
+  border-radius:16px;
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(200,150,62,.13);
+  transition:.3s ease;
+}
 
-    .showcase-head::before{left:0}
-    .showcase-head::after{right:0}
+.feature-mini:hover{
+  border-color:rgba(200,150,62,.42);
+  background:rgba(255,255,255,.045);
+  transform:translateY(-3px);
+}
 
-    .showcase-badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:10px 18px;
-      border-radius:999px;
-      border:1px solid rgba(200,150,62,.25);
-      background:rgba(200,150,62,.08);
-      color:var(--gold2);
-      font-size:13px;
-      letter-spacing:1px;
-      text-transform:uppercase;
-      box-shadow:0 12px 30px rgba(0,0,0,.16);
-    }
+.feature-mini-accent{
+  border-color:rgba(214,150,180,.24);
+  background:rgba(214,150,180,.03);
+}
 
-    .showcase-title{
-      margin-top:22px;
-      font-family:"Cormorant Garamond",serif;
-      font-size:clamp(42px,6vw,72px);
-      line-height:1;
-      font-weight:600;
-      color:#fff;
-      letter-spacing:-1px;
-    }
+.feature-mini-accent:hover{
+  border-color:rgba(214,150,180,.5);
+  background:rgba(214,150,180,.05);
+}
 
-    .showcase-title span{
-      background:linear-gradient(
-        135deg,
-        #F7E7B4 0%,
-        #C8963E 35%,
-        #FFE8A3 60%,
-        #B77A1C 100%
-      );
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      background-clip:text;
-      text-shadow:0 0 20px rgba(200,150,62,.18);
-    }
+.feature-mini-accent .feature-mini-icon{
+  background:linear-gradient(160deg, rgba(214,150,180,.26), rgba(200,150,62,.05));
+  border-color:rgba(214,150,180,.4);
+  color:#E7B8CE;
+}
 
-    .showcase-desc{
-      margin:20px auto 0;
-      max-width:780px;
-      color:var(--muted);
-      font-size:18px;
-      line-height:1.8;
-    }
+.feature-mini-icon{
+  flex:0 0 auto;
+  width:42px;
+  height:42px;
+  border-radius:13px;
+  display:grid;
+  place-items:center;
+  color:var(--gold2);
+  background:linear-gradient(160deg, rgba(200,150,62,.22), rgba(200,150,62,.05));
+  border:1px solid rgba(200,150,62,.32);
+}
 
-    .stats-row{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:0;
-      margin-top:28px;
-      padding:18px 16px;
-      border-radius:30px;
-      border:1px solid rgba(200,150,62,.14);
-      background:rgba(255,255,255,.03);
-      overflow:hidden;
-      box-shadow:0 14px 36px rgba(0,0,0,.18);
-    }
+.feature-mini-icon svg{
+  display:block;
+  width:19px;
+  height:19px;
+}
 
-    .stat{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:14px;
-      padding:10px 12px;
-      border-right:1px solid rgba(255,255,255,.08);
-    }
+.feature-mini h5{
+  font-family:"Plus Jakarta Sans",sans-serif;
+  font-style:normal;
+  font-weight:700;
+  font-size:15px;
+  color:var(--text);
+  margin-bottom:4px;
+  letter-spacing:-.1px;
+}
 
-    .stat:last-child{
-      border-right:none;
-    }
+.feature-mini p{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+}
 
-    .stat-icon{
-      width:64px;
-      height:64px;
-      border-radius:50%;
-      display:grid;
-      place-items:center;
-      flex:0 0 auto;
-      border:1px solid rgba(200,150,62,.42);
-      background:rgba(200,150,62,.06);
-      box-shadow:0 0 24px rgba(200,150,62,.08);
-      color:var(--gold2);
-      font-size:28px;
-    }
+.stat-strip{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:0;
+  margin:6px auto 0;
+  max-width:880px;
+}
 
-    .stat strong{
-      display:block;
-      font-family:"Cormorant Garamond",serif;
-      font-style:italic;
-      font-size:42px;
-      line-height:1;
-      color:var(--gold2);
-      letter-spacing:-.4px;
-    }
+.stat-inline{
+  display:flex;
+  align-items:baseline;
+  gap:9px;
+  padding:6px 24px;
+  border-left:1px solid rgba(200,150,62,.22);
+}
 
-    .stat span{
-      display:block;
-      color:var(--text);
-      font-size:14px;
-      font-weight:600;
-      margin-top:3px;
-    }
+.stat-inline:first-child{
+  border-left:none;
+}
 
-    .showcase-cta{
-      position:relative;
-      text-align:center;
-      margin-top:36px;
-    }
+.stat-inline strong{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:30px;
+  color:var(--gold2);
+  letter-spacing:-.4px;
+}
 
-    .showcase-cta::before{
-      content:"";
-      position:absolute;
-      left:50%;
-      top:-18px;
-      transform:translateX(-50%);
-      width:260px;
-      height:1px;
-      background:linear-gradient(90deg, transparent, rgba(200,150,62,.56), transparent);
-    }
+.stat-inline span{
+  color:var(--muted);
+  font-size:13px;
+  white-space:nowrap;
+}
+.showcase-cta{
+  text-align:center;
+  margin-top:8px;
+}
 
-    @media (max-width: 1180px){
-      .showcase-grid{
-        grid-template-columns:repeat(2,minmax(0,1fr));
-      }
-      .feature-preview{
-        grid-template-columns:repeat(2,minmax(0,1fr));
-      }
-      .stats-row{
-        grid-template-columns:repeat(2,minmax(0,1fr));
-      }
-      .stat{
-        border-right:none;
-        border-bottom:1px solid rgba(255,255,255,.08);
-      }
-      .stat:nth-child(3),
-      .stat:nth-child(4){
-        border-bottom:none;
-      }
-      .showcase-head::before,
-      .showcase-head::after{
-        width:92px;
-      }
-    }
+.btn-gold{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:16px 32px;
+  border-radius:999px;
+  background:linear-gradient(180deg,var(--gold2),var(--gold));
+  color:#0D0A14;
+  font-weight:800;
+  font-size:16px;
+  box-shadow:0 18px 40px rgba(200,150,62,.22);
+  transition:.25s ease;
+}
 
-    @media (max-width: 720px){
-      .showcase-grid,
-      .feature-preview,
-      .stats-row{
-        grid-template-columns:1fr;
-      }
+.btn-gold:hover{
+  transform:translateY(-2px);
+  box-shadow:0 22px 48px rgba(200,150,62,.28);
+}
 
-      .showcase-head::before,
-      .showcase-head::after{
-        display:none;
-      }
+@media (max-width: 1180px){
+  .showcase-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
 
-      .showcase-title{
-        font-size:clamp(38px,10vw,58px);
-      }
+  .feature-panel{
+    grid-template-columns:1fr;
+  }
 
-      .showcase-desc{
-        font-size:16px;
-      }
+  .feature-lead p{
+    max-width:520px;
+  }
+}
 
-      .showcase-card img{
-        height:240px;
-      }
+@media (max-width: 720px){
+  .showcase-grid{
+    grid-template-columns:1fr;
+  }
 
-      .stat{
-        justify-content:flex-start;
-        border-right:none;
-        border-bottom:1px solid rgba(255,255,255,.08);
-      }
+  .showcase-title{
+    font-size:clamp(38px,12vw,58px);
+  }
 
-      .stat:last-child{
-        border-bottom:none;
-      }
-    }
+  .showcase-desc{
+    font-size:16px;
+  }
+
+  .feature-mini-grid{
+    grid-template-columns:1fr;
+  }
+
+  .feature-lead h4{
+    font-size:34px;
+  }
+
+  .stat-strip{
+    gap:6px 0;
+  }
+
+  .stat-inline{
+    padding:6px 16px;
+    border-left:none;
+  }
+}
 
   </style>
 </head>
@@ -1105,129 +1090,154 @@
     </section>
 
 
-    <section id="showcaseSection" class="section">
-      <div class="wrap">
+<section id="showcaseSection" class="section showcase-section">
+  <div class="wrap">
 
-        <div class="section-head showcase-head">
-          <span class="showcase-badge">✦ StudioBooth Showcase</span>
+    <div class="showcase-head">
+      <span class="showcase-badge">✦ StudioBooth Showcase</span>
 
-          <h2 class="showcase-title">
-            Pilih Gaya <span>Photobooth</span><br>
-            Favoritmu
-          </h2>
+      <h2 class="showcase-title">
+        Pilih Gaya <span>Photobooth</span> Favoritmu
+      </h2>
 
-          <p class="showcase-desc">
-            Layout elegan, frame premium, filter estetik,
-            dan hasil berkualitas tinggi untuk setiap momen.
-          </p>
+      <p class="showcase-desc">
+        Layout elegan, frame premium, filter estetik, dan hasil berkualitas tinggi untuk setiap momen.
+      </p>
+    </div>
+
+    <div class="showcase-grid">
+
+      <div class="showcase-card">
+        <div class="layout-badge signature">✦ Signature</div>
+        <div class="showcase-image">
+          <img src="public/images/model1.jpg" alt="Solo Strip">
         </div>
-
-        <div class="showcase-grid">
-          <div class="showcase-card">
-            <div class="layout-badge signature">
-                ✦ Signature
-            </div>
-            <div class="card-index">01</div>
-            <img src="public/images/model1.jpg" alt="Solo Strip preview">
+        <div class="showcase-content">
+          <div class="showcase-meta">
             <h3>Solo Strip</h3>
-            <p>Cocok untuk pasangan dan bestie.</p>
+            <span>01</span>
           </div>
-
-          <div class="showcase-card showcase-card-featured">
-           <div class="layout-badge popular">
-                🔥 Paling Populer
-          </div>
-            <div class="card-index">02</div>
-            <img src="public/images/model2.jpg" alt="Golden Duo preview">
-            <h3>Golden Duo</h3>
-            <p>Paling populer untuk photobooth.</p>
-          </div>
-
-          <div class="showcase-card">
-            <div class="layout-badge party">
-              👑 Party Choice
-           </div>
-            <div class="card-index">03</div>
-            <img src="public/images/model3.jpg" alt="Bestie Booth preview">
-            <h3>Bestie Booth</h3>
-            <p>Lebih banyak pose dan ekspresi.</p>
-          </div>
+          <p>Cocok untuk pasangan dan bestie.</p>
         </div>
+      </div>
 
-        <div class="feature-preview">
-          <div class="feature-box feature-box-highlight">
-            <div class="feature-circle"><span>🖼️</span></div>
-            <h4>Frame Premium</h4>
-            <p>Gold, Cream, Forest, Lavender, dan warna eksklusif lainnya.</p>
+      <div class="showcase-card showcase-card-featured">
+        <div class="layout-badge popular">🔥 Paling Populer</div>
+        <div class="showcase-image">
+          <img src="public/images/model2.jpg" alt="Golden Duo">
+        </div>
+        <div class="showcase-content">
+          <div class="showcase-meta">
+            <h3>Golden Duo</h3>
+            <span>02</span>
           </div>
+          <p>Paling populer untuk photobooth.</p>
+        </div>
+      </div>
 
-          <div class="feature-box">
-            <div class="feature-circle"><span>✨</span></div>
-            <h4>Filter Realtime</h4>
+      <div class="showcase-card">
+        <div class="layout-badge party">👑 Party Choice</div>
+        <div class="showcase-image">
+          <img src="public/images/model3.jpg" alt="Bestie Booth">
+        </div>
+        <div class="showcase-content">
+          <div class="showcase-meta">
+            <h3>Bestie Booth</h3>
+            <span>03</span>
+          </div>
+          <p>Lebih banyak pose dan ekspresi.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="feature-panel">
+
+      <div class="feature-lead">
+        <span class="feature-lead-tag">Andalan Kami</span>
+        <h4>Frame Premium</h4>
+        <p>Gold, Cream, Forest, Lavender, dan warna eksklusif lainnya — dipilih langsung dari palet studio kami.</p>
+        <div class="swatch-row">
+          <span style="background:#C8963E"></span>
+          <span style="background:#F1E8D8"></span>
+          <span style="background:#3B5B41"></span>
+          <span style="background:#8C7BA8"></span>
+          <span class="swatch-more">+3</span>
+        </div>
+      </div>
+
+      <div class="feature-mini-grid">
+
+        <div class="feature-mini">
+          <span class="feature-mini-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+              <line x1="5" y1="4" x2="5" y2="20"/><circle cx="5" cy="9" r="2.1"/>
+              <line x1="12" y1="4" x2="12" y2="20"/><circle cx="12" cy="15" r="2.1"/>
+              <line x1="19" y1="4" x2="19" y2="20"/><circle cx="19" cy="7" r="2.1"/>
+            </svg>
+          </span>
+          <div>
+            <h5>Filter Realtime</h5>
             <p>Warm, Vintage, Noir, Dreamy dan lainnya.</p>
           </div>
+        </div>
 
-          <div class="feature-box">
-            <div class="feature-circle"><span>🎀</span></div>
-            <h4>Sticker Estetik</h4>
+        <div class="feature-mini feature-mini-accent">
+          <span class="feature-mini-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+              <path d="M12 3 L14 10 L21 12 L14 14 L12 21 L10 14 L3 12 L10 10 Z"/>
+            </svg>
+          </span>
+          <div>
+            <h5>Sticker Estetik</h5>
             <p>Heart, Ribbon, Flower, Sparkle dan Coffee.</p>
           </div>
+        </div>
 
-          <div class="feature-box">
-            <div class="feature-circle"><span>📷</span></div>
-            <h4>Hasil Berkualitas</h4>
-            <p>Foto tajam, warna elegan, siap untuk dibagikan.</p>
-          </div>
-
-          <div class="feature-box">
-            <div class="feature-circle"><span>⬇️</span></div>
-            <h4>Download HD</h4>
-            <p>Resolusi tinggi, kualitas terbaik untuk setiap momen.</p>
+        <div class="feature-mini">
+          <span class="feature-mini-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 8h3l1.4-2h7.2L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/>
+              <circle cx="12" cy="13" r="3.3"/>
+            </svg>
+          </span>
+          <div>
+            <h5>Hasil Berkualitas</h5>
+            <p>Foto tajam, warna elegan, siap dibagikan.</p>
           </div>
         </div>
 
-        <div class="stats-row">
-          <div class="stat">
-            <div class="stat-icon">▦</div>
-            <div>
-              <strong>4+</strong>
-              <span>Layout Premium</span>
-            </div>
+        <div class="feature-mini">
+          <span class="feature-mini-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 4v11"/><path d="M7.5 11.5L12 16l4.5-4.5"/><path d="M5 19h14"/>
+            </svg>
+          </span>
+          <div>
+            <h5>Download HD</h5>
+            <p>Resolusi tinggi untuk setiap momen.</p>
           </div>
-
-          <div class="stat">
-            <div class="stat-icon">◎</div>
-            <div>
-              <strong>7+</strong>
-              <span>Warna Frame</span>
-            </div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-icon">✦</div>
-            <div>
-              <strong>20+</strong>
-              <span>Sticker Estetik</span>
-            </div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-icon">HD</div>
-            <div>
-              <strong>HD</strong>
-              <span>Download Quality</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="showcase-cta">
-          <button class="btn btn-gold" onclick="showSection('boothSection')">
-            Mulai Photobooth →
-          </button>
         </div>
 
       </div>
-    </section>
+
+    </div>
+
+    <div class="stat-strip">
+      <div class="stat-inline"><strong>4+</strong><span>Layout Premium</span></div>
+      <div class="stat-inline"><strong>7+</strong><span>Warna Frame</span></div>
+      <div class="stat-inline"><strong>20+</strong><span>Sticker Estetik</span></div>
+      <div class="stat-inline"><strong>HD</strong><span>Download Quality</span></div>
+    </div>
+
+    <div class="showcase-cta">
+      <button class="btn btn-gold" onclick="showSection('boothSection')">
+        Mulai Photobooth →
+      </button>
+    </div>
+
+  </div>
+</section>
 
 
     <section id="boothSection" class="section">
