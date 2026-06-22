@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StudioBooth — Photo Booth</title>
+  <title>StudioBooth — Photo Booth V2</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -618,145 +618,434 @@
     }
 
     .showcase-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-    gap:24px;
-    margin-bottom:50px;
-}
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:24px;
+      margin-bottom:34px;
+    }
 
-.showcase-card{
-    background:rgba(255,255,255,.03);
-    border:1px solid rgba(200,150,62,.15);
-    border-radius:28px;
-    overflow:hidden;
-    transition:.3s;
-}
+    .showcase-card{
+      position:relative;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(200,150,62,.18);
+      border-radius:28px;
+      overflow:hidden;
+      transition:.35s ease;
+      box-shadow:0 14px 36px rgba(0,0,0,.18);
+    }
 
-.showcase-card:hover{
-    transform:translateY(-6px);
-    border-color:var(--accent);
-}
+    .showcase-card:hover{
+      transform:translateY(-8px);
+      border-color:rgba(200,150,62,.52);
+      box-shadow:
+        0 20px 50px rgba(0,0,0,.45),
+        0 0 30px rgba(200,150,62,.15);
+    }
 
-.showcase-card img{
-    width:100%;
-    height:260px;
-    object-fit:cover;
-}
+    .showcase-card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.58) 100%);
+      pointer-events:none;
+      z-index:1;
+    }
 
-.showcase-card h3{
-    padding:20px 20px 8px;
-    font-size:24px;
-}
+    .showcase-card img{
+      display:block;
+      width:100%;
+      height:280px;
+      object-fit:cover;
+      filter:saturate(1.02) contrast(1.04) brightness(.95);
+    }
 
-.showcase-card p{
-    padding:0 20px 24px;
-    color:var(--muted);
-}
+    .layout-badge{
+      position:absolute;
+      top:16px;
+      left:16px;
+      z-index:3;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:rgba(15,15,15,.66);
+      backdrop-filter:blur(12px);
+      border:1px solid rgba(200,150,62,.36);
+      color:var(--gold2);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.5px;
+      box-shadow:0 10px 28px rgba(0,0,0,.22);
+    }
 
-.feature-preview{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:20px;
-}
+    .layout-badge::before{
+      content:"✦";
+      color:var(--gold2);
+      font-size:12px;
+      opacity:.95;
+    }
 
-.feature-box{
-    background:rgba(255,255,255,.03);
-    border:1px solid rgba(200,150,62,.12);
-    border-radius:24px;
-    padding:24px;
-    text-align:center;
-}
+    .card-index{
+      position:absolute;
+      right:16px;
+      bottom:14px;
+      z-index:3;
+      font-family:"Cormorant Garamond",serif;
+      font-style:italic;
+      font-size:34px;
+      line-height:1;
+      color:var(--gold2);
+      text-shadow:0 0 18px rgba(200,150,62,.3);
+      opacity:.95;
+    }
 
-.feature-box span{
-    font-size:32px;
-    display:block;
-    margin-bottom:12px;
-}
+    .showcase-card h3{
+      position:relative;
+      z-index:2;
+      padding:18px 20px 6px;
+      font-family:"Cormorant Garamond",serif;
+      font-style:italic;
+      font-size:30px;
+      font-weight:600;
+      color:var(--gold2);
+      letter-spacing:-.4px;
+    }
 
-.feature-box h4{
-    margin-bottom:10px;
-}
+    .showcase-card p{
+      position:relative;
+      z-index:2;
+      padding:0 20px 22px;
+      color:#cfc8d8;
+      font-size:14px;
+      line-height:1.7;
+      max-width:280px;
+    }
 
-.feature-box p{
-    color:var(--muted);
-}
+    .showcase-card-featured{
+      border-color:rgba(200,150,62,.45);
+      box-shadow:
+        0 0 0 1px rgba(200,150,62,.08),
+        0 22px 50px rgba(0,0,0,.42),
+        0 0 24px rgba(200,150,62,.10);
+      transform:translateY(-2px);
+    }
 
-.showcase-head{
-    text-align:center;
-    margin-bottom:60px;
-}
+    .showcase-card-featured:hover{
+      transform:translateY(-10px);
+    }
 
-.showcase-badge{
-    display:inline-block;
-    padding:10px 18px;
-    border-radius:999px;
-    border:1px solid rgba(200,150,62,.25);
-    background:rgba(200,150,62,.08);
-    color:var(--accent);
-    font-size:13px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-}
+    .showcase-card-featured::after{
+      content:"";
+      position:absolute;
+      inset:auto 12px 12px auto;
+      width:86px;
+      height:86px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(200,150,62,.18), transparent 68%);
+      filter:blur(2px);
+      pointer-events:none;
+      z-index:1;
+    }
 
-.showcase-title{
-    margin-top:22px;
-    font-family:'Cormorant Garamond',serif;
-    font-size:clamp(42px,6vw,72px);
-    line-height:1;
-    font-weight:600;
-    color:#fff;
-}
+    .feature-preview{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:18px;
+      margin-top:26px;
+    }
 
-.showcase-title span{
-    background:linear-gradient(
+    .feature-box{
+      position:relative;
+      padding:28px 18px 24px;
+      text-align:center;
+      border-radius:28px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+      border:1px solid rgba(200,150,62,.12);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.02);
+      overflow:hidden;
+      transition:.35s ease;
+    }
+
+    .feature-box::before{
+      content:"✦";
+      position:absolute;
+      top:16px;
+      left:16px;
+      color:rgba(200,150,62,.78);
+      font-size:13px;
+      z-index:1;
+    }
+
+    .feature-box::after{
+      content:"✦";
+      position:absolute;
+      top:16px;
+      right:16px;
+      color:rgba(200,150,62,.78);
+      font-size:13px;
+      z-index:1;
+    }
+
+    .feature-box:hover{
+      transform:translateY(-8px);
+      border-color:rgba(200,150,62,.45);
+      box-shadow:
+        0 20px 44px rgba(0,0,0,.38),
+        0 0 28px rgba(200,150,62,.12);
+    }
+
+    .feature-box-highlight{
+      background:linear-gradient(180deg, rgba(200,150,62,.09), rgba(255,255,255,.02));
+      border-color:rgba(200,150,62,.28);
+    }
+
+    .feature-circle{
+      width:96px;
+      height:96px;
+      margin:8px auto 20px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      position:relative;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,.18), rgba(255,255,255,.03) 55%, rgba(0,0,0,.08) 100%);
+      border:1px solid rgba(200,150,62,.5);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.03),
+        0 0 28px rgba(200,150,62,.08);
+    }
+
+    .feature-circle::before{
+      content:"";
+      position:absolute;
+      inset:12px;
+      border-radius:50%;
+      border:1px solid rgba(200,150,62,.14);
+    }
+
+    .feature-circle span{
+      font-size:42px;
+      filter:drop-shadow(0 8px 14px rgba(0,0,0,.28));
+    }
+
+    .feature-box h4{
+      font-family:"Cormorant Garamond",serif;
+      font-style:italic;
+      font-size:32px;
+      line-height:1;
+      color:var(--gold2);
+      margin-bottom:10px;
+    }
+
+    .feature-box p{
+      color:#ccc5d7;
+      font-size:14px;
+      line-height:1.7;
+    }
+
+    .showcase-head{
+      position:relative;
+      text-align:center;
+      margin-bottom:52px;
+      padding-top:10px;
+    }
+
+    .showcase-head::before,
+    .showcase-head::after{
+      content:"";
+      position:absolute;
+      top:32px;
+      width:120px;
+      height:1px;
+      background:linear-gradient(90deg, transparent, rgba(200,150,62,.66), transparent);
+    }
+
+    .showcase-head::before{left:0}
+    .showcase-head::after{right:0}
+
+    .showcase-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 18px;
+      border-radius:999px;
+      border:1px solid rgba(200,150,62,.25);
+      background:rgba(200,150,62,.08);
+      color:var(--gold2);
+      font-size:13px;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      box-shadow:0 12px 30px rgba(0,0,0,.16);
+    }
+
+    .showcase-title{
+      margin-top:22px;
+      font-family:"Cormorant Garamond",serif;
+      font-size:clamp(42px,6vw,72px);
+      line-height:1;
+      font-weight:600;
+      color:#fff;
+      letter-spacing:-1px;
+    }
+
+    .showcase-title span{
+      background:linear-gradient(
         135deg,
         #F7E7B4 0%,
         #C8963E 35%,
         #FFE8A3 60%,
         #B77A1C 100%
-    );
+      );
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+      text-shadow:0 0 20px rgba(200,150,62,.18);
+    }
 
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    background-clip:text;
-}
+    .showcase-desc{
+      margin:20px auto 0;
+      max-width:780px;
+      color:var(--muted);
+      font-size:18px;
+      line-height:1.8;
+    }
 
-.showcase-desc{
-    margin:20px auto 0;
-    max-width:720px;
-    color:var(--muted);
-    font-size:18px;
-    line-height:1.8;
-}
+    .stats-row{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:0;
+      margin-top:28px;
+      padding:18px 16px;
+      border-radius:30px;
+      border:1px solid rgba(200,150,62,.14);
+      background:rgba(255,255,255,.03);
+      overflow:hidden;
+      box-shadow:0 14px 36px rgba(0,0,0,.18);
+    }
 
-.showcase-card{
-    position:relative;
-    overflow:hidden;
-    background:rgba(255,255,255,.03);
-    border:1px solid rgba(200,150,62,.15);
-    border-radius:28px;
-    transition:.35s ease;
-}
+    .stat{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      padding:10px 12px;
+      border-right:1px solid rgba(255,255,255,.08);
+    }
 
-.showcase-card:hover{
-    transform:translateY(-10px);
-    border-color:rgba(200,150,62,.55);
-    box-shadow:
-      0 20px 50px rgba(0,0,0,.45),
-      0 0 30px rgba(200,150,62,.15);
-}
+    .stat:last-child{
+      border-right:none;
+    }
 
-.showcase-card::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:linear-gradient(
-      180deg,
-      transparent 0%,
-      rgba(0,0,0,.55) 100%
-    );
-    pointer-events:none;
-}
+    .stat-icon{
+      width:64px;
+      height:64px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      flex:0 0 auto;
+      border:1px solid rgba(200,150,62,.42);
+      background:rgba(200,150,62,.06);
+      box-shadow:0 0 24px rgba(200,150,62,.08);
+      color:var(--gold2);
+      font-size:28px;
+    }
+
+    .stat strong{
+      display:block;
+      font-family:"Cormorant Garamond",serif;
+      font-style:italic;
+      font-size:42px;
+      line-height:1;
+      color:var(--gold2);
+      letter-spacing:-.4px;
+    }
+
+    .stat span{
+      display:block;
+      color:var(--text);
+      font-size:14px;
+      font-weight:600;
+      margin-top:3px;
+    }
+
+    .showcase-cta{
+      position:relative;
+      text-align:center;
+      margin-top:36px;
+    }
+
+    .showcase-cta::before{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:-18px;
+      transform:translateX(-50%);
+      width:260px;
+      height:1px;
+      background:linear-gradient(90deg, transparent, rgba(200,150,62,.56), transparent);
+    }
+
+    @media (max-width: 1180px){
+      .showcase-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+      .feature-preview{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+      .stats-row{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+      .stat{
+        border-right:none;
+        border-bottom:1px solid rgba(255,255,255,.08);
+      }
+      .stat:nth-child(3),
+      .stat:nth-child(4){
+        border-bottom:none;
+      }
+      .showcase-head::before,
+      .showcase-head::after{
+        width:92px;
+      }
+    }
+
+    @media (max-width: 720px){
+      .showcase-grid,
+      .feature-preview,
+      .stats-row{
+        grid-template-columns:1fr;
+      }
+
+      .showcase-head::before,
+      .showcase-head::after{
+        display:none;
+      }
+
+      .showcase-title{
+        font-size:clamp(38px,10vw,58px);
+      }
+
+      .showcase-desc{
+        font-size:16px;
+      }
+
+      .showcase-card img{
+        height:240px;
+      }
+
+      .stat{
+        justify-content:flex-start;
+        border-right:none;
+        border-bottom:1px solid rgba(255,255,255,.08);
+      }
+
+      .stat:last-child{
+        border-bottom:none;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -778,7 +1067,7 @@
             <div class="eyebrow"><span></span> Photobooth V2</div>
             <h1>Abadikan <span>Momen</span> dengan gaya yang lebih premium.</h1>
             <p>
-              StudioBooth ini menghadir dengan nuansa dark luxury, warna gold elegan, filter realtime,
+              StudioBooth V2 hadir dengan nuansa dark luxury, warna gold elegan, filter realtime,
               layout 2–4 foto, frame color, sticker, dan preview hasil langsung di satu tempat.
             </p>
             <div class="feature-row">
@@ -802,84 +1091,125 @@
       </div>
     </section>
 
-<section id="showcaseSection" class="section">
-  <div class="wrap">
 
-    <div class="section-head showcase-head">
-        <span class="showcase-badge">✦ StudioBooth Showcase</span>
+    <section id="showcaseSection" class="section">
+      <div class="wrap">
 
-        <h2 class="showcase-title">
-            Temukan <span>Gaya Photobooth</span><br>
-            yang Paling Cocok Untukmu
-        </h2>
+        <div class="section-head showcase-head">
+          <span class="showcase-badge">✦ StudioBooth Showcase</span>
 
-        <p class="showcase-desc">
-            Pilih layout favorit, frame premium, filter estetik,
-            dan hasil photobooth berkualitas tinggi.
-        </p>
-    </div>
+          <h2 class="showcase-title">
+            Pilih Gaya <span>Photobooth</span><br>
+            Favoritmu
+          </h2>
 
-    <div class="showcase-grid">
+          <p class="showcase-desc">
+            Layout elegan, frame premium, filter estetik,
+            dan hasil berkualitas tinggi untuk setiap momen.
+          </p>
+        </div>
 
-      <div class="showcase-card">
-        <img src="public/images/model1.jpg" alt="">
-        <h3>Layout 1 Foto</h3>
-        <p>Cocok untuk pasangan dan bestie.</p>
+        <div class="showcase-grid">
+          <div class="showcase-card">
+            <div class="layout-badge">Signature</div>
+            <div class="card-index">01</div>
+            <img src="public/images/model1.jpg" alt="Solo Strip preview">
+            <h3>Solo Strip</h3>
+            <p>Cocok untuk pasangan dan bestie.</p>
+          </div>
+
+          <div class="showcase-card showcase-card-featured">
+            <div class="layout-badge">Paling Populer</div>
+            <div class="card-index">02</div>
+            <img src="public/images/model2.jpg" alt="Golden Duo preview">
+            <h3>Golden Duo</h3>
+            <p>Paling populer untuk photobooth.</p>
+          </div>
+
+          <div class="showcase-card">
+            <div class="layout-badge">Party Choice</div>
+            <div class="card-index">03</div>
+            <img src="public/images/model3.jpg" alt="Bestie Booth preview">
+            <h3>Bestie Booth</h3>
+            <p>Lebih banyak pose dan ekspresi.</p>
+          </div>
+        </div>
+
+        <div class="feature-preview">
+          <div class="feature-box feature-box-highlight">
+            <div class="feature-circle"><span>🖼️</span></div>
+            <h4>Frame Premium</h4>
+            <p>Gold, Cream, Forest, Lavender, dan warna eksklusif lainnya.</p>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-circle"><span>✨</span></div>
+            <h4>Filter Realtime</h4>
+            <p>Warm, Vintage, Noir, Dreamy dan lainnya.</p>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-circle"><span>🎀</span></div>
+            <h4>Sticker Estetik</h4>
+            <p>Heart, Ribbon, Flower, Sparkle dan Coffee.</p>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-circle"><span>📷</span></div>
+            <h4>Hasil Berkualitas</h4>
+            <p>Foto tajam, warna elegan, siap untuk dibagikan.</p>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-circle"><span>⬇️</span></div>
+            <h4>Download HD</h4>
+            <p>Resolusi tinggi, kualitas terbaik untuk setiap momen.</p>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat">
+            <div class="stat-icon">▦</div>
+            <div>
+              <strong>4+</strong>
+              <span>Layout Premium</span>
+            </div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-icon">◎</div>
+            <div>
+              <strong>7+</strong>
+              <span>Warna Frame</span>
+            </div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-icon">✦</div>
+            <div>
+              <strong>20+</strong>
+              <span>Sticker Estetik</span>
+            </div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-icon">HD</div>
+            <div>
+              <strong>HD</strong>
+              <span>Download Quality</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="showcase-cta">
+          <button class="btn btn-gold" onclick="showSection('boothSection')">
+            Mulai Photobooth →
+          </button>
+        </div>
+
       </div>
+    </section>
 
-      <div class="showcase-card">
-        <img src="public/images/model2.jpg" alt="">
-        <h3>Layout 2 Foto</h3>
-        <p>Paling populer untuk photobooth.</p>
-      </div>
-
-      <div class="showcase-card">
-        <img src="public/images/model3.jpg" alt="">
-        <h3>Layout 3 Foto</h3>
-        <p>Lebih banyak pose dan ekspresi.</p>
-      </div>
-
-    </div>
-
-    <div class="feature-preview">
-
-      <div class="feature-box">
-        <span>🎨</span>
-        <h4>Frame Premium</h4>
-        <p>Gold, Cream, Forest, Lavender, Midnight.</p>
-      </div>
-
-      <div class="feature-box">
-        <span>✨</span>
-        <h4>Filter Realtime</h4>
-        <p>Warm, Vintage, Noir, Dreamy dan lainnya.</p>
-      </div>
-
-      <div class="feature-box">
-        <span>🎀</span>
-        <h4>Sticker Estetik</h4>
-        <p>Heart, Ribbon, Flower, Sparkle dan Coffee.</p>
-      </div>
-
-      <div class="feature-box">
-        <span>📸</span>
-        <h4>Download HD</h4>
-        <p>Hasil tajam siap dibagikan ke sosial media.</p>
-      </div>
-
-    </div>
-
-    <div style="text-align:center;margin-top:50px">
-      <button
-        class="btn btn-gold"
-        onclick="showSection('boothSection')"
-      >
-        Mulai Photobooth →
-      </button>
-    </div>
-
-  </div>
-</section>
 
     <section id="boothSection" class="section">
       <div class="nav">
