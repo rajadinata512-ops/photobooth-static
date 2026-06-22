@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StudioBooth — Photo Booth V2</title>
+  <title>StudioBooth — Photo Booth</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -71,13 +71,15 @@
     }
     .brand em{color:var(--gold);font-style:italic}
     .brand-badge{
-      width:32px;height:32px;border-radius:11px;
+      min-width:32px;height:32px;padding:0 6px;border-radius:11px;
       background:linear-gradient(135deg, rgba(200,150,62,.24), rgba(200,150,62,.06));
       border:1px solid rgba(200,150,62,.28);
       display:grid;place-items:center;
       box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);
       color:var(--gold2);
       font-weight:800;
+      font-size:13px;
+      letter-spacing:.2px;
     }
     .nav .pill{
       display:inline-flex;align-items:center;gap:8px;
@@ -1052,7 +1054,7 @@
       <div class="nav">
         <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:18px;">
           <div class="brand">
-            <div class="brand-badge">S</div>
+            <div class="brand-badge">SB</div>
             Studio<em>Booth</em>
           </div>
           <div class="pill">Photo Booth Web · dark luxury</div>
@@ -1062,10 +1064,10 @@
       <div class="wrap">
         <div class="hero">
           <div class="hero-copy">
-            <div class="eyebrow"><span></span> Photobooth V2</div>
+            <div class="eyebrow"><span></span> Photobooth Premium</div>
             <h1>Abadikan <span>Momen</span> dengan gaya yang lebih premium.</h1>
             <p>
-              StudioBooth V2 hadir dengan nuansa dark luxury, warna gold elegan, filter realtime,
+              StudioBooth hadir dengan nuansa dark luxury, warna gold elegan, filter realtime,
               layout 2–4 foto, frame color, sticker, dan preview hasil langsung di satu tempat.
             </p>
             <div class="feature-row">
@@ -1244,7 +1246,7 @@
       <div class="nav">
         <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:18px;">
           <div class="brand">
-            <div class="brand-badge">S</div>
+            <div class="brand-badge">SB</div>
             Studio<em>Booth</em>
           </div>
           <div class="pill" id="sessionStatus">Siap memulai sesi foto</div>
