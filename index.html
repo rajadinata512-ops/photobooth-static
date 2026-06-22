@@ -640,7 +640,7 @@ function capturePhoto() {
   img.src = capCanvas.toDataURL('image/png');
 }
 
-const CUSTOMS_VERSION = 'v6';
+const CUSTOMS_VERSION = 'v7';
 
 function loadCustoms(){
   try{
@@ -821,86 +821,64 @@ async function render(ctx, canvas){
   }
 
   const cust = getCustTpl();
+  const defaultSlots = getPhotoSlots(W,H);
+  const slots = (cust && Array.isArray(cust.slots) && cust.slots.length === 3) ? cust.slots : defaultSlots;
 
   if(cust){
-    if(cust.slots && cust.slots.length === 3){
+    const tplImg = await loadCached(cust.src);
 
-      if(cust.hasTransparency){
-        // ── TRANSPARENT PNG template (e.g. Kate & Jackson) ──
-        // Strategy: draw photos FIRST, overlay PNG template ON TOP.
-        // The transparent areas of the PNG act as "windows" showing photos below.
-        
-        // 1. White base (so transparent areas outside slots look clean)
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, W, H);
-        
-        // 2. Draw each photo into its detected slot
-        cust.slots.forEach((slot, i) => {
-          const img = capturedImgs[i];
-          if(img){
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(slot.x, slot.y, slot.w, slot.h);
-            ctx.clip();
-            drawImageCover(ctx, img, slot.x, slot.y, slot.w, slot.h);
-            ctx.restore();
-          } else {
-            ctx.fillStyle = '#222';
-            ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
-          }
-        });
-        
-        // 3. Overlay the template PNG (transparent holes reveal photos below)
-        const tplImg = await loadCached(cust.src);
-        if(tplImg) ctx.drawImage(tplImg, 0, 0, W, H);
+    if(cust.hasTransparency){
+      // Template transparan: foto dulu, template di atas
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, H);
 
-      } else {
-        // ── OPAQUE template (solid background, colored slot areas) ──
-        // Strategy: draw template AS BACKGROUND first, then draw photos ON TOP
-        // in the slot positions (covering the colored placeholder areas).
-        
-        // 1. Draw template as background
-        const tplImg = await loadCached(cust.src);
-        if(tplImg){
-          ctx.drawImage(tplImg, 0, 0, W, H);
+      slots.forEach((slot, i) => {
+        const img = capturedImgs[i];
+        if(img){
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(slot.x, slot.y, slot.w, slot.h);
+          ctx.clip();
+          drawImageCover(ctx, img, slot.x, slot.y, slot.w, slot.h);
+          ctx.restore();
         } else {
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, W, H);
+          ctx.fillStyle = '#222';
+          ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
         }
-        
-        // 2. Draw photos ON TOP at slot positions (covers the colored placeholders)
-        cust.slots.forEach((slot, i) => {
-          const img = capturedImgs[i];
-          if(img){
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(slot.x, slot.y, slot.w, slot.h);
-            ctx.clip();
-            drawImageCover(ctx, img, slot.x, slot.y, slot.w, slot.h);
-            ctx.restore();
-          }
-        });
+      });
+
+      if(tplImg) ctx.drawImage(tplImg, 0, 0, W, H);
+    } else {
+      // Template solid: template di bawah, foto di atas
+      if(tplImg){
+        ctx.drawImage(tplImg, 0, 0, W, H);
+      } else {
+        drawBG(ctx, W, H);
       }
 
-    } else {
-      // ── No slots detected: standard fallback ──
-      // Draw standard photo grid, then overlay template on top
-      drawBG(ctx, W, H);
-      drawPhoto(ctx, W, H);
-      const tplImg = await loadCached(cust.src);
-      if(tplImg) ctx.drawImage(tplImg, 0, 0, W, H);
+      slots.forEach((slot, i) => {
+        const img = capturedImgs[i];
+        if(img){
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(slot.x, slot.y, slot.w, slot.h);
+          ctx.clip();
+          drawImageCover(ctx, img, slot.x, slot.y, slot.w, slot.h);
+          ctx.restore();
+        }
+      });
     }
 
     drawCaption(ctx, W, H);
-
-  } else {
-    // ── Built-in template ──
-    drawBG(ctx,W,H);
-    drawPhoto(ctx,W,H);
-    drawFrame(ctx,W,H);
-    drawDecor(ctx,W,H);
-    drawCaption(ctx,W,H);
+    return;
   }
+
+  // ── Built-in template ──
+  drawBG(ctx,W,H);
+  drawPhoto(ctx,W,H);
+  drawFrame(ctx,W,H);
+  drawDecor(ctx,W,H);
+  drawCaption(ctx,W,H);
 }
 
 function drawPlaceholder(ctx,W,H){
@@ -1107,7 +1085,6 @@ function retakePhoto(){
  * KEY FIX: hasTransparency disimpan ke object customs di localStorage.
  * ===================================================================== */
 function analyzeCustomTemplate(probeImg, W, H){
-  /* ── Buat canvas dengan template di-scale ke 800×1050 ── */
   const off = document.createElement('canvas');
   off.width = W; off.height = H;
   const octx = off.getContext('2d');
@@ -1117,49 +1094,78 @@ function analyzeCustomTemplate(probeImg, W, H){
   const data = imgData.data;
   const total = W * H;
 
-  /* ── Deteksi apakah PNG punya alpha channel ── */
   let alphaLowCount = 0;
   for(let p = 0; p < total; p++){
     if(data[p*4+3] < 30) alphaLowCount++;
   }
   const hasTransparency = (alphaLowCount / total) > 0.04;
 
-  /* ── Luminance setiap pixel ── */
   const lum = new Float32Array(total);
   for(let p = 0; p < total; p++){
     const i = p*4;
     lum[p] = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
   }
 
-  /* ── Warna dominan (background template) ── */
-  const hist = new Int32Array(256);
-  for(let p = 0; p < total; p++){
-    if(data[p*4+3] > 30) hist[lum[p]|0]++;
-  }
-  // Smooth histogram dengan window 8
-  let domLum = 128, domMax = 0;
-  for(let b = 0; b < 256; b++){
-    let s = 0;
-    for(let d = -4; d <= 4; d++) s += hist[Math.max(0, Math.min(255, b+d))];
-    if(s > domMax){ domMax = s; domLum = b; }
-  }
-
-  /* ── Tandai pixel kandidat "slot foto" ── */
-  const cand = new Uint8Array(total); // 0=bukan, 1=solid kontras, 2=transparan
+  const cand = new Uint8Array(total); // 0=bukan, 1=solid kontras, 2=hole transparan
 
   if(hasTransparency){
-    // Mode A: cari area transparan
+    const transparent = new Uint8Array(total);
     for(let p = 0; p < total; p++){
-      if(data[p*4+3] < 30) cand[p] = 2;
+      if(data[p*4+3] < 30) transparent[p] = 1;
+    }
+
+    const outside = new Uint8Array(total);
+    const queue = new Int32Array(total);
+    let qh = 0, qt = 0;
+
+    function pushIfTransparent(p){
+      if(p < 0 || p >= total) return;
+      if(!transparent[p] || outside[p]) return;
+      outside[p] = 1;
+      queue[qt++] = p;
+    }
+
+    for(let x = 0; x < W; x++){
+      pushIfTransparent(x);
+      pushIfTransparent((H-1)*W + x);
+    }
+    for(let y = 0; y < H; y++){
+      pushIfTransparent(y*W);
+      pushIfTransparent(y*W + (W-1));
+    }
+
+    while(qh < qt){
+      const p = queue[qh++];
+      const px = p % W;
+
+      if(px < W-1) pushIfTransparent(p + 1);
+      if(px > 0)   pushIfTransparent(p - 1);
+      pushIfTransparent(p + W);
+      pushIfTransparent(p - W);
+    }
+
+    for(let p = 0; p < total; p++){
+      if(transparent[p] && !outside[p]) cand[p] = 2;
     }
   } else {
-    // Mode B: cari area solid yang FLAT (variance rendah) dan KONTRAS dengan BG
-    const FLAT = 16;   // max perbedaan lum dengan tetangga
-    const CONT = 50;   // min perbedaan lum dengan warna dominan
+    const hist = new Int32Array(256);
+    for(let p = 0; p < total; p++){
+      hist[lum[p] | 0]++;
+    }
+
+    let domLum = 128, domMax = 0;
+    for(let b = 0; b < 256; b++){
+      let s = 0;
+      for(let d = -4; d <= 4; d++) s += hist[Math.max(0, Math.min(255, b+d))];
+      if(s > domMax){ domMax = s; domLum = b; }
+    }
+
+    const FLAT = 16;
+    const CONT = 50;
     for(let y = 1; y < H-1; y++){
       for(let x = 1; x < W-1; x++){
         const p = y*W+x;
-        if(data[p*4+3] < 200) continue; // skip semi-transparan
+        if(data[p*4+3] < 200) continue;
         const c = lum[p];
         const diff = Math.max(
           Math.abs(c - lum[p-1]), Math.abs(c - lum[p+1]),
@@ -1170,9 +1176,8 @@ function analyzeCustomTemplate(probeImg, W, H){
     }
   }
 
-  /* ── Flood fill untuk temukan cluster ── */
   const visited = new Uint8Array(total);
-  const queue   = new Int32Array(total);
+  const queue = new Int32Array(total);
   const clusters = [];
   const COLOR_TOL = 32;
 
@@ -1204,9 +1209,8 @@ function analyzeCustomTemplate(probeImg, W, H){
     clusters.push({ x0, x1, y0, y1, cnt, type });
   }
 
-  /* ── Filter & pilih 3 slot terbaik ── */
-  const MIN_AREA = total * 0.013;  // min 1.3% canvas
-  const MAX_DIM_RATIO = 0.90;      // max 90% lebar/tinggi canvas (bukan BG)
+  const MIN_AREA = total * 0.008;
+  const MAX_DIM_RATIO = 0.90;
 
   function rectFill(cl){
     return cl.cnt / ((cl.x1-cl.x0+1) * (cl.y1-cl.y0+1));
@@ -1218,14 +1222,13 @@ function analyzeCustomTemplate(probeImg, W, H){
   }
 
   function isTooWide(cl){
-    // Cluster transparan yang melebar ke seluruh lebar = border/background, bukan slot
     return cl.type===2 && (cl.x1-cl.x0+1) > W*0.92;
   }
 
   const pool = clusters
     .filter(cl =>
       cl.cnt >= MIN_AREA &&
-      rectFill(cl) >= 0.55 &&
+      rectFill(cl) >= 0.45 &&
       !isBackground(cl) &&
       !isTooWide(cl)
     )
@@ -1235,21 +1238,22 @@ function analyzeCustomTemplate(probeImg, W, H){
   let slots = null;
 
   if(pool.length >= 3){
-    // Temukan triplet terbaik: 3 slot tidak overlap (terurut vertikal) dengan ukuran paling konsisten
     let bestTriplet = null, bestScore = Infinity;
 
     for(let i = 0; i < pool.length-2; i++){
       for(let j = i+1; j < pool.length-1; j++){
         for(let k = j+1; k < pool.length; k++){
           const trio = [pool[i],pool[j],pool[k]].sort((a,b)=>a.y0-b.y0);
-          // Pastikan tidak overlap vertikal
           if(trio[0].y1 >= trio[1].y0) continue;
           if(trio[1].y1 >= trio[2].y0) continue;
-          // Score = variance area (makin kecil makin baik = makin seragam)
           const areas = trio.map(c=>c.cnt);
           const mean = (areas[0]+areas[1]+areas[2])/3;
           const variance = areas.reduce((s,a)=>s+(a-mean)**2,0)/3;
-          if(variance < bestScore){ bestScore=variance; bestTriplet=trio; }
+          const spacing1 = trio[1].y0 - trio[0].y1;
+          const spacing2 = trio[2].y0 - trio[1].y1;
+          const spacingPenalty = Math.abs(spacing1-spacing2) * 10;
+          const score = variance + spacingPenalty;
+          if(score < bestScore){ bestScore=score; bestTriplet=trio; }
         }
       }
     }
@@ -1257,14 +1261,13 @@ function analyzeCustomTemplate(probeImg, W, H){
     if(!bestTriplet) bestTriplet = pool.slice(0,3).sort((a,b)=>a.y0-b.y0);
 
     slots = bestTriplet.map(cl=>({
-      x: cl.x0, y: cl.y0,
+      x: cl.x0,
+      y: cl.y0,
       w: cl.x1-cl.x0+1,
       h: cl.y1-cl.y0+1
     }));
   }
 
-  // Canvas dikembalikan = template asli (tidak dimodifikasi sama sekali)
-  // Logika render yang benar ada di fungsi render() berdasarkan hasTransparency
   return { canvas: off, slots, hasTransparency };
 }
 
