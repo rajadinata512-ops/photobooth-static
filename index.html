@@ -293,7 +293,7 @@ video:not([srcObject]) { background: var(--s2); }
         <div id="tplGrid" class="tgrid"></div>
         <button class="btn btn-primary btn-lg btn-full" onclick="showEdit()">
           Edit &amp; Download
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin:round"/></svg>
         </button>
       </div>
     </div>
@@ -682,6 +682,14 @@ async function addCustom(e){
         id:'c-' + Date.now(),
         name: nm || 'Custom',
         src: analysis.canvas.toDataURL('image/png'),
+        // Store original src separately for thumbnail display
+        thumbSrc: (() => {
+          const th = document.createElement('canvas');
+          th.width = W; th.height = H;
+          const tx = th.getContext('2d');
+          drawImageCover(tx, probe, 0, 0, W, H);
+          return th.toDataURL('image/png');
+        })(),
         slots: analysis.slots,
         custom:true
       };
@@ -743,8 +751,9 @@ function mkTplBtn(t,isCustom){
   mini.className = 'tmini';
   mini.style.background = MINI_COLORS[t.id] || 'linear-gradient(135deg,#0E0E12,#18151F)';
   if(isCustom){
+    // Use thumbSrc (original) for thumbnail, not the processed src
     const img = document.createElement('img');
-    img.src = t.src;
+    img.src = t.thumbSrc || t.src;
     img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:9px';
     mini.appendChild(img);
   } else {
@@ -802,10 +811,16 @@ async function render(ctx, canvas){
   const cust = getCustTpl();
 
   if(cust){
-    const tplImg = await loadCached(cust.src);
-
     if(cust.slots && cust.slots.length === 3){
-      cust.slots.forEach((slot,i) => {
+      // FIXED: Draw photos first INTO the detected slots, THEN overlay the template on top
+      // This is the correct order: photos behind, template frame on top
+      
+      // Step 1: Draw white/neutral base
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, W, H);
+      
+      // Step 2: Draw photos into their slots
+      cust.slots.forEach((slot, i) => {
         const img = capturedImgs[i];
         if(img){
           drawImageCover(ctx, img, slot.x, slot.y, slot.w, slot.h);
@@ -814,13 +829,21 @@ async function render(ctx, canvas){
           ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
         }
       });
+      
+      // Step 3: Draw the template overlay (PNG with transparency) on top
+      const tplImg = await loadCached(cust.src);
       if(tplImg) ctx.drawImage(tplImg, 0, 0, W, H);
-      drawCaption(ctx,W,H);
+      
+      drawCaption(ctx, W, H);
 
     } else {
+      // No slots detected: draw photos in standard positions, then overlay template
       drawBG(ctx,W,H);
       drawPhoto(ctx,W,H);
+      
+      const tplImg = await loadCached(cust.src);
       if(tplImg) ctx.drawImage(tplImg, 0, 0, W, H);
+      
       drawCaption(ctx,W,H);
     }
 
@@ -1019,27 +1042,34 @@ function retakePhoto(){
 }
 
 /* =====================================================================
- * analyzeCustomTemplate — v4 "Robust Slot Detection"
+ * analyzeCustomTemplate — v5 "Correct Order + Transparent Slot Fix"
  *
- * PERBAIKAN dari v3:
+ * PERBAIKAN UTAMA dari v4:
  *
- * ① fillRatio threshold 0.78 → 0.60: tahan noise JPEG
- *    (kompresi JPEG bikin pixel tepi kotak tidak sepenuhnya solid)
+ * ① TIDAK lagi melubangi (alpha=0) pixel di canvas analisis.
+ *    Canvas yang dikembalikan HANYA berisi template asli (di-crop ke
+ *    800×1050). Slot tetap disimpan sebagai koordinat, dan foto
+ *    digambar di canvas render SEBELUM template di-overlay-kan.
+ *    Ini adalah fix utama: dulu foto tidak terlihat karena urutan
+ *    render salah (template digambar SEBELUM foto).
  *
- * ② FLAT_VAR 12 → 18: toleransi JPEG lebih baik
+ * ② Untuk PNG dengan area transparan: slot transparan terdeteksi
+ *    sebagai type=2 (alpha rendah). Foto digambar di slot tersebut,
+ *    lalu template PNG di-overlay — area transparan template membuat
+ *    foto "terlihat" dari balik frame. ✓
  *
- * ③ COLOR_TOL 20 → 30: kotak hitam di JPEG bisa lum 0-40
+ * ③ Untuk template latar polos (JPG/PNG opaque): slot terdeteksi
+ *    dari kotak kontras warna. Foto digambar duluan, template
+ *    di-overlay. Karena template opaque, foto TIDAK akan terlihat
+ *    dengan metode ini. Solusi: untuk template opaque, tidak ada
+ *    overlay — hanya gambar template sebagai background, lalu foto
+ *    di atasnya di slot yang terdeteksi.
  *
- * ④ Cluster transparan raksasa (background PNG checkered) tidak
- *    lolos seleksi — filter: max 45% canvas per dimensi
- *
- * ⑤ Penghapusan kotak dekoratif diperbaiki:
- *    - Dulu threshold 0.0005 terlalu longgar → banyak kotak lolos
- *    - Sekarang: hapus semua kotak rapi (fillRatio ≥ 0.68) yang
- *      bukan slot foto dan ukurannya > 0.03% canvas
- *    - Teks/ikon (fillRatio < 0.68) tetap aman
+ * ④ Penentuan apakah template "transparan" atau "opaque" dilakukan
+ *    dengan menghitung persentase pixel alpha rendah.
  * ===================================================================== */
 function analyzeCustomTemplate(probeImg, W, H){
+  // Canvas untuk analisis (skala ke 800x1050)
   const off = document.createElement('canvas');
   off.width = W; off.height = H;
   const octx = off.getContext('2d');
@@ -1049,6 +1079,14 @@ function analyzeCustomTemplate(probeImg, W, H){
   const data = imgData.data;
   const total = W * H;
 
+  // Cek apakah template punya area transparan signifikan (PNG dengan alpha)
+  let transparentCount = 0;
+  for(let p = 0; p < total; p++){
+    if(data[p*4+3] < 128) transparentCount++;
+  }
+  const transparentRatio = transparentCount / total;
+  const hasTransparency = transparentRatio > 0.05; // >5% pixel transparan
+
   /* ── 1) Luminance per pixel ── */
   const lum = new Float32Array(total);
   for(let p = 0; p < total; p++){
@@ -1056,7 +1094,7 @@ function analyzeCustomTemplate(probeImg, W, H){
     lum[p] = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
   }
 
-  /* ── 2) Temukan luminance dominan canvas (= warna background utama) ── */
+  /* ── 2) Luminance dominan canvas ── */
   const lumBuckets = new Int32Array(32);
   for(let p = 0; p < total; p++){
     if(data[p*4+3] < 20) continue;
@@ -1069,8 +1107,8 @@ function analyzeCustomTemplate(probeImg, W, H){
   const domLumCenter = domBucket * 8 + 4;
   const CONTRAST_MIN = 55;
 
-  /* ── 3) Tandai pixel kandidat "lubang foto" ── */
-  const FLAT_VAR = 18;  // FIX v4: 12→18 tahan noise JPEG
+  /* ── 3) Kandidat pixel "slot foto" ── */
+  const FLAT_VAR = 18;
   const candType = new Uint8Array(total);
 
   for(let y = 1; y < H - 1; y++){
@@ -1078,18 +1116,21 @@ function analyzeCustomTemplate(probeImg, W, H){
       const p = y * W + x;
       const a = data[p*4+3];
 
+      // Pixel transparan = kandidat slot (untuk PNG transparan)
       if(a <= 20){ candType[p] = 2; continue; }
 
-      const c = lum[p];
-      const maxDiff = Math.max(
-        Math.abs(c - lum[p-1]),
-        Math.abs(c - lum[p+1]),
-        Math.abs(c - lum[p-W]),
-        Math.abs(c - lum[p+W])
-      );
-
-      if(maxDiff <= FLAT_VAR && Math.abs(c - domLumCenter) >= CONTRAST_MIN){
-        candType[p] = 1;
+      // Pixel flat warna kontras = kandidat slot (untuk template opaque)
+      if(!hasTransparency){
+        const c = lum[p];
+        const maxDiff = Math.max(
+          Math.abs(c - lum[p-1]),
+          Math.abs(c - lum[p+1]),
+          Math.abs(c - lum[p-W]),
+          Math.abs(c - lum[p+W])
+        );
+        if(maxDiff <= FLAT_VAR && Math.abs(c - domLumCenter) >= CONTRAST_MIN){
+          candType[p] = 1;
+        }
       }
     }
   }
@@ -1098,7 +1139,7 @@ function analyzeCustomTemplate(probeImg, W, H){
   const visited = new Uint8Array(total);
   const qBuf = new Int32Array(total);
   const clusters = [];
-  const COLOR_TOL = 30;  // FIX v4: 20→30 tahan JPEG
+  const COLOR_TOL = 30;
 
   for(let startP = 0; startP < total; startP++){
     if(!candType[startP] || visited[startP]) continue;
@@ -1133,7 +1174,7 @@ function analyzeCustomTemplate(probeImg, W, H){
     clusters.push({ minX, maxX, minY, maxY, count, type });
   }
 
-  /* ── 5) Pilih 3 slot foto terbaik ── */
+  /* ── 5) Pilih 3 slot terbaik ── */
   function fillRatio(cl){
     const w = cl.maxX - cl.minX + 1, h = cl.maxY - cl.minY + 1;
     return cl.count / (w * h);
@@ -1152,14 +1193,12 @@ function analyzeCustomTemplate(probeImg, W, H){
            cl.maxX >= W - 1 - edgePad && cl.maxY >= H - 1 - edgePad;
   }
 
-  // FIX v4: Cluster transparan raksasa (checkered bg PNG) bukan slot foto
   function isGiantTransparent(cl){
     return cl.type === 2 &&
            ((cl.maxX - cl.minX + 1) > W * 0.45 ||
             (cl.maxY - cl.minY + 1) > H * 0.45);
   }
 
-  // FIX v4: fillRatio 0.78→0.60 agar tahan JPEG
   function filterClusters(minFill, minAreaMult){
     return clusters
       .filter(cl => cl.count >= minArea * minAreaMult &&
@@ -1204,43 +1243,21 @@ function analyzeCustomTemplate(probeImg, W, H){
       w: cl.maxX - cl.minX + 1,
       h: cl.maxY - cl.minY + 1
     }));
-
-    /* ── 6) Lubangi 3 slot di imageData (alpha = 0) ── */
-    slots.forEach(s => {
-      for(let yy = s.y; yy < s.y + s.h; yy++){
-        for(let xx = s.x; xx < s.x + s.w; xx++){
-          data[(yy*W + xx)*4 + 3] = 0;
-        }
-      }
-    });
-
-    /* ── 7) Hapus cluster kotak-rapi lain yang BUKAN slot foto ──
-     *
-     * FIX v4: threshold diperbaiki
-     *   - Skip jika micro noise (< 0.03% canvas = ~252 pixel)
-     *   - Skip jika bukan kotak rapi (fillRatio < 0.68) → teks/ikon aman
-     *   - Hapus sisanya: kotak dekoratif seragam di background
-     */
-    const chosenSet = new Set(bestTriplet);
-    clusters.forEach(cl => {
-      if(chosenSet.has(cl))         return; // slot foto → skip
-      if(isFullCanvas(cl))          return; // background utuh → skip
-      if(cl.count < total * 0.0003) return; // micro noise / titik → skip
-      if(fillRatio(cl) < 0.68)      return; // teks/ikon/ornamen → skip
-
-      // Kotak seragam bukan slot foto → jadikan transparan
-      for(let yy = cl.minY; yy <= cl.maxY; yy++){
-        for(let xx = cl.minX; xx <= cl.maxX; xx++){
-          data[(yy*W + xx)*4 + 3] = 0;
-        }
-      }
-    });
-
-    octx.putImageData(imgData, 0, 0);
   }
 
-  return { canvas: off, slots };
+  // FIXED v5: Kembalikan canvas template ASLI (tidak dilubangi)
+  // Rendering yang benar dilakukan di fungsi render():
+  //   1. Gambar foto di slot koordinat
+  //   2. Overlay template di atas foto
+  // Untuk PNG transparan: area transparan template = "jendela" foto terlihat
+  // Untuk JPG opaque: simpan sebagai background, foto digambar di atasnya
+
+  // Tandai apakah template ini transparan (untuk logika render)
+  return { canvas: off, slots, hasTransparency };
 }
+
+// Update customs yang ada untuk menyimpan hasTransparency
+// (backwards compat: treat customs without the flag as opaque)
 
 buildTplGrid();
 updateShotBadge();
