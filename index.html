@@ -290,7 +290,7 @@ video:not([srcObject]) { background: var(--s2); }
           <button class="btn btn-outline" onclick="resetCustom()">Reset Custom</button>
           <input id="tplUpload" class="hidden" type="file" accept="image/png,image/jpeg,image/webp" onchange="addCustom(event)">
         </div>
-        <div class="tnote">Gunakan file <strong>PNG transparan ukuran 800 × 1050px</strong> agar foto tetap terlihat dan frame menempel rapi di atas foto.</div>
+        <div class="tnote">Gunakan file <strong>PNG transparan ukuran 800 × 1050px</strong> agar foto tetap terlihat dan frame menempel rapi di atas foto. Kalau tidak transparan, pastikan area kotak foto berwarna <strong>polos</strong> (hitam, putih, atau warna lain — asal tanpa motif/tekstur) dan punya garis/jarak yang jelas dari elemen lain, supaya posisi foto bisa terdeteksi otomatis.</div>
         <div id="tplGrid" class="tgrid"></div>
         <button class="btn btn-primary btn-lg btn-full" onclick="showEdit()">
           Edit &amp; Download
@@ -711,7 +711,7 @@ async function addCustom(e){
       if(t.slots){
         showAlert('Template berhasil dianalisis — 3 slot foto terdeteksi otomatis. Foto kamu akan ditempatkan di posisi tersebut.', {icon:'info'});
       } else {
-        showAlert('Slot foto tidak terdeteksi otomatis. Foto akan memakai posisi standar di belakang template.', {icon:'warn'});
+        showAlert('Slot foto tidak terdeteksi otomatis, jadi foto akan memakai posisi standar di belakang template. Untuk hasil terbaik: pakai PNG transparan, atau pastikan kotak foto berwarna polos (hitam/putih/warna lain, tanpa motif) dan punya garis/jarak yang jelas dari elemen lain di template.', {icon:'warn'});
       }
     };
     probe.src = ev.target.result;
@@ -1047,15 +1047,21 @@ function retakePhoto(){
 }
 
 /**
- * FIX UTAMA #3: analyzeCustomTemplate yang lebih toleran
- * 
- * Perubahan:
- * - DARK_LUM naik dari 42 → 65: mendeteksi slot yang sedikit keabu-abuan
- * - edgeMargin naik dari 3 → 18px: toleransi lebih lebar untuk template
- *   yang slot-nya agak dekat ke tepi (tapi bukan border/frame itu sendiri)
- * - Filter anti-touch-edge pakai boundingBox, bukan tiap pixel
- * - Fallback: jika tepat 3 kandidat tidak ditemukan, ambil 3 kandidat 
- *   terbesar meskipun menyentuh tepi (lebih baik dari tidak ada sama sekali)
+ * FIX UTAMA #4: analyzeCustomTemplate sekarang mendukung template
+ * berlatar PUTIH/TERANG, bukan cuma yang gelap/transparan.
+ *
+ * Masalah sebelumnya: deteksi slot foto hanya mencari pixel GELAP
+ * (lum <= DARK_LUM) atau TRANSPARAN. Kalau template-nya berlatar
+ * putih, slot foto biasanya juga berwarna putih/terang — jadi tidak
+ * pernah terdeteksi sebagai "lubang", dan foto tidak pernah muncul
+ * di posisi yang benar.
+ *
+ * Solusinya: deteksi area kotak SOLID/RATA WARNA — baik gelap
+ * maupun terang — lalu pilih 3 area terbesar yang berbentuk kotak
+ * rapi (fillRatio tinggi) sebagai slot foto. Kotak-kotak lain yang
+ * terdeteksi tapi BUKAN bagian dari 3 slot foto utama (misalnya pola
+ * dekoratif/grid di background) otomatis dikosongkan/dihilangkan
+ * (alpha = 0) supaya tidak tampil sebagai kotak aneh di hasil akhir.
  */
 function analyzeCustomTemplate(probeImg, W, H){
   const off = document.createElement('canvas');
@@ -1067,31 +1073,55 @@ function analyzeCustomTemplate(probeImg, W, H){
   const data = imgData.data;
   const total = W * H;
 
-  // Lebih toleran: DARK_LUM dari 42 → 65 (tangkap abu-abu gelap juga)
-  const DARK_LUM = 65;
-  const ALPHA_OPAQUE = 180;
-  const ALPHA_TRANSPARENT = 20;
-
-  const isHoleMask = new Uint8Array(total);
+  // ---- 1) Hitung luminance per-pixel & tandai pixel "rata" (flat) ----
+  // Pixel dianggap "rata" kalau bedanya dengan tetangga kiri/kanan/atas/bawah kecil.
+  // Ini berlaku untuk warna apa pun (gelap ATAU terang), jadi tidak bias ke satu warna saja.
+  const lum = new Float32Array(total);
   for(let p=0;p<total;p++){
     const idx = p*4;
-    const r = data[idx], g = data[idx+1], b = data[idx+2], a = data[idx+3];
-    const lum = 0.299*r + 0.587*g + 0.114*b;
-    if(a <= ALPHA_TRANSPARENT || (a >= ALPHA_OPAQUE && lum <= DARK_LUM)){
-      isHoleMask[p] = 1;
+    lum[p] = 0.299*data[idx] + 0.587*data[idx+1] + 0.114*data[idx+2];
+  }
+
+  const FLAT_VAR = 10;
+  const isFlat = new Uint8Array(total);
+  for(let y=1;y<H-1;y++){
+    for(let x=1;x<W-1;x++){
+      const p = y*W+x;
+      const c = lum[p];
+      const l = lum[p-1], rr = lum[p+1], u = lum[p-W], dn = lum[p+W];
+      const maxDiff = Math.max(Math.abs(c-l),Math.abs(c-rr),Math.abs(c-u),Math.abs(c-dn));
+      if(maxDiff <= FLAT_VAR) isFlat[p] = 1;
     }
   }
 
-  // Flood fill untuk cluster
+  // ---- 2) Tentukan tipe kandidat hole per pixel ----
+  // type 1 = kotak gelap solid, type 2 = transparan, type 3 = kotak terang/putih solid
+  const ALPHA_TRANSPARENT = 20;
+  const DARK_LUM = 65;
+  const LIGHT_LUM = 225;
+
+  const candMask = new Uint8Array(total);
+  for(let p=0;p<total;p++){
+    const a = data[p*4+3];
+    if(a <= ALPHA_TRANSPARENT){ candMask[p] = 2; continue; }
+    if(!isFlat[p]) continue;
+    if(lum[p] <= DARK_LUM) candMask[p] = 1;
+    else if(lum[p] >= LIGHT_LUM) candMask[p] = 3;
+  }
+
+  // ---- 3) Flood fill cluster — hanya gabung pixel bertipe sama & warna mirip ----
   const visited = new Uint8Array(total);
   const qx = new Int32Array(total);
   const qy = new Int32Array(total);
   const clusters = [];
+  const COLOR_TOL = 18;
 
   for(let y=0;y<H;y++){
     for(let x=0;x<W;x++){
       const p = y*W+x;
-      if(!isHoleMask[p] || visited[p]) continue;
+      if(!candMask[p] || visited[p]) continue;
+      const type = candMask[p];
+      const baseLum = lum[p];
       let qh=0, qt=0;
       qx[qt]=x; qy[qt]=y; qt++;
       visited[p]=1;
@@ -1101,39 +1131,43 @@ function analyzeCustomTemplate(probeImg, W, H){
         count++;
         if(cx<minX)minX=cx; if(cx>maxX)maxX=cx;
         if(cy<minY)minY=cy; if(cy>maxY)maxY=cy;
-        if(cx+1<W){const np=cy*W+(cx+1); if(isHoleMask[np]&&!visited[np]){visited[np]=1;qx[qt]=cx+1;qy[qt]=cy;qt++;}}
-        if(cx-1>=0){const np=cy*W+(cx-1); if(isHoleMask[np]&&!visited[np]){visited[np]=1;qx[qt]=cx-1;qy[qt]=cy;qt++;}}
-        if(cy+1<H){const np=(cy+1)*W+cx; if(isHoleMask[np]&&!visited[np]){visited[np]=1;qx[qt]=cx;qy[qt]=cy+1;qt++;}}
-        if(cy-1>=0){const np=(cy-1)*W+cx; if(isHoleMask[np]&&!visited[np]){visited[np]=1;qx[qt]=cx;qy[qt]=cy-1;qt++;}}
+        if(cx+1<W){ const np=cy*W+(cx+1); if(!visited[np] && candMask[np]===type && (type===2 || Math.abs(lum[np]-baseLum)<=COLOR_TOL)){visited[np]=1;qx[qt]=cx+1;qy[qt]=cy;qt++;} }
+        if(cx-1>=0){ const np=cy*W+(cx-1); if(!visited[np] && candMask[np]===type && (type===2 || Math.abs(lum[np]-baseLum)<=COLOR_TOL)){visited[np]=1;qx[qt]=cx-1;qy[qt]=cy;qt++;} }
+        if(cy+1<H){ const np=(cy+1)*W+cx; if(!visited[np] && candMask[np]===type && (type===2 || Math.abs(lum[np]-baseLum)<=COLOR_TOL)){visited[np]=1;qx[qt]=cx;qy[qt]=cy+1;qt++;} }
+        if(cy-1>=0){ const np=(cy-1)*W+cx; if(!visited[np] && candMask[np]===type && (type===2 || Math.abs(lum[np]-baseLum)<=COLOR_TOL)){visited[np]=1;qx[qt]=cx;qy[qt]=cy-1;qt++;} }
       }
-      clusters.push({minX,maxX,minY,maxY,count});
+      clusters.push({minX,maxX,minY,maxY,count,type});
     }
   }
 
-  const minArea = total * 0.015; // dari 0.02 → 0.015 (lebih sensitif)
+  function fillRatio(c){
+    const w = c.maxX-c.minX+1, h = c.maxY-c.minY+1;
+    return c.count / (w*h);
+  }
 
-  // Coba dulu dengan filter tepi ketat
-  const edgeMargin = 18; // dari 3 → 18
+  const minArea = total * 0.015;
+  const edgeMargin = 18;
+
+  // ---- 4) Filter kandidat slot foto: cukup besar & bentuknya kotak rapi ----
   let candidates = clusters
     .filter(c => {
       const w = c.maxX - c.minX + 1;
       const h = c.maxY - c.minY + 1;
-      const ar = w / h;
-      // Bukan border (aspect ratio frame biasanya sangat lebar/tinggi atau tipis)
+      const isFullCanvas = w >= W * 0.9 && h >= H * 0.9;
       const touchesEdge = c.minX<=edgeMargin && c.minY<=edgeMargin && c.maxX>=W-1-edgeMargin && c.maxY>=H-1-edgeMargin;
-      return c.count >= minArea && !touchesEdge;
+      return c.count >= minArea && fillRatio(c) >= 0.8 && !touchesEdge && !isFullCanvas;
     })
     .sort((a,b) => b.count - a.count)
     .slice(0,3);
 
-  // Fallback: jika kurang dari 3, ambil tanpa filter tepi (tapi bukan seluruh canvas)
+  // Fallback: longgarkan sedikit kalau belum ketemu 3
   if(candidates.length < 3){
     candidates = clusters
       .filter(c => {
         const w = c.maxX - c.minX + 1;
         const h = c.maxY - c.minY + 1;
         const isFullCanvas = w >= W * 0.9 && h >= H * 0.9;
-        return c.count >= minArea && !isFullCanvas;
+        return c.count >= minArea && fillRatio(c) >= 0.7 && !isFullCanvas;
       })
       .sort((a,b) => b.count - a.count)
       .slice(0,3);
@@ -1150,15 +1184,34 @@ function analyzeCustomTemplate(probeImg, W, H){
       h: c.maxY - c.minY + 1
     }));
 
-    // Lubangi pixel gelap dalam slot supaya foto bisa tembus
+    // Lubangi 3 slot foto utama supaya foto bisa tembus
     slots.forEach(s => {
       for(let yy=s.y; yy<s.y+s.h; yy++){
         for(let xx=s.x; xx<s.x+s.w; xx++){
-          const p = yy*W+xx;
-          if(isHoleMask[p]) data[p*4+3] = 0;
+          data[(yy*W+xx)*4+3] = 0;
         }
       }
     });
+
+    // ---- 5) Hilangkan kotak-kotak lain (pola/dekorasi) yang BUKAN slot foto ----
+    // Sesuai permintaan: kalau ada kotak-kotak lain di background template
+    // (selain 3 slot foto), kosongkan saja (jadi transparan) supaya tidak
+    // tampil sebagai kotak aneh di hasil akhir.
+    const chosenSet = new Set(candidates);
+    clusters.forEach(cl => {
+      if(chosenSet.has(cl)) return;
+      const w = cl.maxX - cl.minX + 1, h = cl.maxY - cl.minY + 1;
+      const isFullCanvas = w >= W * 0.9 && h >= H * 0.9;
+      if(isFullCanvas) return;                 // jangan sentuh background utuh
+      if(cl.count < total * 0.0008) return;     // terlalu kecil, kemungkinan teks/noise
+      if(fillRatio(cl) < 0.7) return;           // bukan bentuk kotak rapi (teks/ikon)
+      for(let yy=cl.minY; yy<=cl.maxY; yy++){
+        for(let xx=cl.minX; xx<=cl.maxX; xx++){
+          data[(yy*W+xx)*4+3] = 0;
+        }
+      }
+    });
+
     octx.putImageData(imgData,0,0);
   }
 
