@@ -289,7 +289,7 @@ video:not([srcObject]) { background: var(--s2); }
           <button class="btn btn-outline" onclick="resetCustom()">Reset Custom</button>
           <input id="tplUpload" class="hidden" type="file" accept="image/png,image/jpeg,image/webp" onchange="addCustom(event)">
         </div>
-        <div class="tnote">Gunakan file <strong>PNG transparan ukuran 800 × 1050px</strong> agar foto tetap terlihat dan frame menempel rapi di atas foto. Template latar <strong>putih/gelap</strong> juga didukung — pastikan area foto berwarna polos & kontras dengan latar (kotak hitam di latar putih, atau area terang di latar gelap).</div>
+        <div class="tnote">Gunakan file <strong>PNG transparan ukuran 800 × 1050px</strong> agar foto tetap terlihat dan frame menempel rapi di atas foto. Template latar <strong>putih/gelap</strong> juga didukung — pastikan area foto berwarna polos & kontras dengan latar (kotak hitam di latar putih, atau kotak terang di latar gelap).</div>
         <div id="tplGrid" class="tgrid"></div>
         <button class="btn btn-primary btn-lg btn-full" onclick="showEdit()">
           Edit &amp; Download
@@ -1019,34 +1019,25 @@ function retakePhoto(){
 }
 
 /* =====================================================================
- * analyzeCustomTemplate — v3 "Dominant Background + Contrast Slots"
+ * analyzeCustomTemplate — v4 "Robust Slot Detection"
  *
- * PERUBAHAN UTAMA dari versi sebelumnya:
+ * PERBAIKAN dari v3:
  *
- * ① Deteksi warna dominan canvas → tentukan warna BACKGROUND utama
- *    (putih, hitam, dsb). Tidak lagi mengasumsikan background pasti gelap.
+ * ① fillRatio threshold 0.78 → 0.60: tahan noise JPEG
+ *    (kompresi JPEG bikin pixel tepi kotak tidak sepenuhnya solid)
  *
- * ② Kandidat "lubang foto" = pixel yang:
- *    - TRANSPARAN (alpha < 20), ATAU
- *    - WARNA RATA (variance rendah dg 4 tetangga) + KONTRAS ≥ 55 lum
- *      dari warna dominan background
- *    → template putih + kotak hitam = TERDETEKSI ✓
- *    → template gelap + lubang transparan = TETAP TERDETEKSI ✓
+ * ② FLAT_VAR 12 → 18: toleransi JPEG lebih baik
  *
- * ③ Flood fill hanya gabungkan pixel bertipe & warna mirip (tol = 20 lum)
- *    → cluster bersih, tidak bocor antar warna berbeda
+ * ③ COLOR_TOL 20 → 30: kotak hitam di JPEG bisa lum 0-40
  *
- * ④ Pilih TRIPLET TERBAIK: 3 cluster yang:
- *    - Ukuran ≥ 1.5% canvas
- *    - fillRatio ≥ 0.78 (bentuk kotak, bukan teks/ikon)
- *    - Tidak full-canvas (bukan background)
- *    - Tidak menyentuh semua 4 tepi sekaligus
- *    - Tidak saling overlap Y
- *    - Variance area antar ketiganya paling kecil (paling "seragam")
+ * ④ Cluster transparan raksasa (background PNG checkered) tidak
+ *    lolos seleksi — filter: max 45% canvas per dimensi
  *
- * ⑤ Hapus cluster lain yang "kotak rapi" tapi bukan slot foto
- *    → kotak-kotak dekoratif di background hilang (alpha = 0)
- *    → filter: jangan hapus yang terlalu kecil (teks/noise) atau full-canvas
+ * ⑤ Penghapusan kotak dekoratif diperbaiki:
+ *    - Dulu threshold 0.0005 terlalu longgar → banyak kotak lolos
+ *    - Sekarang: hapus semua kotak rapi (fillRatio ≥ 0.68) yang
+ *      bukan slot foto dan ukurannya > 0.03% canvas
+ *    - Teks/ikon (fillRatio < 0.68) tetap aman
  * ===================================================================== */
 function analyzeCustomTemplate(probeImg, W, H){
   const off = document.createElement('canvas');
@@ -1066,8 +1057,6 @@ function analyzeCustomTemplate(probeImg, W, H){
   }
 
   /* ── 2) Temukan luminance dominan canvas (= warna background utama) ── */
-  // Bagi 0-255 ke 32 bucket (lebar 8 lum tiap bucket)
-  // Bucket paling banyak muncul = background dominan
   const lumBuckets = new Int32Array(32);
   for(let p = 0; p < total; p++){
     if(data[p*4+3] < 20) continue;
@@ -1077,12 +1066,11 @@ function analyzeCustomTemplate(probeImg, W, H){
   for(let b = 0; b < 32; b++){
     if(lumBuckets[b] > domCount){ domCount = lumBuckets[b]; domBucket = b; }
   }
-  const domLumCenter = domBucket * 8 + 4; // titik tengah bucket dominan
-  const CONTRAST_MIN = 55; // slot foto harus beda minimal 55 lum dari background
+  const domLumCenter = domBucket * 8 + 4;
+  const CONTRAST_MIN = 55;
 
   /* ── 3) Tandai pixel kandidat "lubang foto" ── */
-  const FLAT_VAR = 12;   // max variance dg tetangga → pixel dianggap "rata"
-  // candType: 0=bukan kandidat | 1=warna rata kontras bg | 2=transparan
+  const FLAT_VAR = 18;  // FIX v4: 12→18 tahan noise JPEG
   const candType = new Uint8Array(total);
 
   for(let y = 1; y < H - 1; y++){
@@ -1090,10 +1078,8 @@ function analyzeCustomTemplate(probeImg, W, H){
       const p = y * W + x;
       const a = data[p*4+3];
 
-      // Pixel transparan → langsung kandidat tipe 2
       if(a <= 20){ candType[p] = 2; continue; }
 
-      // Cek apakah pixel "rata" (minim noise/tekstur)
       const c = lum[p];
       const maxDiff = Math.max(
         Math.abs(c - lum[p-1]),
@@ -1102,7 +1088,6 @@ function analyzeCustomTemplate(probeImg, W, H){
         Math.abs(c - lum[p+W])
       );
 
-      // Rata + kontras signifikan dari background → kandidat tipe 1
       if(maxDiff <= FLAT_VAR && Math.abs(c - domLumCenter) >= CONTRAST_MIN){
         candType[p] = 1;
       }
@@ -1113,7 +1098,7 @@ function analyzeCustomTemplate(probeImg, W, H){
   const visited = new Uint8Array(total);
   const qBuf = new Int32Array(total);
   const clusters = [];
-  const COLOR_TOL = 20; // toleransi lum dalam 1 cluster (warna harus mirip)
+  const COLOR_TOL = 30;  // FIX v4: 20→30 tahan JPEG
 
   for(let startP = 0; startP < total; startP++){
     if(!candType[startP] || visited[startP]) continue;
@@ -1133,13 +1118,12 @@ function analyzeCustomTemplate(probeImg, W, H){
       if(px < minX) minX = px; if(px > maxX) maxX = px;
       if(py < minY) minY = py; if(py > maxY) maxY = py;
 
-      // 4-connected neighbors
       const ns = [p+1, p-1, p+W, p-W];
       for(let ni = 0; ni < 4; ni++){
         const np = ns[ni];
         if(np < 0 || np >= total) continue;
         if(visited[np] || candType[np] !== type) continue;
-        if(ni === 0 && px === W-1) continue; // cegah wrap baris
+        if(ni === 0 && px === W-1) continue;
         if(ni === 1 && px === 0)   continue;
         if(type === 1 && Math.abs(lum[np] - baseLum) > COLOR_TOL) continue;
         visited[np] = 1;
@@ -1155,7 +1139,7 @@ function analyzeCustomTemplate(probeImg, W, H){
     return cl.count / (w * h);
   }
 
-  const minArea  = total * 0.015; // minimal 1.5% canvas
+  const minArea  = total * 0.015;
   const edgePad  = 16;
 
   function isFullCanvas(cl){
@@ -1168,24 +1152,31 @@ function analyzeCustomTemplate(probeImg, W, H){
            cl.maxX >= W - 1 - edgePad && cl.maxY >= H - 1 - edgePad;
   }
 
-  // Saring cluster yang layak jadi slot foto
+  // FIX v4: Cluster transparan raksasa (checkered bg PNG) bukan slot foto
+  function isGiantTransparent(cl){
+    return cl.type === 2 &&
+           ((cl.maxX - cl.minX + 1) > W * 0.45 ||
+            (cl.maxY - cl.minY + 1) > H * 0.45);
+  }
+
+  // FIX v4: fillRatio 0.78→0.60 agar tahan JPEG
   function filterClusters(minFill, minAreaMult){
     return clusters
       .filter(cl => cl.count >= minArea * minAreaMult &&
                     fillRatio(cl) >= minFill &&
                     !isFullCanvas(cl) &&
-                    !touchesAllEdges(cl))
+                    !touchesAllEdges(cl) &&
+                    !isGiantTransparent(cl))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 9); // ambil 9 terbesar, cari triplet terbaik dari sini
+      .slice(0, 9);
   }
 
-  let pool = filterClusters(0.78, 1.0);
-  if(pool.length < 3) pool = filterClusters(0.65, 0.7); // fallback lebih longgar
+  let pool = filterClusters(0.60, 1.0);
+  if(pool.length < 3) pool = filterClusters(0.48, 0.7);
 
   let slots = null;
 
   if(pool.length >= 3){
-    // Cari TRIPLET dengan variance area terkecil + tidak saling overlap Y
     let bestTriplet = null, bestVar = Infinity;
 
     for(let i = 0; i < pool.length - 2; i++){
@@ -1193,7 +1184,6 @@ function analyzeCustomTemplate(probeImg, W, H){
         for(let k = j + 1; k < pool.length; k++){
           const trio = [pool[i], pool[j], pool[k]]
                          .sort((a, b) => a.minY - b.minY);
-          // Tidak boleh saling overlap Y
           if(trio[0].maxY >= trio[1].minY) continue;
           if(trio[1].maxY >= trio[2].minY) continue;
 
@@ -1205,7 +1195,6 @@ function analyzeCustomTemplate(probeImg, W, H){
       }
     }
 
-    // Fallback: ambil 3 terbesar berdasar Y kalau tidak ada triplet valid
     if(!bestTriplet){
       bestTriplet = pool.slice(0, 3).sort((a, b) => a.minY - b.minY);
     }
@@ -1225,16 +1214,21 @@ function analyzeCustomTemplate(probeImg, W, H){
       }
     });
 
-    /* ── 7) Hapus cluster kotak-rapi lain yang BUKAN slot foto ── */
-    // Ini yang bikin kotak-kotak dekoratif di background hilang
+    /* ── 7) Hapus cluster kotak-rapi lain yang BUKAN slot foto ──
+     *
+     * FIX v4: threshold diperbaiki
+     *   - Skip jika micro noise (< 0.03% canvas = ~252 pixel)
+     *   - Skip jika bukan kotak rapi (fillRatio < 0.68) → teks/ikon aman
+     *   - Hapus sisanya: kotak dekoratif seragam di background
+     */
     const chosenSet = new Set(bestTriplet);
     clusters.forEach(cl => {
-      if(chosenSet.has(cl))        return; // slot foto → jangan hapus
-      if(isFullCanvas(cl))         return; // background utuh → jangan hapus
-      if(cl.count < total * 0.0005) return; // terlalu kecil (teks/noise) → biarkan
-      if(fillRatio(cl) < 0.72)    return; // bukan kotak rapi (teks/ikon) → biarkan
+      if(chosenSet.has(cl))         return; // slot foto → skip
+      if(isFullCanvas(cl))          return; // background utuh → skip
+      if(cl.count < total * 0.0003) return; // micro noise / titik → skip
+      if(fillRatio(cl) < 0.68)      return; // teks/ikon/ornamen → skip
 
-      // Kotak seragam yang bukan slot foto → jadikan transparan
+      // Kotak seragam bukan slot foto → jadikan transparan
       for(let yy = cl.minY; yy <= cl.maxY; yy++){
         for(let xx = cl.minX; xx <= cl.maxX; xx++){
           data[(yy*W + xx)*4 + 3] = 0;
