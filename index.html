@@ -1,1340 +1,1774 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Studio Booth — Photobooth Estetik</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,300;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0B0914;
-  --s1:#130F28;
-  --s2:#1B1738;
-  --s3:#231E48;
-  --gold:#C8963E;
-  --gold-lt:#E4B870;
-  --gold-dim:rgba(200,150,62,.22);
-  --rose:#C98B7C;
-  --cream:#F0E5D3;
-  --text:#EDE5D5;
-  --muted:#9080AC;
-  --border:rgba(200,150,62,.2);
-  --border2:rgba(200,200,255,.08);
-  --r:12px;
-  --rl:20px;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudioBooth — Photo Booth V2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0B0914;
+      --bg2:#130F28;
+      --bg3:#1B1738;
+      --card:rgba(19,15,40,.92);
+      --card2:rgba(27,23,56,.82);
+      --gold:#C8963E;
+      --gold2:#E4B870;
+      --gold3:rgba(200,150,62,.16);
+      --text:#F1E8D8;
+      --muted:#9183AF;
+      --line:rgba(200,150,62,.18);
+      --line2:rgba(210,200,255,.09);
+      --shadow:0 24px 80px rgba(0,0,0,.42);
+      --r:18px;
+      --r2:24px;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      min-height:100vh;
+      font-family:"Plus Jakarta Sans",system-ui,sans-serif;
+      background:
+        radial-gradient(circle at 18% 16%, rgba(200,150,62,.08), transparent 18%),
+        radial-gradient(circle at 82% 18%, rgba(155,114,207,.08), transparent 20%),
+        linear-gradient(180deg, #090812 0%, #0B0914 26%, #090812 100%);
+      color:var(--text);
+      overflow-x:hidden;
+    }
+    body::before{
+      content:"";
+      position:fixed;inset:0;pointer-events:none;z-index:0;
+      background-image:radial-gradient(rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size:24px 24px;
+      opacity:.18;
+    }
+    a{text-decoration:none;color:inherit}
+    button,input,select{font:inherit}
+    button{cursor:pointer;border:none}
+    .app{position:relative;z-index:1}
+    .section{min-height:100vh;display:none}
+    .section.active{display:block}
+    .wrap{width:min(1380px, calc(100% - 32px));margin:0 auto}
+
+    /* Top nav */
+    .nav{
+      height:76px;
+      display:flex;align-items:center;justify-content:space-between;
+      border-bottom:1px solid rgba(200,150,62,.16);
+      backdrop-filter:blur(16px);
+      background:rgba(10,8,19,.74);
+      position:sticky;top:0;z-index:30;
+    }
+    .nav .brand{
+      display:flex;align-items:center;gap:12px;
+      font-family:"Cormorant Garamond",serif;
+      font-size:28px;font-style:italic;font-weight:600;
+      letter-spacing:-.5px;
+      color:var(--text);
+    }
+    .brand em{color:var(--gold);font-style:italic}
+    .brand-badge{
+      width:32px;height:32px;border-radius:11px;
+      background:linear-gradient(135deg, rgba(200,150,62,.24), rgba(200,150,62,.06));
+      border:1px solid rgba(200,150,62,.28);
+      display:grid;place-items:center;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);
+      color:var(--gold2);
+      font-weight:800;
+    }
+    .nav .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:11px 16px;border-radius:999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--muted);font-size:13px;
+    }
+
+    /* Landing */
+    .hero{
+      min-height:calc(100vh - 76px);
+      display:grid;grid-template-columns:1.05fr .95fr;
+      gap:28px;align-items:center;
+      padding:28px 0 34px;
+    }
+    .hero-copy{
+      padding:16px 4px;
+    }
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:10px;
+      padding:9px 14px;border-radius:999px;
+      background:rgba(200,150,62,.08);
+      border:1px solid rgba(200,150,62,.18);
+      color:var(--gold2);
+      font-size:12px;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;
+      margin-bottom:18px;
+    }
+    .eyebrow span{
+      width:7px;height:7px;border-radius:50%;
+      background:var(--gold);
+      box-shadow:0 0 14px rgba(200,150,62,.45);
+    }
+    .hero h1{
+      font-family:"Cormorant Garamond",serif;
+      font-size:clamp(54px,7vw,94px);
+      line-height:.92;
+      font-weight:700;
+      font-style:italic;
+      letter-spacing:-2px;
+      margin-bottom:18px;
+      max-width:780px;
+    }
+    .hero h1 span{color:var(--gold)}
+    .hero p{
+      max-width:590px;
+      color:var(--muted);
+      line-height:1.9;
+      font-size:15px;
+      margin-bottom:28px;
+    }
+    .feature-row{
+      display:flex;flex-wrap:wrap;gap:12px;
+      margin-bottom:30px;
+    }
+    .feature-chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:11px 14px;border-radius:999px;
+      background:rgba(255,255,255,.035);
+      border:1px solid rgba(255,255,255,.08);
+      font-size:13px;color:var(--text);
+    }
+    .feature-dot{
+      width:7px;height:7px;border-radius:50%;
+      background:var(--gold);
+      box-shadow:0 0 10px rgba(200,150,62,.55);
+    }
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:10px;
+      padding:14px 22px;border-radius:16px;
+      font-size:14px;font-weight:700;
+      transition:.2s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn-gold{
+      background:linear-gradient(180deg,var(--gold2),var(--gold));
+      color:#0D0A14;
+      box-shadow:0 16px 34px rgba(200,150,62,.20);
+    }
+    .btn-ghost{
+      color:var(--text);
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .btn-outline{
+      color:var(--gold2);
+      background:transparent;
+      border:1px solid rgba(200,150,62,.28);
+    }
+
+    .hero-panel{
+      position:relative;
+      border-radius:30px;
+      border:1px solid rgba(200,150,62,.16);
+      background:linear-gradient(135deg, rgba(255,255,255,.03), rgba(200,150,62,.03));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      min-height:520px;
+      padding:20px;
+    }
+    .hero-panel::before{
+      content:"";
+      position:absolute;inset:-60px -40px auto auto;
+      width:220px;height:220px;border-radius:50%;
+      background:radial-gradient(circle, rgba(200,150,62,.22), transparent 68%);
+      filter:blur(4px);
+    }
+    .hero-strip{
+      position:relative;z-index:1;
+      border-radius:24px;
+      height:100%;
+      min-height:480px;
+      background:linear-gradient(180deg, rgba(14,12,24,.88), rgba(22,18,42,.86));
+      border:1px solid rgba(200,150,62,.12);
+      display:flex;align-items:center;justify-content:center;
+      padding:18px;
+      overflow:hidden;
+    }
+    .hero-strip img{
+      width:100%;
+      max-height:100%;
+      object-fit:cover;
+      border-radius:18px;
+      filter:saturate(1.02) contrast(1.04) brightness(.94);
+      box-shadow:0 20px 60px rgba(0,0,0,.35);
+    }
+
+    /* Booth */
+    .booth{
+      padding:24px 0 34px;
+    }
+    .booth-head{
+      display:flex;align-items:end;justify-content:space-between;gap:18px;
+      padding:12px 0 18px;
+    }
+    .booth-title h2{
+      font-family:"Cormorant Garamond",serif;
+      font-style:italic;
+      font-size:clamp(32px,3.8vw,54px);
+      font-weight:700;
+      letter-spacing:-1px;
+      margin-bottom:8px;
+    }
+    .booth-title p{
+      color:var(--muted);
+      font-size:14px;line-height:1.7;
+      max-width:720px;
+    }
+    .timer-bar{
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+      padding:10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.035);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .timer-chip{
+      min-width:52px;
+      padding:10px 14px;border-radius:999px;
+      background:rgba(255,255,255,.03);
+      border:1px solid transparent;
+      color:var(--text);
+      font-weight:700;font-size:13px;
+      transition:.2s;
+    }
+    .timer-chip.active{
+      background:rgba(200,150,62,.16);
+      border-color:rgba(200,150,62,.34);
+      color:var(--gold2);
+      box-shadow:0 0 0 3px rgba(200,150,62,.05);
+    }
+
+    .booth-grid{
+      display:grid;
+      grid-template-columns:320px minmax(0,1.25fr) 390px;
+      gap:18px;
+      align-items:start;
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(19,15,40,.94), rgba(15,12,28,.94));
+      border:1px solid rgba(200,150,62,.14);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+    }
+
+    .tool-card{padding:18px}
+    .tool-tabs{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      margin-bottom:16px;
+    }
+    .tool-tab{
+      width:100%;
+      display:flex;align-items:center;gap:12px;
+      padding:14px 16px;border-radius:18px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.07);
+      color:var(--text);
+      transition:.2s ease;
+      font-weight:700;
+    }
+    .tool-tab svg{flex:0 0 auto;opacity:.9}
+    .tool-tab.active{
+      background:linear-gradient(180deg, rgba(200,150,62,.18), rgba(200,150,62,.08));
+      border-color:rgba(200,150,62,.35);
+      color:var(--gold2);
+    }
+    .panel-title{
+      font-family:"Cormorant Garamond",serif;
+      font-style:italic;
+      font-size:24px;
+      margin-bottom:8px;
+      color:var(--text);
+    }
+    .panel-desc{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:14px}
+    .tool-panel{display:grid;gap:12px}
+    .panel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .layout-card{
+      padding:12px;border-radius:18px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--text);
+      text-align:left;
+      min-height:96px;
+      transition:.2s;
+    }
+    .layout-card.active{
+      border-color:rgba(200,150,62,.38);
+      background:linear-gradient(180deg, rgba(200,150,62,.16), rgba(200,150,62,.07));
+      box-shadow:0 0 0 3px rgba(200,150,62,.05);
+    }
+    .layout-preview{
+      width:100%;aspect-ratio:3/4;border-radius:12px;
+      overflow:hidden;background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      display:flex;flex-direction:column;gap:3px;padding:7px;
+      margin-bottom:8px;
+    }
+    .layout-preview .slot{
+      flex:1;border-radius:8px;
+      background:rgba(0,0,0,.28);
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .layout-label{font-size:12px;font-weight:800;color:inherit}
+    .layout-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+    .swatches{display:flex;flex-wrap:wrap;gap:10px}
+    .swatch{
+      width:28px;height:28px;border-radius:50%;
+      border:2px solid transparent;
+      box-shadow:0 0 0 1px rgba(255,255,255,.08);
+      transition:.2s ease;
+    }
+    .swatch.active{
+      border-color:#fff;
+      box-shadow:0 0 0 2px rgba(200,150,62,.95), 0 0 0 1px rgba(255,255,255,.08);
+      transform:scale(1.08);
+    }
+
+    .filter-grid{
+      display:grid;grid-template-columns:repeat(2,1fr);gap:10px;
+    }
+    .filter-chip{
+      padding:12px 14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.07);
+      color:var(--text);
+      text-align:left;
+      font-size:13px;
+      font-weight:700;
+      transition:.2s;
+    }
+    .filter-chip.active{
+      border-color:rgba(200,150,62,.36);
+      background:rgba(200,150,62,.12);
+      color:var(--gold2);
+    }
+    .range-row{
+      display:grid;gap:10px;
+      padding:14px;
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.07);
+    }
+    .range-row label{
+      display:flex;justify-content:space-between;gap:10px;
+      color:var(--text);font-size:13px;font-weight:700;
+    }
+    .range-row input[type="range"]{width:100%}
+    .helper{
+      font-size:12px;color:var(--muted);line-height:1.6;
+      padding:12px 14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.07);
+    }
+
+    .stage-card{padding:16px}
+    .video-shell{
+      position:relative;
+      background:linear-gradient(180deg, rgba(6,8,17,.96), rgba(10,10,20,.96));
+      border-radius:24px;
+      overflow:hidden;
+      border:1px solid rgba(200,150,62,.16);
+      min-height:560px;
+    }
+    .video-top{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.02);
+    }
+    .video-badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      background:rgba(200,150,62,.10);
+      border:1px solid rgba(200,150,62,.16);
+      font-size:12px;color:var(--gold2);font-weight:700;
+    }
+    .live-dot{
+      width:8px;height:8px;border-radius:50%;
+      background:#34d399;box-shadow:0 0 12px rgba(52,211,153,.65);
+      animation:blink 1.8s ease-in-out infinite;
+    }
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    .video-stage{
+      position:relative;
+      min-height:480px;
+      display:grid;
+      place-items:center;
+      padding:14px;
+    }
+    video{
+      width:100%;
+      max-height:520px;
+      aspect-ratio:4/3;
+      object-fit:cover;
+      border-radius:18px;
+      background:#090812;
+      transform:scaleX(-1);
+      box-shadow:0 24px 52px rgba(0,0,0,.34);
+    }
+    .corner{
+      position:absolute;width:26px;height:26px;opacity:.8;
+      border-color:var(--gold);border-style:solid;
+      border-width:0;
+    }
+    .corner.tl{top:26px;left:26px;border-top-width:2px;border-left-width:2px}
+    .corner.tr{top:26px;right:26px;border-top-width:2px;border-right-width:2px}
+    .corner.bl{bottom:26px;left:26px;border-bottom-width:2px;border-left-width:2px}
+    .corner.br{bottom:26px;right:26px;border-bottom-width:2px;border-right-width:2px}
+    .countdown{
+      position:absolute;inset:14px;
+      display:none;place-items:center;
+      background:rgba(0,0,0,.34);
+      backdrop-filter:blur(5px);
+      border-radius:18px;
+      z-index:4;
+    }
+    .countdown div{
+      font-size:120px;font-weight:800;
+      color:#fff;
+      text-shadow:0 16px 50px rgba(200,150,62,.42);
+      font-family:"Plus Jakarta Sans",sans-serif;
+    }
+    .camera-controls{
+      display:flex;align-items:center;justify-content:center;gap:14px;
+      padding:16px 16px 18px;
+      border-top:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.02);
+    }
+    .shutter{
+      width:72px;height:72px;border-radius:50%;
+      background:#fff;border:6px solid rgba(255,255,255,.32);
+      display:grid;place-items:center;
+      transition:.2s ease;
+      box-shadow:0 0 0 8px rgba(200,150,62,.08);
+    }
+    .shutter::after{
+      content:"";
+      width:28px;height:28px;border-radius:50%;
+      background:linear-gradient(180deg,var(--gold2),var(--gold));
+      box-shadow:0 0 0 1px rgba(0,0,0,.08);
+    }
+    .shutter:hover{transform:scale(1.06);box-shadow:0 0 0 12px rgba(200,150,62,.1)}
+    .mini-row{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+      margin-top:14px;
+    }
+    .mini-shot{
+      aspect-ratio:1/1;border-radius:16px;overflow:hidden;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      display:grid;place-items:center;
+      color:var(--muted);font-size:11px;
+    }
+    .mini-shot img{width:100%;height:100%;object-fit:cover}
+
+    .result-card{padding:16px}
+    .result-title{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin-bottom:12px;
+    }
+    .result-title h3{
+      font-family:"Cormorant Garamond",serif;
+      font-style:italic;font-size:26px;
+    }
+    .result-title small{color:var(--muted)}
+    .canvas-wrap{
+      border-radius:24px;
+      padding:14px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+    }
+    .result-canvas{
+      width:100%;
+      display:block;
+      border-radius:16px;
+      background:#f7f3ec;
+      box-shadow:0 22px 52px rgba(0,0,0,.25);
+    }
+    .caption-box{
+      margin-top:14px;
+      display:grid;gap:10px;
+    }
+    .caption-box label{
+      color:var(--text);
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      font-weight:800;
+    }
+    .caption-box input{
+      width:100%;
+      padding:13px 14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--text);
+      outline:none;
+    }
+    .caption-box input:focus{border-color:rgba(200,150,62,.35)}
+    .action-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+    .action-row .btn{width:100%}
+    .download-btn{
+      background:linear-gradient(180deg, var(--gold2), var(--gold));
+      color:#110d16;
+      box-shadow:0 18px 40px rgba(200,150,62,.18);
+    }
+    .retake-btn{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--text);
+    }
+    .sticker-chips{
+      display:flex;flex-wrap:wrap;gap:8px;margin-top:8px
+    }
+    .sticker-chip{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      font-size:12px;
+      color:var(--text);
+      display:inline-flex;align-items:center;gap:8px;
+    }
+    .sticker-chip.active{
+      border-color:rgba(200,150,62,.38);
+      background:rgba(200,150,62,.12);
+      color:var(--gold2);
+    }
+    .footer-note{
+      padding:12px 2px 0;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.7;
+    }
+
+    /* modal */
+    .modal-backdrop{
+      position:fixed;inset:0;z-index:50;
+      background:rgba(3,3,10,.72);
+      backdrop-filter:blur(8px);
+      display:none;align-items:center;justify-content:center;
+      padding:20px;
+    }
+    .modal-backdrop.show{display:flex}
+    .modal{
+      width:min(420px, 100%);
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(19,15,40,.98), rgba(13,10,21,.98));
+      border:1px solid rgba(200,150,62,.14);
+      box-shadow:0 24px 64px rgba(0,0,0,.55);
+      padding:22px;
+    }
+    .modal h4{
+      font-family:"Cormorant Garamond",serif;
+      font-style:italic;font-size:28px;margin-bottom:8px
+    }
+    .modal p{color:var(--muted);line-height:1.7;font-size:14px}
+    .modal .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+    .modal .modal-actions .btn{padding:12px 16px}
+
+    /* Responsive */
+    @media (max-width: 1180px){
+      .booth-grid{grid-template-columns:1fr}
+      .hero{grid-template-columns:1fr}
+      .hero-panel{min-height:420px}
+    }
+    @media (max-width: 720px){
+      .nav .pill{display:none}
+      .wrap{width:min(100% - 18px, 1380px)}
+      .booth-head{flex-direction:column;align-items:flex-start}
+      .timer-bar{width:100%;justify-content:flex-start}
+      .panel-grid,.filter-grid,.mini-row,.action-row{grid-template-columns:1fr 1fr}
+      .hero h1{font-size:clamp(42px,13vw,62px)}
+      .video-stage{min-height:380px}
+      video{aspect-ratio:1/1}
+      .result-canvas{width:100%}
+      .action-row{grid-template-columns:1fr}
+    }
+    @media (max-width: 520px){
+      .panel-grid,.filter-grid,.mini-row{grid-template-columns:1fr}
+      .booth-grid{gap:12px}
+      .tool-card,.stage-card,.result-card{padding:14px}
+      .video-shell{min-height:auto}
+      .video-stage{padding:10px}
+    }
+
+    .showcase-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:24px;
+    margin-bottom:50px;
 }
-body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
-button,input{font-family:inherit}
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-.page{display:none;min-height:100vh;flex-direction:column}
-.page.active{display:flex}
-.nav{height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:1px solid var(--border);background:rgba(11,9,20,.88);backdrop-filter:blur(14px);position:sticky;top:0;z-index:50}
-.logo{font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;font-style:italic;color:var(--cream);letter-spacing:-.5px;user-select:none}
-.logo em{color:var(--gold);font-style:italic}
-.nav-links{display:flex;gap:28px}
-.nav-links a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;transition:color .2s}
-.nav-links a:hover{color:var(--text)}
-.wrap{flex:1;padding:32px;max-width:1200px;width:100%;margin:0 auto}
-.btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:var(--r);padding:13px 26px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.02em;white-space:nowrap}
-.btn-primary{background:var(--gold);color:#0B0914}
-.btn-primary:hover{background:var(--gold-lt);transform:translateY(-2px);box-shadow:0 8px 24px rgba(200,150,62,.3)}
-.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
-.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
-.btn-ghost{background:var(--s2);color:var(--text);border:1px solid var(--border2)}
-.btn-ghost:hover{background:var(--s3)}
-.btn-danger{background:#8C3A3A;color:#fff}
-.btn-danger:hover{background:#A44545;transform:translateY(-2px)}
-.btn-lg{padding:15px 34px;font-size:15px}
-.btn-full{width:100%;justify-content:center}
-.shutter{width:68px;height:68px;border-radius:50%;padding:0;border:6px solid rgba(255,255,255,.35);background:white;cursor:pointer;position:relative;transition:all .2s;display:grid;place-items:center}
-.shutter::after{content:'';width:28px;height:28px;border-radius:50%;background:var(--gold);display:block}
-.shutter:hover{transform:scale(1.06);box-shadow:0 0 0 8px rgba(200,150,62,.18)}
-.iconbtn{width:38px;height:38px;border-radius:50%;padding:0;display:grid;place-items:center;background:var(--s2);border:1px solid var(--border);font-size:14px;color:var(--muted);cursor:pointer;transition:background .2s,opacity .2s,color .2s;opacity:.6}
-.iconbtn:hover{background:var(--s3);opacity:1;color:var(--text)}
-.back{display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;padding:6px 0;transition:color .2s}
-.back:hover{color:var(--text)}
-.stepper{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:30px}
-.step{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);font-weight:500}
-.step.active{color:var(--gold)}
-.step.done{color:var(--muted);opacity:.7}
-.sdot{width:7px;height:7px;border-radius:50%;background:var(--s3)}
-.step.active .sdot{background:var(--gold);box-shadow:0 0 8px rgba(200,150,62,.5)}
-.step.done .sdot{background:var(--gold-lt);opacity:.6}
-.sline{width:52px;height:1px;background:var(--border)}
-.stitle{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:22px;color:var(--cream);margin-bottom:6px}
-.sdesc{font-size:13px;color:var(--muted);line-height:1.6}
-.divider{height:1px;background:var(--border)}
-.flabel{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;display:block}
-.finput{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:11px 14px;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;width:100%}
-.finput:focus{border-color:var(--gold)}
-.cdots{display:flex;gap:9px;flex-wrap:wrap}
-.cdot{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all .2s}
-.cdot.active{border-color:white;box-shadow:0 0 0 2px var(--gold);transform:scale(1.12)}
-.ccard{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:22px;text-align:center}
-.ccard-label{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--cream);margin-bottom:14px}
-canvas{width:100%;max-width:310px;border-radius:8px;box-shadow:0 16px 48px rgba(0,0,0,.7)}
-.scard{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:24px}
-.tmini{width:100%;aspect-ratio:3/4;border-radius:9px;position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
-.tmini-frame{position:absolute;inset:7px;border-radius:5px;border:1.5px solid rgba(255,255,255,.2)}
-.tmini-label{position:absolute;bottom:7px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:9px;opacity:.7;color:white}
-.topt{border:2px solid transparent;background:transparent;padding:0;cursor:pointer;border-radius:var(--r);width:100%;transition:all .2s}
-.topt.active{border-color:var(--gold)}
-.topt:hover:not(.active){border-color:rgba(200,150,62,.4);transform:translateY(-2px)}
-.tname{display:block;font-size:11px;color:var(--muted);text-align:center;margin-top:5px}
-.topt.active .tname{color:var(--gold)}
-.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.twrap{position:relative}
-.tdel{position:absolute;top:4px;right:4px;width:18px;height:18px;border:none;border-radius:50%;background:rgba(100,30,30,.9);color:white;cursor:pointer;display:grid;place-items:center;font-size:10px;z-index:2;transition:background .2s}
-.tdel:hover{background:rgba(146,45,45,.9)}
-.tnote{font-size:12px;color:var(--muted);line-height:1.6;padding:11px 14px;background:var(--s2);border-radius:var(--r);border:1px solid var(--border2)}
-.tips{display:flex;flex-direction:column;gap:12px}
-.tip{display:flex;gap:11px;align-items:flex-start}
-.tipn{width:28px;height:28px;border-radius:8px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-.tipn svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.tipt{font-size:12px;color:var(--muted);line-height:1.5}
-.tipt strong{color:var(--text);font-weight:600;display:block;margin-bottom:2px}
-.camwrap{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;min-width:0}
-.vwrap{position:relative;background:#000;min-height:460px;overflow:hidden}
-video{width:100%;height:460px;object-fit:cover;display:block;transform:scaleX(-1);background:#000}
-video:not([srcObject]) { background: var(--s2); }
-.fcorner{position:absolute;width:24px;height:24px;border-color:var(--gold);border-style:solid;border-width:0;opacity:.75}
-.fcorner.tl{top:14px;left:14px;border-top-width:2px;border-left-width:2px}
-.fcorner.tr{top:14px;right:14px;border-top-width:2px;border-right-width:2px}
-.fcorner.bl{bottom:14px;left:14px;border-bottom-width:2px;border-left-width:2px}
-.fcorner.br{bottom:14px;right:14px;border-bottom-width:2px;border-right-width:2px}
-.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:20;transition:opacity .25s ease-out}
-.liveDot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pls 2s ease-in-out infinite}
-@keyframes pls{0%,100%{opacity:1}50%{opacity:.2}}
-.cdlayer{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.62);backdrop-filter:blur(4px)}
-.cdnum{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:120px;font-weight:700;color:white;text-shadow:0 4px 20px rgba(200,150,62,.5);line-height:1}
-.camctrl{display:flex;align-items:center;justify-content:center;gap:40px;padding:16px 20px;border-top:1px solid var(--border);background:var(--s1)}
-.camhint{font-size:11px;color:var(--muted);text-align:center;padding:0 20px 12px}
-.hero{min-height:calc(100vh - 66px);display:grid;grid-template-columns:1fr 480px;gap:40px;align-items:center}
-.htitle{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(50px,6vw,86px);font-style:italic;font-weight:600;line-height:.96;letter-spacing:-2px;color:var(--cream);margin-bottom:22px}
-.htitle span{color:var(--gold)}
-.htitle .eyebrow{display:block;font-size:.38em;font-style:normal;font-weight:400;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:14px}
-.hdesc{color:var(--muted);font-size:14px;line-height:1.85;margin-bottom:34px;max-width:400px}
-.hfeats{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:38px}
-.hfeat{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);opacity:.7}
-.fdot{width:5px;height:5px;border-radius:50%;background:var(--gold)}
-.filmvis{position:relative;display:flex;justify-content:center;align-items:center;padding:30px 0}
-.filmstrip{display:flex;position:relative}
-.frail{width:20px;background:var(--s2);background-image:radial-gradient(circle,var(--bg) 4px,transparent 4px);background-size:20px 20px;background-repeat:repeat-y;background-position:center 6px}
-.fframes{display:flex;flex-direction:column;gap:3px;background:var(--s2)}
-.fframe{width:200px;height:155px;background:var(--s3);position:relative;overflow:hidden}
-.fframe::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 50%,rgba(200,150,62,.07) 100%)}
-.fframe-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-.fframe-inner span{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--muted);font-size:12px}
-.fdeco{position:absolute;font-size:22px;opacity:.35}
-.cgrid{display:grid;grid-template-columns:1.65fr .75fr;gap:22px;align-items:start}
-.tgridlay{display:grid;grid-template-columns:370px 1fr;gap:26px;align-items:start}
-.egridlay{display:grid;grid-template-columns:370px 1fr;gap:26px;align-items:start}
-.editpanel{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:26px;display:flex;flex-direction:column;gap:18px;position:sticky;top:90px}
-#flowbar{display:none!important}
-.shotbadge{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(11,9,20,.75);border:1px solid var(--border);backdrop-filter:blur(8px);border-radius:999px;padding:5px 13px;font-size:11px;color:var(--text);display:flex;align-items:center;gap:6px;z-index:5}
-.hidden{display:none!important}
-.modal-overlay{position:fixed;inset:0;background:rgba(5,4,10,.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:300;padding:20px}
-.modal-overlay.hidden{display:none!important}
-.modal-box{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:26px;max-width:360px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.6);animation:modalIn .18s ease-out}
-@keyframes modalIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-.modal-icon{width:38px;height:38px;border-radius:11px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
-.modal-icon svg{width:19px;height:19px;stroke:var(--gold);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.modal-icon.danger{background:rgba(140,58,58,.22)}
-.modal-icon.danger svg{stroke:#E08585}
-.modal-msg{font-size:14px;color:var(--text);line-height:1.65;margin-bottom:18px}
-#modalInput{margin-bottom:18px}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end}
-.modal-actions .btn{padding:10px 20px;font-size:13px}
-.hero-poster{width:100%;max-width:480px;border:1px solid var(--border);border-radius:28px;background:linear-gradient(135deg,rgba(240,229,211,.08),rgba(200,150,62,.08));padding:18px;position:relative;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.45)}
-.hero-poster::before{content:'';position:absolute;width:220px;height:220px;top:-90px;right:-80px;background:radial-gradient(circle,rgba(200,150,62,.35),transparent 65%);filter:blur(8px)}
-.hero-poster img{width:100%;display:block;border-radius:20px;object-fit:cover;position:relative;z-index:1}
-@media(max-width:900px){
-  .hero,.cgrid,.tgridlay,.egridlay{grid-template-columns:1fr}
-  .filmvis{display:none}
-  .ccard{position:static!important}
-  .editpanel{position:static!important}
-  .wrap{padding:20px 16px}
-  .nav-links{display:none}
-  .htitle{font-size:48px}
+
+.showcase-card{
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(200,150,62,.15);
+    border-radius:28px;
+    overflow:hidden;
+    transition:.3s;
 }
-</style>
+
+.showcase-card:hover{
+    transform:translateY(-6px);
+    border-color:var(--accent);
+}
+
+.showcase-card img{
+    width:100%;
+    height:260px;
+    object-fit:cover;
+}
+
+.showcase-card h3{
+    padding:20px 20px 8px;
+    font-size:24px;
+}
+
+.showcase-card p{
+    padding:0 20px 24px;
+    color:var(--muted);
+}
+
+.feature-preview{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+
+.feature-box{
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(200,150,62,.12);
+    border-radius:24px;
+    padding:24px;
+    text-align:center;
+}
+
+.feature-box span{
+    font-size:32px;
+    display:block;
+    margin-bottom:12px;
+}
+
+.feature-box h4{
+    margin-bottom:10px;
+}
+
+.feature-box p{
+    color:var(--muted);
+}
+
+.showcase-head{
+    text-align:center;
+    margin-bottom:60px;
+}
+
+.showcase-badge{
+    display:inline-block;
+    padding:10px 18px;
+    border-radius:999px;
+    border:1px solid rgba(200,150,62,.25);
+    background:rgba(200,150,62,.08);
+    color:var(--accent);
+    font-size:13px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+}
+
+.showcase-title{
+    margin-top:22px;
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(42px,6vw,72px);
+    line-height:1;
+    font-weight:600;
+    color:#fff;
+}
+
+.showcase-title span{
+    background:linear-gradient(
+        135deg,
+        #F7E7B4 0%,
+        #C8963E 35%,
+        #FFE8A3 60%,
+        #B77A1C 100%
+    );
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+}
+
+.showcase-desc{
+    margin:20px auto 0;
+    max-width:720px;
+    color:var(--muted);
+    font-size:18px;
+    line-height:1.8;
+}
+
+.showcase-card{
+    position:relative;
+    overflow:hidden;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(200,150,62,.15);
+    border-radius:28px;
+    transition:.35s ease;
+}
+
+.showcase-card:hover{
+    transform:translateY(-10px);
+    border-color:rgba(200,150,62,.55);
+    box-shadow:
+      0 20px 50px rgba(0,0,0,.45),
+      0 0 30px rgba(200,150,62,.15);
+}
+
+.showcase-card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(0,0,0,.55) 100%
+    );
+    pointer-events:none;
+}
+  </style>
 </head>
 <body>
-
-<!-- ============ LANDING ============ -->
-<section id="landingPage" class="page active">
-  <nav class="nav">
-    <div class="logo">Studio<em>Booth</em></div>
-  </nav>
-  <div class="wrap">
-    <div class="hero">
-      <div>
-        <h1 class="htitle">
-          Abadikan<br><span>Momen</span><br>Terbaikmu
-        </h1>
-        <p class="hdesc">Foto keren, frame estetik, tambah template sendiri, dan hasilnya langsung diunduh dalam sekejap.</p>
-        <div class="hfeats">
-          <div class="hfeat"><div class="fdot"></div> Timer otomatis</div>
-          <div class="hfeat"><div class="fdot"></div> 9 template eksklusif</div>
-          <div class="hfeat"><div class="fdot"></div> Upload template sendiri</div>
-          <div class="hfeat"><div class="fdot"></div> Download langsung</div>
+  <div class="app">
+    <section id="landingSection" class="section active">
+      <div class="nav">
+        <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:18px;">
+          <div class="brand">
+            <div class="brand-badge">S</div>
+            Studio<em>Booth</em>
+          </div>
+          <div class="pill">Photo Booth Web · dark luxury</div>
         </div>
-        <button class="btn btn-primary btn-lg" onclick="startSession()">
-          Mulai Foto
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
       </div>
-      <div class="hero-poster">
-        <img src="public/images/kamera.jpg" alt="Studio Booth Camera">
+
+      <div class="wrap">
+        <div class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow"><span></span> Photobooth V2</div>
+            <h1>Abadikan <span>Momen</span> dengan gaya yang lebih premium.</h1>
+            <p>
+              StudioBooth V2 hadir dengan nuansa dark luxury, warna gold elegan, filter realtime,
+              layout 2–4 foto, frame color, sticker, dan preview hasil langsung di satu tempat.
+            </p>
+            <div class="feature-row">
+              <div class="feature-chip"><span class="feature-dot"></span> Timer 3s / 5s / 10s</div>
+              <div class="feature-chip"><span class="feature-dot"></span> Layout 2 / 3 / 4 foto</div>
+              <div class="feature-chip"><span class="feature-dot"></span> Filter & Bersinar</div>
+              <div class="feature-chip"><span class="feature-dot"></span> Frame + Stiker</div>
+            </div>
+            <div class="hero-actions">
+              <button class="btn btn-gold" id="startBtn">Mulai Sesi</button>
+              <a class="btn btn-ghost" href="#boothSection">Lihat Booth</a>
+            </div>
+          </div>
+
+          <div class="hero-panel">
+            <div class="hero-strip">
+              <img src="public/images/kamera.jpg" alt="StudioBooth preview">
+            </div>
+          </div>
+        </div>
       </div>
+    </section>
+
+<section id="showcaseSection" class="section">
+  <div class="wrap">
+
+    <div class="section-head showcase-head">
+        <span class="showcase-badge">✦ StudioBooth Showcase</span>
+
+        <h2 class="showcase-title">
+            Temukan <span>Gaya Photobooth</span><br>
+            yang Paling Cocok Untukmu
+        </h2>
+
+        <p class="showcase-desc">
+            Pilih layout favorit, frame premium, filter estetik,
+            dan hasil photobooth berkualitas tinggi.
+        </p>
     </div>
+
+    <div class="showcase-grid">
+
+      <div class="showcase-card">
+        <img src="public/images/model1.jpg" alt="">
+        <h3>Layout 1 Foto</h3>
+        <p>Cocok untuk pasangan dan bestie.</p>
+      </div>
+
+      <div class="showcase-card">
+        <img src="public/images/model2.jpg" alt="">
+        <h3>Layout 2 Foto</h3>
+        <p>Paling populer untuk photobooth.</p>
+      </div>
+
+      <div class="showcase-card">
+        <img src="public/images/model3.jpg" alt="">
+        <h3>Layout 3 Foto</h3>
+        <p>Lebih banyak pose dan ekspresi.</p>
+      </div>
+
+    </div>
+
+    <div class="feature-preview">
+
+      <div class="feature-box">
+        <span>🎨</span>
+        <h4>Frame Premium</h4>
+        <p>Gold, Cream, Forest, Lavender, Midnight.</p>
+      </div>
+
+      <div class="feature-box">
+        <span>✨</span>
+        <h4>Filter Realtime</h4>
+        <p>Warm, Vintage, Noir, Dreamy dan lainnya.</p>
+      </div>
+
+      <div class="feature-box">
+        <span>🎀</span>
+        <h4>Sticker Estetik</h4>
+        <p>Heart, Ribbon, Flower, Sparkle dan Coffee.</p>
+      </div>
+
+      <div class="feature-box">
+        <span>📸</span>
+        <h4>Download HD</h4>
+        <p>Hasil tajam siap dibagikan ke sosial media.</p>
+      </div>
+
+    </div>
+
+    <div style="text-align:center;margin-top:50px">
+      <button
+        class="btn btn-gold"
+        onclick="showSection('boothSection')"
+      >
+        Mulai Photobooth →
+      </button>
+    </div>
+
   </div>
 </section>
 
-<!-- ============ CAMERA ============ -->
-<section id="cameraPage" class="page">
-  <nav class="nav"><div class="logo">Studio<em>Booth</em></div></nav>
-  <div class="wrap">
-    <button class="back" onclick="showPage('landingPage')">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Kembali
-    </button>
-    <div class="stepper">
-      <div class="step active"><div class="sdot"></div>Kamera</div>
-      <div class="sline"></div>
-      <div class="step"><div class="sdot"></div>Template</div>
-      <div class="sline"></div>
-      <div class="step"><div class="sdot"></div>Download</div>
-    </div>
-    <div class="cgrid">
-      <div class="camwrap">
-        <div class="vwrap">
-          <video id="video" autoplay playsinline></video>
-          <div class="fcorner tl"></div>
-          <div class="fcorner tr"></div>
-          <div class="fcorner bl"></div>
-          <div class="fcorner br"></div>
-          <div id="flashEl" class="flash"></div>
-          <div id="shotBadge" class="shotbadge">
-            <div class="liveDot"></div>
-            <span id="shotText">Siap 3x Foto</span>
+    <section id="boothSection" class="section">
+      <div class="nav">
+        <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:18px;">
+          <div class="brand">
+            <div class="brand-badge">S</div>
+            Studio<em>Booth</em>
           </div>
-          <div id="cdLayer" class="cdlayer">
-            <div id="cdNum" class="cdnum">3</div>
-          </div>
+          <div class="pill" id="sessionStatus">Siap memulai sesi foto</div>
         </div>
-        <div class="camctrl">
-          <button class="iconbtn" onclick="startCamera()" title="Restart kamera">⟳</button>
-          <button class="shutter" onclick="startCountdown()" title="Ambil foto"></button>
-          <button class="iconbtn" onclick="stopCamera()" title="Matikan kamera">✕</button>
-        </div>
-        <p class="camhint">Tekan ● sekali — sistem otomatis ambil 3 foto.</p>
       </div>
-      <div class="scard">
-        <div class="stitle">Cara Pakai</div>
-        <br>
-        <div class="tips">
-          <div class="tip">
-            <div class="tipn"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg></div>
-            <div class="tipt"><strong>Posisikan wajah</strong>Pastikan dalam frame & cahaya cukup</div>
+
+      <div class="wrap booth">
+        <div class="booth-head">
+          <div class="booth-title">
+            <h2>Photo Booth Web — Kamera Online & Strip Foto</h2>
+            <p>
+              Pilih layout, filter, dan warna frame sesuai tema kamu. Setelah foto selesai, hasilnya langsung muncul
+              di preview kanan dan siap diunduh.
+            </p>
           </div>
-          <div class="tip">
-            <div class="tipn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-            <div class="tipt"><strong>Tekan shutter</strong>Countdown 3 detik berjalan otomatis</div>
-          </div>
-          <div class="tip">
-            <div class="tipn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
-            <div class="tipt"><strong>Pilih template</strong>9 frame estetik atau upload sendiri</div>
-          </div>
-          <div class="tip">
-            <div class="tipn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
-            <div class="tipt"><strong>Download</strong>Tambah caption & simpan hasilnya</div>
+          <div class="timer-bar" aria-label="Timer">
+            <button class="timer-chip active" data-timer="3">3s</button>
+            <button class="timer-chip" data-timer="5">5s</button>
+            <button class="timer-chip" data-timer="10">10s</button>
           </div>
         </div>
+
+        <div class="booth-grid">
+          <aside class="card tool-card">
+            <div class="tool-tabs">
+              <button class="tool-tab active" data-tool="layout">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+                  <path d="M3 9h18M3 15h18"></path>
+                </svg>
+                Kisi / Layout
+              </button>
+              <button class="tool-tab" data-tool="filter">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 6h16M7 12h10M10 18h4"></path>
+                </svg>
+                Filter
+              </button>
+              <button class="tool-tab" data-tool="brightness">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+                </svg>
+                Bersinar
+              </button>
+              <button class="tool-tab" data-tool="frame">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="4" y="4" width="16" height="16" rx="4"></rect>
+                  <rect x="8" y="8" width="8" height="8" rx="2"></rect>
+                </svg>
+                Frame
+              </button>
+              <button class="tool-tab" data-tool="sticker">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 3h3a4 4 0 0 1 4 4v3a1 1 0 0 1-1 1h-3a4 4 0 0 0-4 4v3a1 1 0 0 1-1 1h-3a4 4 0 0 1-4-4v-3a4 4 0 0 1 4-4h3a4 4 0 0 0 4-4z"></path>
+                </svg>
+                Stiker
+              </button>
+            </div>
+
+            <div class="panel-title" id="toolTitle">Pilih Layout</div>
+            <div class="panel-desc" id="toolDesc">Tentukan jumlah foto yang akan diambil. Layout 3 foto jadi default yang paling serasi untuk strip photobooth.</div>
+
+            <div class="tool-panel" id="toolPanel"></div>
+          </aside>
+
+          <main class="card stage-card">
+            <div class="video-shell">
+              <div class="video-top">
+                <div class="video-badge"><span class="live-dot"></span> Live Camera</div>
+                <div class="video-badge" id="shotBadge">Siap 3x Foto</div>
+              </div>
+
+              <div class="video-stage">
+                <video id="video" autoplay playsinline muted></video>
+                <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+                <div class="countdown" id="countdown"><div id="countdownNum">3</div></div>
+              </div>
+
+              <div class="camera-controls">
+                <button class="btn btn-outline" id="restartBtn">Restart Kamera</button>
+                <button class="shutter" id="shutterBtn" aria-label="Ambil foto"></button>
+                <button class="btn btn-outline" id="stopBtn">Matikan</button>
+              </div>
+            </div>
+
+            <div class="mini-row" id="miniShots">
+              <div class="mini-shot">Shot 1</div>
+              <div class="mini-shot">Shot 2</div>
+              <div class="mini-shot">Shot 3</div>
+              <div class="mini-shot">Shot 4</div>
+            </div>
+          </main>
+
+          <aside class="card result-card">
+            <div class="result-title">
+              <div>
+                <h3>Preview Hasil</h3>
+                <small>Live render sesuai layout yang dipilih</small>
+              </div>
+            </div>
+
+            <div class="canvas-wrap">
+              <canvas id="previewCanvas" class="result-canvas"></canvas>
+            </div>
+
+            <div class="caption-box">
+              <label for="captionInput">Caption</label>
+              <input id="captionInput" type="text" maxlength="24" value="best moment">
+            </div>
+
+            <div class="action-row">
+              <button class="btn download-btn" id="downloadBtn">Download</button>
+              <button class="btn retake-btn" id="retakeBtn">Ambil Ulang</button>
+            </div>
+
+            <div class="sticker-chips" id="selectedStickerChips"></div>
+
+            <div class="footer-note">
+              Hasil download mengikuti tema StudioBooth: dark luxury, gold accent, dan frame elegan.
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <h4 id="modalTitle">Info</h4>
+      <p id="modalText">...</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="modalCancel">Batal</button>
+        <button class="btn btn-gold" id="modalOk">OK</button>
       </div>
     </div>
   </div>
-</section>
 
-<!-- ============ TEMPLATE ============ -->
-<section id="templatePage" class="page">
-  <nav class="nav"><div class="logo">Studio<em>Booth</em></div></nav>
-  <div class="wrap">
-    <button class="back" onclick="showPage('cameraPage')">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Kembali
-    </button>
-    <div class="stepper">
-      <div class="step done"><div class="sdot"></div>Kamera</div>
-      <div class="sline"></div>
-      <div class="step active"><div class="sdot"></div>Template</div>
-      <div class="sline"></div>
-      <div class="step"><div class="sdot"></div>Download</div>
-    </div>
-    <div class="tgridlay">
-      <div class="ccard" style="position:sticky;top:90px">
-        <div class="ccard-label">Preview</div>
-        <canvas id="resultCanvas" width="800" height="1050"></canvas>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:18px">
-        <div>
-          <div class="stitle">Pilih Template</div>
-          <div class="sdesc">Pilih frame yang tersedia atau tambahkan template milikmu sendiri.</div>
-        </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-ghost" onclick="openTplUpload()">+ Tambah Template</button>
-          <button class="btn btn-outline" onclick="resetCustom()">Reset Custom</button>
-          <input id="tplUpload" class="hidden" type="file" accept="image/png,image/jpeg,image/webp" onchange="addCustom(event)">
-        </div>
-        <div class="tnote">Gunakan file <strong>PNG transparan ukuran 800 × 1050px</strong> agar foto tetap terlihat dan frame menempel rapi di atas foto. Template latar <strong>putih/gelap</strong> juga didukung — pastikan area foto berwarna polos & kontras dengan latar (kotak hitam di latar putih, atau kotak terang di latar gelap).</div>
-        <div id="tplGrid" class="tgrid"></div>
-        <button class="btn btn-primary btn-lg btn-full" onclick="showEdit()">
-          Edit &amp; Download
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin:round"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-</section>
+  <canvas id="captureCanvas" style="display:none"></canvas>
 
-<!-- ============ EDIT / DOWNLOAD ============ -->
-<section id="editPage" class="page">
-  <nav class="nav"><div class="logo">Studio<em>Booth</em></div></nav>
-  <div class="wrap">
-    <button class="back" onclick="showPage('templatePage')">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Kembali
-    </button>
-    <div class="stepper">
-      <div class="step done"><div class="sdot"></div>Kamera</div>
-      <div class="sline"></div>
-      <div class="step done"><div class="sdot"></div>Template</div>
-      <div class="sline"></div>
-      <div class="step active"><div class="sdot"></div>Download</div>
-    </div>
-    <div class="egridlay">
-      <div class="ccard" style="position:sticky;top:90px">
-        <div class="ccard-label">Hasil Akhir</div>
-        <canvas id="finalCanvas" width="800" height="1050"></canvas>
-      </div>
-      <div class="editpanel">
-        <div>
-          <div class="stitle">Edit Foto</div>
-          <div class="sdesc">Tambahkan sentuhan personal pada fotomu.</div>
-        </div>
-        <div>
-          <label class="flabel" for="capInput">Caption</label>
-          <input id="capInput" class="finput" type="text" value="best moment" maxlength="24" oninput="updateCaption()">
-        </div>
-        <div>
-          <div class="flabel">Warna Teks</div>
-          <div class="cdots">
-            <button class="cdot active" style="background:#F0E5D3" onclick="pickColor('#F0E5D3',this)"></button>
-            <button class="cdot" style="background:#C8963E" onclick="pickColor('#C8963E',this)"></button>
-            <button class="cdot" style="background:#C98B7C" onclick="pickColor('#C98B7C',this)"></button>
-            <button class="cdot" style="background:#6B9E7A" onclick="pickColor('#6B9E7A',this)"></button>
-            <button class="cdot" style="background:#9B72CF" onclick="pickColor('#9B72CF',this)"></button>
-            <button class="cdot" style="background:#111111" onclick="pickColor('#111111',this)"></button>
-          </div>
-        </div>
-        <div class="divider"></div>
-        <button class="btn btn-primary btn-full btn-lg" onclick="downloadPhoto()">
-          Download Foto
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 3v8M4 9l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <button class="btn btn-outline btn-full" onclick="retakePhoto()">
-          Ambil Ulang
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 8a6 6 0 016-6 6 6 0 014.5 2M2 8l2-2 2 2M14 8a6 6 0 01-6 6 6 6 0 01-4.5-2M14 8l-2 2-2-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-</section>
+  <script>
+    const els = {
+      landing: document.getElementById('landingSection'),
+      booth: document.getElementById('boothSection'),
+      startBtn: document.getElementById('startBtn'),
+      video: document.getElementById('video'),
+      previewCanvas: document.getElementById('previewCanvas'),
+      captureCanvas: document.getElementById('captureCanvas'),
+      countdown: document.getElementById('countdown'),
+      countdownNum: document.getElementById('countdownNum'),
+      shutterBtn: document.getElementById('shutterBtn'),
+      restartBtn: document.getElementById('restartBtn'),
+      stopBtn: document.getElementById('stopBtn'),
+      downloadBtn: document.getElementById('downloadBtn'),
+      retakeBtn: document.getElementById('retakeBtn'),
+      sessionStatus: document.getElementById('sessionStatus'),
+      shotBadge: document.getElementById('shotBadge'),
+      captionInput: document.getElementById('captionInput'),
+      miniShots: document.getElementById('miniShots'),
+      toolPanel: document.getElementById('toolPanel'),
+      toolTitle: document.getElementById('toolTitle'),
+      toolDesc: document.getElementById('toolDesc'),
+      selectedStickerChips: document.getElementById('selectedStickerChips'),
+      modalBackdrop: document.getElementById('modalBackdrop'),
+      modalTitle: document.getElementById('modalTitle'),
+      modalText: document.getElementById('modalText'),
+      modalCancel: document.getElementById('modalCancel'),
+      modalOk: document.getElementById('modalOk')
+    };
 
-<div id="modalOverlay" class="modal-overlay hidden">
-  <div class="modal-box">
-    <div id="modalIcon" class="modal-icon"></div>
-    <div id="modalMsg" class="modal-msg"></div>
-    <input id="modalInput" class="finput hidden" type="text">
-    <div class="modal-actions">
-      <button id="modalCancelBtn" class="btn btn-outline hidden">Batal</button>
-      <button id="modalOkBtn" class="btn btn-primary">OK</button>
-    </div>
-  </div>
-</div>
+    const state = {
+      tool: 'layout',
+      timer: 3,
+      layout: 3,
+      filter: 'normal',
+      brightness: 1.04,
+      contrast: 1.03,
+      saturation: 1.02,
+      frame: 'gold',
+      caption: 'best moment',
+      stickers: [],
+      photos: [],
+      shooting: false,
+      stream: null
+    };
 
-<canvas id="capCanvas" class="hidden"></canvas>
-<div id="flowbar"></div>
+    const LAYOUTS = {
+      2: { w: 800, h: 900 },
+      3: { w: 800, h: 1050 },
+      4: { w: 800, h: 1320 }
+    };
 
-<script>
-const pages = document.querySelectorAll('.page');
-const videoEl = document.getElementById('video');
-const capCanvas = document.getElementById('capCanvas');
-const rCanvas = document.getElementById('resultCanvas');
-const fCanvas = document.getElementById('finalCanvas');
-const rCtx = rCanvas.getContext('2d');
-const fCtx = fCanvas.getContext('2d');
-const cdLayer = document.getElementById('cdLayer');
-const cdNum = document.getElementById('cdNum');
-const capInput = document.getElementById('capInput');
-const tplGrid = document.getElementById('tplGrid');
-const shotBadge = document.getElementById('shotBadge');
-const shotText  = document.getElementById('shotText');
+    const FILTERS = {
+      normal: { label: 'Normal', css: 'saturate(1) brightness(1) contrast(1) sepia(0) grayscale(0)' },
+      warm:   { label: 'Warm',   css: 'saturate(1.12) brightness(1.05) contrast(1.05) sepia(.18) hue-rotate(-10deg)' },
+      vintage:{ label: 'Vintage',css: 'saturate(.92) brightness(1.02) contrast(.96) sepia(.34) hue-rotate(4deg)' },
+      noir:   { label: 'Noir',   css: 'grayscale(1) contrast(1.12) brightness(.96)' },
+      dreamy: { label: 'Dreamy', css: 'saturate(1.08) brightness(1.12) contrast(.94) blur(.15px)' },
+      cream:  { label: 'Cream',  css: 'saturate(.9) brightness(1.08) contrast(.92) sepia(.06)' },
+      golden: { label: 'Golden', css: 'saturate(1.15) brightness(1.07) contrast(1.08) sepia(.22) hue-rotate(-16deg)' },
+      forest:  { label: 'Forest', css: 'saturate(1.1) brightness(1.0) contrast(1.05) sepia(.12) hue-rotate(72deg)' }
+    };
 
-const PHOTO_TOTAL = 3;
-let currentShot = 0;
-let isShooting = false;
+    const FRAME_THEMES = {
+      gold:    { accent: '#C8963E', title: 'Gold' },
+      rosegold:{ accent: '#C98B7C', title: 'Rose Gold' },
+      cream:   { accent: '#EBD9C2', title: 'Cream' },
+      lavender:{ accent: '#A08ED0', title: 'Lavender' },
+      forest:  { accent: '#6B9E7A', title: 'Forest' },
+      midnight:{ accent: '#7389D8', title: 'Midnight' },
+      noir:    { accent: '#8F8F98', title: 'Noir' }
+    };
 
-const BUILT_IN = [
-  { id:'noir',     name:'Noir Elegant',  bg:['#0E0E12','#18151F'], fg:'light', frame:'#C8963E', deco:'#C8963E', chars:['✦','✦','◈','◈','✧','✧'] },
-  { id:'cream',    name:'Cream Film',    bg:['#EAD8C3','#FFF5E6'], fg:'dark',  frame:'#D4B896', deco:'#8B6F4E', chars:['✿','✿','❀','❀','❁','❁'] },
-  { id:'rose',     name:'Rose Dust',     bg:['#3D1E1C','#6B2E28'], fg:'light', frame:'#C98B7C', deco:'#F4B8AE', chars:['♡','♡','✿','✿','♡','♡'] },
-  { id:'midnight', name:'Midnight',      bg:['#060D2E','#0D1F55'], fg:'light', frame:'#3A4E8C', deco:'#9B72CF', chars:['✦','✦','☾','★','◎','◎'] },
-  { id:'lavender', name:'Lavender',      bg:['#1A1030','#2E1960'], fg:'light', frame:'#A08ED0', deco:'#C8B4F8', chars:['✧','✧','☆','☆','✦','✦'] },
-  { id:'retro',    name:'Retro Sun',     bg:['#FFF0D0','#FFE3B3'], fg:'dark',  frame:'#C4924A', deco:'#C4924A', chars:['✺','✺','◉','◉','✸','✸'] },
-  { id:'white',    name:'Minimal White', bg:['#FFFFFF','#F5F0EC'], fg:'dark',  frame:'#D8D3CB', deco:'#9ca3af', chars:['·','·','◇','◇','·','·'] },
-  { id:'forest',   name:'Forest',        bg:['#0D2214','#1B3D25'], fg:'light', frame:'#3D6B4E', deco:'#6B9E7A', chars:['❧','❧','☘','☘','✿','✿'] },
-  { id:'polaroid', name:'Polaroid',      bg:['#FFFFFF','#FAFAFA'], fg:'dark',  frame:'#E8E4DE', deco:'#374151', chars:['◇','◇','◈','◈','◇','◇'] }
-];
+    const STICKERS = [
+      { id:'heart', label:'Heart', icon:'❤' },
+      { id:'star', label:'Star', icon:'✦' },
+      { id:'flower', label:'Flower', icon:'❀' },
+      { id:'sparkle', label:'Sparkle', icon:'✧' },
+      { id:'bow', label:'Bow', icon:'🎀' },
+      { id:'coffee', label:'Coffee', icon:'☕' },
+      { id:'camera', label:'Camera', icon:'📸' },
+      { id:'moon', label:'Moon', icon:'☾' },
+      { id:'music', label:'Music', icon:'♫' },
+      { id:'gem', label:'Gem', icon:'◆' }
+    ];
 
-const MINI_COLORS = {
-  noir:'linear-gradient(135deg,#0E0E12,#1a1820)',
-  cream:'linear-gradient(135deg,#EAD8C3,#FFF5E6)',
-  rose:'linear-gradient(135deg,#3D1E1C,#6B2E28)',
-  midnight:'linear-gradient(135deg,#060D2E,#162050)',
-  lavender:'linear-gradient(135deg,#1A1030,#2E1960)',
-  retro:'linear-gradient(135deg,#FFF0D0,#FFE3B3)',
-  white:'linear-gradient(135deg,#FFFFFF,#F5F0EC)',
-  forest:'linear-gradient(135deg,#0D2214,#1B3D25)',
-  polaroid:'#FFFFFF'
-};
-
-let camStream = null;
-let capturedImgs = [];
-let capturedImg = null;
-let selTpl = 'noir';
-let txtColor = '#F0E5D3';
-let capTxt = 'best moment';
-let customs = loadCustoms();
-
-/* ===== Image cache ===== */
-const imgCache = {};
-
-function loadCached(src) {
-  return new Promise((resolve) => {
-    if (!src) { resolve(null); return; }
-    if (imgCache[src]) { resolve(imgCache[src]); return; }
-    const im = new Image();
-    im.onload = () => { imgCache[src] = im; resolve(im); };
-    im.onerror = () => resolve(null);
-    im.src = src;
-  });
-}
-
-/* ===== Modal ===== */
-const modalOverlay = document.getElementById('modalOverlay');
-const modalIcon = document.getElementById('modalIcon');
-const modalMsg = document.getElementById('modalMsg');
-const modalInput = document.getElementById('modalInput');
-const modalOkBtn = document.getElementById('modalOkBtn');
-const modalCancelBtn = document.getElementById('modalCancelBtn');
-let modalResolver = null;
-
-const MODAL_ICONS = {
-  info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r=".6" fill="currentColor" stroke="none"/></svg>',
-  warn: '<svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="16.3" r=".6" fill="currentColor" stroke="none"/></svg>',
-  danger: '<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>'
-};
-
-function openModal({message, showInput=false, inputValue='', showCancel=false, okText='Mengerti', cancelText='Batal', danger=false, icon='info'}){
-  modalMsg.textContent = message;
-  modalIcon.innerHTML = MODAL_ICONS[icon] || MODAL_ICONS.info;
-  modalIcon.classList.toggle('danger', icon === 'danger');
-  modalInput.classList.toggle('hidden', !showInput);
-  modalInput.value = inputValue;
-  modalCancelBtn.classList.toggle('hidden', !showCancel);
-  modalOkBtn.textContent = okText;
-  modalCancelBtn.textContent = cancelText;
-  modalOkBtn.classList.toggle('btn-primary', !danger);
-  modalOkBtn.classList.toggle('btn-danger', danger);
-  modalOverlay.classList.remove('hidden');
-  if(showInput) setTimeout(() => modalInput.focus(), 50);
-}
-
-function closeModal(){
-  modalOverlay.classList.add('hidden');
-  modalResolver = null;
-}
-
-function showAlert(message, opts={}){
-  return new Promise(resolve => {
-    openModal({message, showInput:false, showCancel:false, okText:opts.okText || 'Mengerti', icon:opts.icon || 'info'});
-    modalResolver = () => { closeModal(); resolve(true); };
-  });
-}
-
-function showConfirm(message, opts={}){
-  return new Promise(resolve => {
-    openModal({message, showInput:false, showCancel:true, okText:opts.okText || 'Ya, lanjutkan', cancelText:opts.cancelText || 'Batal', danger:opts.danger, icon:opts.icon || 'warn'});
-    modalResolver = (val) => { closeModal(); resolve(val); };
-  });
-}
-
-function showPrompt(message, defVal='', opts={}){
-  return new Promise(resolve => {
-    openModal({message, showInput:true, inputValue:defVal, showCancel:true, okText:opts.okText || 'Simpan', cancelText:opts.cancelText || 'Batal', icon:opts.icon || 'info'});
-    modalResolver = (val) => { closeModal(); resolve(val); };
-  });
-}
-
-modalOkBtn.onclick = () => {
-  if(!modalResolver) return;
-  const isPrompt = !modalInput.classList.contains('hidden');
-  modalResolver(isPrompt ? modalInput.value : true);
-};
-modalCancelBtn.onclick = () => {
-  if(!modalResolver) return;
-  const isPrompt = !modalInput.classList.contains('hidden');
-  modalResolver(isPrompt ? null : false);
-};
-document.addEventListener('keydown', e => {
-  if(modalOverlay.classList.contains('hidden')) return;
-  if(e.key === 'Enter'){ e.preventDefault(); modalOkBtn.click(); }
-  if(e.key === 'Escape' && !modalCancelBtn.classList.contains('hidden')) modalCancelBtn.click();
-});
-
-/* ===== Flash ===== */
-function triggerFlash(){
-  const el = document.getElementById('flashEl');
-  el.style.transition = 'none';
-  el.style.opacity = '.85';
-  requestAnimationFrame(() => {
-    el.style.transition = 'opacity .25s ease-out';
-    el.style.opacity = '0';
-  });
-}
-
-function showPage(id) {
-  pages.forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function startSession() {
-  capturedImgs = [];
-  capturedImg = null;
-  currentShot = 0;
-  isShooting = false;
-  updateShotBadge();
-  showPage('cameraPage');
-  startCamera();
-}
-
-async function startCamera() {
-  if(camStream && videoEl.srcObject) return;
-  stopCamera();
-  try {
-    camStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode:'user' },
-      audio: false
-    });
-    videoEl.srcObject = camStream;
-  } catch(e) {
-    camStream = null;
-    const msg =
-      e.name === 'NotAllowedError'  ? 'Izin kamera ditolak. Klik ikon kunci di address bar lalu izinkan akses kamera, kemudian refresh halaman.' :
-      e.name === 'NotFoundError'    ? 'Kamera tidak ditemukan. Pastikan kamera terhubung dan tidak dipakai aplikasi lain.' :
-      e.name === 'NotReadableError' ? 'Kamera sedang dipakai aplikasi lain (Zoom, Meet, OBS, dll). Tutup aplikasi tersebut lalu coba lagi.' :
-      'Kamera tidak bisa dibuka: ' + e.message;
-    showAlert(msg, {icon:'warn'});
-  }
-}
-
-function stopCamera() {
-  if(camStream) {
-    camStream.getTracks().forEach(t => t.stop());
-    camStream = null;
-  }
-  videoEl.srcObject = null;
-  videoEl.load();
-}
-
-function updateShotBadge(){
-  if(!shotText) return;
-  const next = Math.min(currentShot + 1, PHOTO_TOTAL);
-  shotText.textContent = isShooting ? `Foto ${next}/${PHOTO_TOTAL}` : `Siap 3x Foto`;
-}
-
-function startCountdown() {
-  if(isShooting) return;
-  if(!videoEl.srcObject) {
-    startCamera().then(() => {
-      showAlert('Kamera sedang diaktifkan. Tekan tombol foto lagi setelah gambar kamera muncul.', {icon:'info'});
-    });
-    return;
-  }
-  capturedImgs = [];
-  capturedImg = null;
-  currentShot = 0;
-  isShooting = true;
-  updateShotBadge();
-  runCountdownThenCapture();
-}
-
-function runCountdownThenCapture() {
-  let c = 3;
-  cdLayer.style.display = 'flex';
-  cdNum.textContent = c;
-  updateShotBadge();
-  const timer = setInterval(() => {
-    c--;
-    if(c > 0){
-      cdNum.textContent = c;
-    } else {
-      clearInterval(timer);
-      cdNum.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="#C8963E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 18px rgba(200,150,62,.7))"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`;
-      setTimeout(() => {
-        cdLayer.style.display = 'none';
-        capturePhoto();
-      }, 320);
-    }
-  }, 1000);
-}
-
-function capturePhoto() {
-  const w = videoEl.videoWidth;
-  const h = videoEl.videoHeight;
-  if(!w || !h){
-    isShooting = false;
-    showAlert('Kamera belum siap. Coba lagi.', {icon:'warn'});
-    updateShotBadge();
-    return;
-  }
-  triggerFlash();
-  capCanvas.width = w;
-  capCanvas.height = h;
-  const ctx = capCanvas.getContext('2d');
-  ctx.save();
-  ctx.translate(w,0);
-  ctx.scale(-1,1);
-  ctx.drawImage(videoEl,0,0,w,h);
-  ctx.restore();
-  const img = new Image();
-  img.onload = () => {
-    capturedImgs.push(img);
-    capturedImg = capturedImgs[0];
-    currentShot = capturedImgs.length;
-    updateShotBadge();
-    if(capturedImgs.length < PHOTO_TOTAL){
-      setTimeout(runCountdownThenCapture, 400);
-    } else {
-      isShooting = false;
-      updateShotBadge();
-      renderAll();
-      showPage('templatePage');
-    }
-  };
-  img.src = capCanvas.toDataURL('image/png');
-}
-
-const CUSTOMS_VERSION = 'v7';
-
-function loadCustoms(){
-  try{
-    // Invalidate customs saved by older versions that lack hasTransparency
-    const ver = localStorage.getItem('sb_ct_ver');
-    if(ver !== CUSTOMS_VERSION){
-      localStorage.removeItem('sb_ct');
-      localStorage.setItem('sb_ct_ver', CUSTOMS_VERSION);
-      return [];
-    }
-    const d = localStorage.getItem('sb_ct');
-    return d ? JSON.parse(d) : [];
-  }catch{ return []; }
-}
-
-function saveCustoms(){
-  localStorage.setItem('sb_ct_ver', CUSTOMS_VERSION);
-  localStorage.setItem('sb_ct', JSON.stringify(customs));
-}
-
-function openTplUpload(){ document.getElementById('tplUpload').click(); }
-
-async function addCustom(e){
-  const f = e.target.files[0];
-  if(!f) return;
-  if(!f.type.startsWith('image/')){
-    showAlert('File harus berupa gambar PNG, JPG, atau WEBP.', {icon:'warn'});
-    e.target.value = '';
-    return;
-  }
-  const r = new FileReader();
-  r.onload = ev => {
-    const probe = new Image();
-    probe.onload = async () => {
-      const targetRatio = 800 / 1050;
-      const ratio = probe.width / probe.height;
-      const offBy = Math.abs(ratio - targetRatio) / targetRatio;
-      if(offBy > 0.05){
-        const proceed = await showConfirm(
-          `Gambar ini berukuran ${probe.width}×${probe.height}px, rasionya beda dari 800×1050px. Supaya tidak gepeng, gambar akan otomatis dipotong (crop). Lanjutkan?`,
-          {okText:'Lanjutkan', cancelText:'Batal', icon:'warn'}
-        );
-        if(!proceed){ e.target.value = ''; return; }
-      }
-      const nm = await showPrompt('Nama template:', f.name.replace(/\.[^/.]+$/,''), {okText:'Simpan'});
-      if(nm === null){ e.target.value = ''; return; }
-
-      const W = rCanvas.width, H = rCanvas.height;
-      const analysis = analyzeCustomTemplate(probe, W, H);
-
-      // Generate thumb from original (unprocessed) image
-      const thumbCanvas = document.createElement('canvas');
-      thumbCanvas.width = W; thumbCanvas.height = H;
-      drawImageCover(thumbCanvas.getContext('2d'), probe, 0, 0, W, H);
-
-      const t = {
-        id:'c-' + Date.now(),
-        name: nm || 'Custom',
-        src: analysis.canvas.toDataURL('image/png'),
-        thumbSrc: thumbCanvas.toDataURL('image/png'),
-        slots: analysis.slots,
-        hasTransparency: analysis.hasTransparency, // CRITICAL: save this!
-        custom:true
-      };
-      customs.push(t);
-      selTpl = t.id;
-      saveCustoms();
-      buildTplGrid();
-      renderAll();
-      e.target.value = '';
-
-      if(t.slots){
-        showAlert('Template berhasil dianalisis — 3 slot foto terdeteksi otomatis. Foto kamu akan ditempatkan di posisi tersebut.', {icon:'info'});
-      } else {
-        showAlert('Slot foto tidak terdeteksi otomatis, jadi foto akan memakai posisi standar di belakang template. Untuk hasil terbaik: pakai PNG transparan, atau pastikan kotak foto berwarna polos (kontras dengan latar) dan punya garis/jarak yang jelas dari elemen lain di template.', {icon:'warn'});
+    const toolMeta = {
+      layout: {
+        title: 'Pilih Layout',
+        desc: 'Tentukan jumlah foto yang akan diambil. Layout 3 foto jadi default yang paling serasi untuk strip photobooth.',
+        render() {
+          return `
+            <div class="panel-grid">
+              ${[2,3,4].map(n => `
+                <button class="layout-card ${state.layout===n?'active':''}" data-layout="${n}">
+                  <div class="layout-preview">${Array.from({length:n}).map(() => '<div class="slot"></div>').join('')}</div>
+                  <div class="layout-label">${n} Foto</div>
+                  <div class="layout-sub">${n===2?'Ringkas & elegan':n===3?'Paling populer':'Lebih panjang'}</div>
+                </button>
+              `).join('')}
+            </div>
+            <div class="helper">Layout yang dipilih juga menentukan jumlah foto yang akan diambil saat tombol shutter ditekan.</div>
+          `;
+        }
+      },
+      filter: {
+        title: 'Filter Realtime',
+        desc: 'Pilih tone yang cocok dengan tema kamu. Filter ini berlaku di live camera dan hasil foto.',
+        render() {
+          return `
+            <div class="filter-grid">
+              ${Object.entries(FILTERS).map(([key, val]) => `
+                <button class="filter-chip ${state.filter===key?'active':''}" data-filter="${key}">${val.label}</button>
+              `).join('')}
+            </div>
+            <div class="helper">Filter yang paling cocok untuk tema dark luxury: Warm, Golden, Noir, dan Cream.</div>
+          `;
+        }
+      },
+      brightness: {
+        title: 'Bersinar',
+        desc: 'Atur brightness, contrast, dan saturation agar wajah lebih hidup tanpa merusak nuansa premium.',
+        render() {
+          return `
+            <div class="range-row">
+              <label><span>Brightness</span><span>${Math.round(state.brightness*100)}%</span></label>
+              <input id="brightnessRange" type="range" min="0.72" max="1.38" step="0.01" value="${state.brightness}">
+            </div>
+            <div class="range-row">
+              <label><span>Contrast</span><span>${Math.round(state.contrast*100)}%</span></label>
+              <input id="contrastRange" type="range" min="0.82" max="1.25" step="0.01" value="${state.contrast}">
+            </div>
+            <div class="range-row">
+              <label><span>Saturation</span><span>${Math.round(state.saturation*100)}%</span></label>
+              <input id="saturationRange" type="range" min="0.72" max="1.28" step="0.01" value="${state.saturation}">
+            </div>
+          `;
+        }
+      },
+      frame: {
+        title: 'Warna Frame',
+        desc: 'Frame yang dipakai saat hasil di-render. Tetap selaras dengan tema StudioBooth.',
+        render() {
+          const frames = [
+            ['gold','#C8963E'],
+            ['rosegold','#C98B7C'],
+            ['cream','#EBD9C2'],
+            ['lavender','#A08ED0'],
+            ['forest','#6B9E7A'],
+            ['midnight','#7389D8'],
+            ['noir','#8F8F98']
+          ];
+          return `
+            <div class="swatches">
+              ${frames.map(([key, c]) => `<button class="swatch ${state.frame===key?'active':''}" data-frame="${key}" style="background:${c}"></button>`).join('')}
+            </div>
+            <div class="helper">Gold paling aman untuk kesan mewah. Cream dan Lavender cocok kalau mau lebih soft.</div>
+          `;
+        }
+      },
+      sticker: {
+        title: 'Stiker',
+        desc: 'Klik stiker untuk menambahkannya ke hasil. Pilihan yang aktif akan tampil di preview kanan.',
+        render() {
+          return `
+            <div class="panel-grid" style="grid-template-columns:repeat(5,1fr)">
+              ${STICKERS.map(s => `
+                <button class="layout-card ${state.stickers.includes(s.id)?'active':''}" data-sticker="${s.id}" style="min-height:82px;text-align:center;padding:10px">
+                  <div style="font-size:28px;line-height:1.1">${s.icon}</div>
+                  <div class="layout-sub" style="margin-top:8px">${s.label}</div>
+                </button>
+              `).join('')}
+            </div>
+            <div class="helper">Maksimal 4 stiker aktif supaya hasil tetap rapi dan tidak menutupi foto.</div>
+          `;
+        }
       }
     };
-    probe.src = ev.target.result;
-  };
-  r.readAsDataURL(f);
-}
 
-async function deleteCustom(id){
-  const ok = await showConfirm('Template ini akan dihapus permanen.', {okText:'Hapus', cancelText:'Batal', danger:true, icon:'danger'});
-  if(!ok) return;
-  customs = customs.filter(t => t.id !== id);
-  if(selTpl === id) selTpl = 'noir';
-  saveCustoms();
-  buildTplGrid();
-  renderAll();
-}
+    function showSection(id){
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
 
-async function resetCustom(){
-  const ok = await showConfirm('Semua template custom akan dihapus permanen.', {okText:'Hapus Semua', cancelText:'Batal', danger:true, icon:'danger'});
-  if(!ok) return;
-  customs = [];
-  selTpl = 'noir';
-  saveCustoms();
-  buildTplGrid();
-  renderAll();
-}
+    function openModal(title, text, {ok='OK', cancel='Batal'} = {}) {
+      els.modalTitle.textContent = title;
+      els.modalText.textContent = text;
+      els.modalOk.textContent = ok;
+      els.modalCancel.textContent = cancel;
+      els.modalBackdrop.classList.add('show');
+      els.modalBackdrop.setAttribute('aria-hidden','false');
+      return new Promise(resolve => {
+        const cleanup = () => {
+          els.modalBackdrop.classList.remove('show');
+          els.modalBackdrop.setAttribute('aria-hidden','true');
+          els.modalOk.onclick = null;
+          els.modalCancel.onclick = null;
+        };
+        els.modalOk.onclick = () => { cleanup(); resolve(true); };
+        els.modalCancel.onclick = () => { cleanup(); resolve(false); };
+      });
+    }
 
-function getCustTpl(){ return customs.find(t => t.id === selTpl); }
-function getTplDef(){ return BUILT_IN.find(t => t.id === selTpl) || BUILT_IN[0]; }
+    function setTool(tool){
+      state.tool = tool;
+      [...document.querySelectorAll('.tool-tab')].forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
+      els.toolTitle.textContent = toolMeta[tool].title;
+      els.toolDesc.textContent = toolMeta[tool].desc;
+      els.toolPanel.innerHTML = toolMeta[tool].render();
+      bindToolPanel();
+      renderAll();
+    }
 
-function buildTplGrid(){
-  tplGrid.innerHTML = '';
-  BUILT_IN.forEach(t => tplGrid.appendChild(mkTplBtn(t,false)));
-  customs.forEach(t => tplGrid.appendChild(mkTplBtn(t,true)));
-}
+    function bindToolPanel(){
+      els.toolPanel.querySelectorAll('[data-layout]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.layout = Number(btn.dataset.layout);
+          if (state.photos.length && state.photos.length !== state.layout) {
+            // Keep it smooth and predictable: reset the session when layout changes after shots exist.
+            state.photos = [];
+            updateMiniShots();
+            updateStatus(`Layout diubah ke ${state.layout} foto. Sesi foto direset agar hasil tetap rapi.`);
+          }
+          setTool('layout');
+          updateShotBadge();
+          renderAll();
+        });
+      });
 
-function mkTplBtn(t,isCustom){
-  const wrap = document.createElement('div');
-  wrap.className = 'twrap';
-  const btn = document.createElement('button');
-  btn.className = 'topt' + (selTpl === t.id ? ' active' : '');
-  btn.type = 'button';
-  btn.onclick = () => { selTpl = t.id; buildTplGrid(); renderAll(); };
-  const mini = document.createElement('div');
-  mini.className = 'tmini';
-  mini.style.background = MINI_COLORS[t.id] || 'linear-gradient(135deg,#0E0E12,#18151F)';
-  if(isCustom){
-    // Use thumbSrc (original) for thumbnail, not the processed src
-    const img = document.createElement('img');
-    img.src = t.thumbSrc || t.src;
-    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:9px';
-    mini.appendChild(img);
-  } else {
-    const fr = document.createElement('div');
-    fr.className = 'tmini-frame';
-    const lbl = document.createElement('div');
-    lbl.className = 'tmini-label';
-    lbl.textContent = '✦';
-    lbl.style.color = (t.fg === 'dark') ? 'rgba(0,0,0,.45)' : 'rgba(255,255,255,.45)';
-    mini.appendChild(fr);
-    mini.appendChild(lbl);
-  }
-  const nm = document.createElement('span');
-  nm.className = 'tname';
-  nm.textContent = t.name;
-  btn.appendChild(mini);
-  btn.appendChild(nm);
-  wrap.appendChild(btn);
-  if(isCustom){
-    const del = document.createElement('button');
-    del.className = 'tdel';
-    del.textContent = '×';
-    del.onclick = ev => { ev.stopPropagation(); deleteCustom(t.id); };
-    wrap.appendChild(del);
-  }
-  return wrap;
-}
+      els.toolPanel.querySelectorAll('[data-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.filter = btn.dataset.filter;
+          setTool('filter');
+          renderAll();
+        });
+      });
 
-function showEdit(){ renderAll(); showPage('editPage'); }
-function updateCaption(){ capTxt = capInput.value || 'best moment'; renderAll(); }
-function pickColor(c,btn){
-  txtColor = c;
-  document.querySelectorAll('.cdot').forEach(d => d.classList.remove('active'));
-  btn.classList.add('active');
-  renderAll();
-}
+      const brightness = els.toolPanel.querySelector('#brightnessRange');
+      const contrast = els.toolPanel.querySelector('#contrastRange');
+      const saturation = els.toolPanel.querySelector('#saturationRange');
+      if (brightness) brightness.addEventListener('input', e => {
+        state.brightness = Number(e.target.value);
+        renderAll();
+        refreshActivePanelOnly();
+      });
+      if (contrast) contrast.addEventListener('input', e => {
+        state.contrast = Number(e.target.value);
+        renderAll();
+        refreshActivePanelOnly();
+      });
+      if (saturation) saturation.addEventListener('input', e => {
+        state.saturation = Number(e.target.value);
+        renderAll();
+        refreshActivePanelOnly();
+      });
 
-function hasPhotos(){ return capturedImgs.length > 0; }
+      els.toolPanel.querySelectorAll('[data-frame]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.frame = btn.dataset.frame;
+          setTool('frame');
+          renderAll();
+        });
+      });
 
-async function renderAll(){
-  await render(rCtx, rCanvas);
-  await render(fCtx, fCanvas);
-}
+      els.toolPanel.querySelectorAll('[data-sticker]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.sticker;
+          if (state.stickers.includes(id)) {
+            state.stickers = state.stickers.filter(x => x !== id);
+          } else {
+            if (state.stickers.length >= 4) {
+              alertMessage('Maksimal 4 stiker aktif supaya hasil tetap rapi.');
+              return;
+            }
+            state.stickers.push(id);
+          }
+          setTool('sticker');
+          renderAll();
+        });
+      });
+    }
 
-async function render(ctx, canvas){
-  const W = canvas.width;
-  const H = canvas.height;
-  ctx.clearRect(0,0,W,H);
+    function refreshActivePanelOnly(){
+      // Update the active panel markup without changing the tool selection.
+      const current = state.tool;
+      els.toolPanel.innerHTML = toolMeta[current].render();
+      bindToolPanel();
+    }
 
-  if(!hasPhotos()){
-    drawPlaceholder(ctx,W,H);
-    return;
-  }
+    function updateStatus(text){
+      els.sessionStatus.textContent = text;
+    }
 
-  const cust = getCustTpl();
-  const defaultSlots = getPhotoSlots(W,H);
-  const slots = (cust && Array.isArray(cust.slots) && cust.slots.length === 3) ? cust.slots : defaultSlots;
+    function applyVideoFilter(){
+      const preset = FILTERS[state.filter]?.css || FILTERS.normal.css;
+      els.video.style.filter = `brightness(${state.brightness}) contrast(${state.contrast}) saturate(${state.saturation}) ${preset}`;
+      els.video.style.transform = 'scaleX(-1)';
+    }
 
-  if(cust){
-    const tplImg = await loadCached(cust.src);
+    function calcOutputSize(){
+      return LAYOUTS[state.layout] || LAYOUTS[3];
+    }
 
-    if(cust.hasTransparency){
-      // Template transparan: foto dulu, template di atas
-      ctx.fillStyle = '#ffffff';
+    function drawRoundedRect(ctx, x, y, w, h, r){
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function getFrameTheme(){
+      return FRAME_THEMES[state.frame] || FRAME_THEMES.gold;
+    }
+
+    function computeStickerPositions(W, H){
+      const positions = [
+        { x: 28, y: 28, s: 34, rot: -8 },
+        { x: W - 62, y: 32, s: 34, rot: 6 },
+        { x: 30, y: H - 66, s: 34, rot: 6 },
+        { x: W - 66, y: H - 68, s: 34, rot: -6 }
+      ];
+      return state.stickers.slice(0, 4).map((id, i) => ({ id, ...positions[i] }));
+    }
+
+    function renderCanvas(canvas, photos = state.photos){
+      const theme = getFrameTheme();
+      const { w: W, h: H } = calcOutputSize();
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      // background
+      const bg = ctx.createLinearGradient(0, 0, W, H);
+      bg.addColorStop(0, '#F6F1EA');
+      bg.addColorStop(1, '#FFFDF8');
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
 
-      slots.forEach((slot, i) => {
-        const img = capturedImgs[i];
-        if(img){
-          ctx.save();
-          ctx.beginPath();
-          ctx.rect(slot.x, slot.y, slot.w, slot.h);
-          ctx.clip();
-          drawImageCover(ctx, img, slot.x, slot.y, slot.w, slot.h);
-          ctx.restore();
-        } else {
-          ctx.fillStyle = '#222';
-          ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
-        }
-      });
+      // outer glow / card
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,.18)';
+      ctx.shadowBlur = 24;
+      ctx.shadowOffsetY = 10;
+      ctx.fillStyle = '#FFFFFF';
+      drawRoundedRect(ctx, 22, 22, W - 44, H - 44, 30);
+      ctx.fill();
+      ctx.restore();
 
-      if(tplImg) ctx.drawImage(tplImg, 0, 0, W, H);
-    } else {
-      // Template solid: template di bawah, foto di atas
-      if(tplImg){
-        ctx.drawImage(tplImg, 0, 0, W, H);
-      } else {
-        drawBG(ctx, W, H);
-      }
+      // frame border
+      ctx.save();
+      ctx.lineWidth = 18;
+      ctx.strokeStyle = theme.accent;
+      drawRoundedRect(ctx, 22, 22, W - 44, H - 44, 30);
+      ctx.stroke();
 
-      slots.forEach((slot, i) => {
-        const img = capturedImgs[i];
-        if(img){
-          ctx.save();
-          ctx.beginPath();
-          ctx.rect(slot.x, slot.y, slot.w, slot.h);
-          ctx.clip();
-          drawImageCover(ctx, img, slot.x, slot.y, slot.w, slot.h);
-          ctx.restore();
-        }
-      });
-    }
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(0,0,0,.08)';
+      drawRoundedRect(ctx, 38, 38, W - 76, H - 76, 24);
+      ctx.stroke();
+      ctx.restore();
 
-    drawCaption(ctx, W, H);
-    return;
-  }
+      // header area
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,.05)';
+      drawRoundedRect(ctx, 48, 48, W - 96, 72, 18);
+      ctx.fill();
 
-  // ── Built-in template ──
-  drawBG(ctx,W,H);
-  drawPhoto(ctx,W,H);
-  drawFrame(ctx,W,H);
-  drawDecor(ctx,W,H);
-  drawCaption(ctx,W,H);
-}
+      ctx.font = 'italic 28px "Cormorant Garamond", serif';
+      ctx.fillStyle = '#231C16';
+      ctx.textAlign = 'left';
+      ctx.fillText('StudioBooth', 68, 94);
 
-function drawPlaceholder(ctx,W,H){
-  ctx.fillStyle = '#130F28';
-  ctx.fillRect(0,0,W,H);
-  ctx.fillStyle = '#1B1738';
-  ctx.fillRect(95,85,W-190,235);
-  ctx.fillRect(95,355,W-190,235);
-  ctx.fillRect(95,625,W-190,235);
-  ctx.fillStyle = '#9080AC';
-  ctx.font = 'italic 34px "Cormorant Garamond",serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('hasil 3 foto akan muncul di sini',W/2,H/2);
-}
+      ctx.font = '600 18px "Plus Jakarta Sans", sans-serif';
+      ctx.fillStyle = theme.accent;
+      ctx.textAlign = 'right';
+      ctx.fillText(`${state.layout} Foto`, W - 68, 94);
+      ctx.restore();
 
-function drawBG(ctx,W,H){
-  const d = getTplDef();
-  const g = ctx.createLinearGradient(0,0,W,H);
-  g.addColorStop(0,d.bg[0]);
-  g.addColorStop(1,d.bg[1]);
-  ctx.fillStyle = g;
-  ctx.fillRect(0,0,W,H);
-  if(selTpl === 'retro') drawRetroSun(ctx,W,H);
-  if(selTpl === 'midnight') drawStars(ctx,W,H);
-  if(selTpl === 'forest') drawLeaves(ctx,W,H);
-}
+      const headerH = 132;
+      const footerH = 132;
+      const usableH = H - headerH - footerH;
+      const gap = 18;
+      const slotH = (usableH - gap * (state.layout - 1)) / state.layout;
+      const slotW = W - 108;
+      const slotX = 54;
+      const slots = Array.from({length: state.layout}, (_, i) => ({
+        x: slotX,
+        y: headerH + i * (slotH + gap),
+        w: slotW,
+        h: slotH
+      }));
 
-function getPhotoSlots(W,H){
-  const mx = 105;
-  const slotW = W - mx * 2;
-  const slotH = 235;
-  const gap = 28;
-  const startY = 92;
-  return [0,1,2].map(i => ({ x:mx, y:startY + i*(slotH+gap), w:slotW, h:slotH }));
-}
+      // slots and photos
+      const crop = state.photos;
+      slots.forEach((slot, idx) => {
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,.035)';
+        drawRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, 18);
+        ctx.fill();
+        ctx.restore();
 
-function drawPhoto(ctx,W,H){
-  const slots = getPhotoSlots(W,H);
-  slots.forEach((slot, i) => {
-    const img = capturedImgs[i];
-    ctx.save();
-    ctx.fillStyle = 'rgba(0,0,0,.28)';
-    roundRect(ctx, slot.x-8, slot.y+8, slot.w+16, slot.h+14, 8, true, false);
-    ctx.restore();
-    if(img){
-      drawImageCover(ctx, img, slot.x, slot.y, slot.w, slot.h);
-    } else {
-      ctx.fillStyle = '#1B1738';
-      ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
-    }
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255,255,255,.18)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(slot.x, slot.y, slot.w, slot.h);
-    ctx.restore();
-  });
-}
+        ctx.save();
+        drawRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, 18);
+        ctx.clip();
 
-function drawImageCover(ctx,img,x,y,w,h){
-  const ir = img.width / img.height;
-  const fr = w / h;
-  let sx, sy, sw, sh;
-  if(ir > fr){
-    sh = img.height; sw = sh*fr; sx = (img.width-sw)/2; sy = 0;
-  } else {
-    sw = img.width; sh = sw/fr; sx = 0; sy = (img.height-sh)/2;
-  }
-  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
-}
-
-function drawImageContain(ctx, img, x, y, w, h){
-  const ir = img.width / img.height;
-  const fr = w / h;
-  let dw, dh;
-  if(ir > fr){
-    dw = w;
-    dh = w / ir;
-  } else {
-    dh = h;
-    dw = h * ir;
-  }
-  const dx = x + (w - dw) / 2;
-  const dy = y + (h - dh) / 2;
-  ctx.drawImage(img, dx, dy, dw, dh);
-}
-
-function roundRect(ctx,x,y,w,h,r,fill,stroke){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
-  if(fill) ctx.fill();
-  if(stroke) ctx.stroke();
-}
-
-function drawFrame(ctx,W,H){
-  const d = getTplDef();
-  ctx.lineWidth = 24;
-  ctx.strokeStyle = d.frame;
-  ctx.strokeRect(40,40,W-80,H-120);
-  ctx.lineWidth = 1.5;
-  ctx.strokeStyle = d.fg === 'dark' ? 'rgba(0,0,0,.15)' : 'rgba(255,255,255,.18)';
-  ctx.strokeRect(58,58,W-116,H-156);
-  if(['noir','midnight','lavender'].includes(selTpl)){
-    drawCorners(ctx,40,40,W-80,H-120,d.deco);
-  }
-}
-
-function drawCorners(ctx,fx,fy,fw,fh,color){
-  ctx.font = '20px serif'; ctx.fillStyle = color;
-  const o = 13;
-  ctx.textAlign = 'left';  ctx.fillText('◈',fx+o,fy+o+18);
-  ctx.textAlign = 'right'; ctx.fillText('◈',fx+fw-o,fy+o+18);
-  ctx.textAlign = 'left';  ctx.fillText('◈',fx+o,fy+fh-o);
-  ctx.textAlign = 'right'; ctx.fillText('◈',fx+fw-o,fy+fh-o);
-}
-
-function drawCaption(ctx,W,H){
-  let color = txtColor;
-  const lightBGs = ['cream','retro','white','polaroid'];
-  if(lightBGs.includes(selTpl) && color === '#F0E5D3') color = '#2C1F14';
-  ctx.save();
-  ctx.textAlign = 'center';
-  ctx.font = 'italic 52px "Cormorant Garamond",Georgia,serif';
-  ctx.fillStyle = color;
-  ctx.fillText(capTxt,W/2,H-70);
-  const tw = ctx.measureText(capTxt).width;
-  ctx.globalAlpha = .28;
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.2;
-  ctx.beginPath();
-  ctx.moveTo(W/2-tw/2,H-52);
-  ctx.lineTo(W/2+tw/2,H-52);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function drawDecor(ctx,W,H){
-  if(getCustTpl()) return;
-  const d = getTplDef();
-  ctx.textAlign = 'center';
-  ctx.font = '22px serif';
-  ctx.fillStyle = d.deco;
-  const xs = [86,W-86,86,W-86,86,W-86];
-  const ys = [72,72,360,360,648,648];
-  d.chars.forEach((ch,i) => ctx.fillText(ch,xs[i],ys[i]));
-}
-
-function drawRetroSun(ctx,W,H){
-  ctx.save();
-  const cx=W/2, cy=H+120, rad=400;
-  const g = ctx.createRadialGradient(cx,cy,0,cx,cy,rad);
-  g.addColorStop(0,'rgba(255,180,60,.3)');
-  g.addColorStop(1,'rgba(255,180,60,0)');
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(cx,cy,rad,Math.PI,0); ctx.fill();
-  ctx.strokeStyle = 'rgba(200,130,40,.1)'; ctx.lineWidth = 3;
-  for(let i=0;i<14;i++){
-    const y = H-40-i*30;
-    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
-  }
-  ctx.restore();
-}
-
-function drawStars(ctx,W,H){
-  ctx.save();
-  const pts = [[100,80,2],[200,128,1.5],[155,58,2.5],[320,98,1],[420,72,2],[650,88,1.5],[710,128,2],[680,48,1],[560,112,1.5],[80,H-300,2],[150,H-348,1.5],[280,H-278,1],[700,H-318,2],[740,H-288,1.5]];
-  pts.forEach(([x,y,r]) => {
-    ctx.fillStyle = 'rgba(155,114,207,.55)';
-    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
-  });
-  ctx.restore();
-}
-
-function drawLeaves(ctx,W,H){
-  ctx.save();
-  ctx.fillStyle = 'rgba(107,158,122,.18)'; ctx.font = '36px serif';
-  ctx.textAlign = 'left';  ctx.fillText('❧',24,190); ctx.fillText('☘',18,470);
-  ctx.textAlign = 'right'; ctx.fillText('❧',W-24,190); ctx.fillText('☘',W-18,470);
-  ctx.restore();
-}
-
-async function downloadPhoto(){
-  await render(fCtx,fCanvas);
-  setTimeout(() => {
-    const a = document.createElement('a');
-    a.download = 'studiobooth-3foto-' + Date.now() + '.png';
-    a.href = fCanvas.toDataURL('image/png');
-    a.click();
-  },250);
-}
-
-function retakePhoto(){
-  capturedImgs = [];
-  capturedImg = null;
-  currentShot = 0;
-  isShooting = false;
-  updateShotBadge();
-  showPage('cameraPage');
-  startCamera();
-}
-
-/* =====================================================================
- * analyzeCustomTemplate — v6 "Definitive Fix"
- *
- * DUA STRATEGI berdasarkan jenis template:
- *
- * A) PNG TRANSPARAN (hasTransparency = true):
- *    - Slot = area dengan alpha rendah (< 20)
- *    - Render: foto dulu → overlay PNG template di atas
- *    - Area transparan PNG = "jendela" foto terlihat
- *    - Canvas yang disimpan = PNG asli (tidak dimodifikasi)
- *
- * B) TEMPLATE OPAQUE (hasTransparency = false, JPG atau PNG solid):
- *    - Slot = area warna flat yang KONTRAS dengan warna dominan background
- *    - Render: template sebagai BG → foto digambar DI ATAS slot
- *    - Canvas yang disimpan = template asli (tidak dimodifikasi)
- *
- * KEY FIX: hasTransparency disimpan ke object customs di localStorage.
- * ===================================================================== */
-function analyzeCustomTemplate(probeImg, W, H){
-  const analysisCanvas = document.createElement('canvas');
-  analysisCanvas.width = W;
-  analysisCanvas.height = H;
-  const actx = analysisCanvas.getContext('2d');
-
-  // For analysis, preserve the full template inside the canvas.
-  // This makes slot detection more reliable for templates that have
-  // transparent padding or decorative borders around the photo holes.
-  drawImageContain(actx, probeImg, 0, 0, W, H);
-
-  const renderCanvas = document.createElement('canvas');
-  renderCanvas.width = W;
-  renderCanvas.height = H;
-  const rctx = renderCanvas.getContext('2d');
-  // Keep the rendered template filling the final output nicely.
-  drawImageCover(rctx, probeImg, 0, 0, W, H);
-
-  const imgData = actx.getImageData(0, 0, W, H);
-  const data = imgData.data;
-  const total = W * H;
-
-  // Find the visible content bounds first so we can ignore the huge
-  // transparent outer area that many PNG templates have.
-  let minX = W, minY = H, maxX = -1, maxY = -1;
-  let alphaLowCount = 0;
-  for(let y = 0; y < H; y++){
-    for(let x = 0; x < W; x++){
-      const p = y * W + x;
-      const a = data[p * 4 + 3];
-      if(a < 30) alphaLowCount++;
-      if(a > 10){
-        if(x < minX) minX = x;
-        if(x > maxX) maxX = x;
-        if(y < minY) minY = y;
-        if(y > maxY) maxY = y;
-      }
-    }
-  }
-
-  const hasTransparency = (alphaLowCount / total) > 0.04;
-
-  // If the image is basically empty (very rare), fall back to default slots.
-  if(maxX < 0 || maxY < 0){
-    return { canvas: renderCanvas, slots: null, hasTransparency };
-  }
-
-  const bounds = {
-    x0: Math.max(0, minX - 2),
-    y0: Math.max(0, minY - 2),
-    x1: Math.min(W - 1, maxX + 2),
-    y1: Math.min(H - 1, maxY + 2)
-  };
-  const boundsW = bounds.x1 - bounds.x0 + 1;
-  const boundsH = bounds.y1 - bounds.y0 + 1;
-  const contentArea = boundsW * boundsH;
-
-  const lum = new Float32Array(total);
-  for(let p = 0; p < total; p++){
-    const i = p * 4;
-    lum[p] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-  }
-
-  const cand = new Uint8Array(total); // 0=bukan, 1=solid kontras, 2=hole transparan
-
-  if(hasTransparency){
-    // Mark transparent pixels that are INSIDE the visible template bounds.
-    // This excludes the giant outside region that touches the canvas edge.
-    for(let y = bounds.y0; y <= bounds.y1; y++){
-      for(let x = bounds.x0; x <= bounds.x1; x++){
-        const p = y * W + x;
-        if(data[p * 4 + 3] < 30) cand[p] = 2;
-      }
-    }
-  } else {
-    // Opaque templates: find fairly flat areas with a strong contrast
-    // against the dominant luminance.
-    const hist = new Int32Array(256);
-    for(let p = 0; p < total; p++){
-      hist[lum[p] | 0]++;
-    }
-
-    let domLum = 128, domMax = 0;
-    for(let b = 0; b < 256; b++){
-      let s = 0;
-      for(let d = -4; d <= 4; d++) s += hist[Math.max(0, Math.min(255, b + d))];
-      if(s > domMax){
-        domMax = s;
-        domLum = b;
-      }
-    }
-
-    const FLAT = 16;
-    const CONT = 42;
-    for(let y = Math.max(1, bounds.y0); y < Math.min(H - 1, bounds.y1); y++){
-      for(let x = Math.max(1, bounds.x0); x < Math.min(W - 1, bounds.x1); x++){
-        const p = y * W + x;
-        if(data[p * 4 + 3] < 200) continue;
-        const c = lum[p];
-        const diff = Math.max(
-          Math.abs(c - lum[p - 1]), Math.abs(c - lum[p + 1]),
-          Math.abs(c - lum[p - W]), Math.abs(c - lum[p + W])
-        );
-        if(diff <= FLAT && Math.abs(c - domLum) >= CONT) cand[p] = 1;
-      }
-    }
-  }
-
-  // Flood fill clusters
-  const visited = new Uint8Array(total);
-  const queue = new Int32Array(total);
-  const clusters = [];
-  const COLOR_TOL = 32;
-
-  function touchesBounds(cl){
-    return cl.x0 <= bounds.x0 + 1 || cl.y0 <= bounds.y0 + 1 || cl.x1 >= bounds.x1 - 1 || cl.y1 >= bounds.y1 - 1;
-  }
-
-  for(let seed = 0; seed < total; seed++){
-    if(!cand[seed] || visited[seed]) continue;
-    const type = cand[seed];
-    const seedLum = lum[seed];
-    let qh = 0, qt = 0;
-    queue[qt++] = seed;
-    visited[seed] = 1;
-    let x0 = seed % W, x1 = x0, y0 = (seed / W) | 0, y1 = y0, cnt = 0;
-
-    while(qh < qt){
-      const p = queue[qh++];
-      cnt++;
-      const px = p % W, py = (p / W) | 0;
-      if(px < x0) x0 = px;
-      if(px > x1) x1 = px;
-      if(py < y0) y0 = py;
-      if(py > y1) y1 = py;
-
-      for(let d = 0; d < 4; d++){
-        const np = d === 0 ? p + 1 : d === 1 ? p - 1 : d === 2 ? p + W : p - W;
-        if(np < 0 || np >= total) continue;
-        if(d === 0 && px === W - 1) continue;
-        if(d === 1 && px === 0) continue;
-        if(visited[np] || cand[np] !== type) continue;
-        if(type === 1 && Math.abs(lum[np] - seedLum) > COLOR_TOL) continue;
-        visited[np] = 1;
-        queue[qt++] = np;
-      }
-    }
-
-    clusters.push({ x0, x1, y0, y1, cnt, type });
-  }
-
-  const MIN_AREA = contentArea * 0.012;
-  const MAX_DIM_RATIO = 0.95;
-
-  function rectFill(cl){
-    return cl.cnt / ((cl.x1 - cl.x0 + 1) * (cl.y1 - cl.y0 + 1));
-  }
-
-  function isBackground(cl){
-    const w = cl.x1 - cl.x0 + 1;
-    const h = cl.y1 - cl.y0 + 1;
-    return w >= W * 0.9 && h >= H * 0.9;
-  }
-
-  function isTooWide(cl){
-    return cl.type === 2 && (cl.x1 - cl.x0 + 1) > W * 0.93;
-  }
-
-  const pool = clusters
-    .filter(cl =>
-      cl.cnt >= MIN_AREA &&
-      rectFill(cl) >= 0.42 &&
-      !isBackground(cl) &&
-      !isTooWide(cl) &&
-      !touchesBounds(cl)
-    )
-    .sort((a, b) => b.cnt - a.cnt)
-    .slice(0, 12);
-
-  let slots = null;
-
-  if(pool.length >= 3){
-    let bestTriplet = null;
-    let bestScore = Infinity;
-
-    for(let i = 0; i < pool.length - 2; i++){
-      for(let j = i + 1; j < pool.length - 1; j++){
-        for(let k = j + 1; k < pool.length; k++){
-          const trio = [pool[i], pool[j], pool[k]].sort((a, b) => a.y0 - b.y0);
-          if(trio[0].y1 >= trio[1].y0) continue;
-          if(trio[1].y1 >= trio[2].y0) continue;
-
-          const areas = trio.map(c => c.cnt);
-          const mean = (areas[0] + areas[1] + areas[2]) / 3;
-          const variance = areas.reduce((s, a) => s + (a - mean) ** 2, 0) / 3;
-
-          const spacing1 = trio[1].y0 - trio[0].y1;
-          const spacing2 = trio[2].y0 - trio[1].y1;
-          const spacingPenalty = Math.abs(spacing1 - spacing2) * 10;
-
-          // Prefer narrow, tall photo slots and stable spacing.
-          const ratioPenalty = trio.reduce((acc, c) => {
-            const w = c.x1 - c.x0 + 1;
-            const h = c.y1 - c.y0 + 1;
-            const ratio = w / h;
-            return acc + Math.abs(ratio - 0.75) * 40000;
-          }, 0);
-
-          const score = variance + spacingPenalty + ratioPenalty;
-          if(score < bestScore){
-            bestScore = score;
-            bestTriplet = trio;
+        const img = crop[idx];
+        if (img) {
+          const ir = img.width / img.height;
+          const fr = slot.w / slot.h;
+          let sx, sy, sw, sh;
+          if (ir > fr) {
+            sh = img.height;
+            sw = sh * fr;
+            sx = (img.width - sw) / 2;
+            sy = 0;
+          } else {
+            sw = img.width;
+            sh = sw / fr;
+            sx = 0;
+            sy = (img.height - sh) / 2;
           }
+          ctx.drawImage(img, sx, sy, sw, sh, slot.x, slot.y, slot.w, slot.h);
+        } else {
+          const slotBg = ctx.createLinearGradient(slot.x, slot.y, slot.x + slot.w, slot.y + slot.h);
+          slotBg.addColorStop(0, 'rgba(255,255,255,.92)');
+          slotBg.addColorStop(1, 'rgba(245,240,235,.95)');
+          ctx.fillStyle = slotBg;
+          ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
+          ctx.strokeStyle = 'rgba(0,0,0,.05)';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(slot.x + 1, slot.y + 1, slot.w - 2, slot.h - 2);
+          ctx.fillStyle = 'rgba(0,0,0,.18)';
+          ctx.font = '600 18px "Plus Jakarta Sans", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(`Shot ${idx + 1}`, slot.x + slot.w / 2, slot.y + slot.h / 2 + 6);
         }
+        ctx.restore();
+
+        // inner line
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0,0,0,.07)';
+        ctx.lineWidth = 1.6;
+        drawRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, 18);
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // decorative frame ornaments
+      ctx.save();
+      ctx.font = '22px serif';
+      ctx.fillStyle = theme.accent;
+      ctx.globalAlpha = .52;
+      ctx.textAlign = 'center';
+      ctx.fillText('✦', W / 2, 116);
+      ctx.fillText('✦', W / 2, H - 96);
+      ctx.fillText('✦', 36, H / 2);
+      ctx.fillText('✦', W - 36, H / 2);
+      ctx.restore();
+
+      // caption
+      ctx.save();
+      const cap = (state.caption || 'best moment').trim() || 'best moment';
+      ctx.fillStyle = '#19140F';
+      ctx.font = 'italic 54px "Cormorant Garamond", serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(cap, W / 2, H - 58);
+      const tw = ctx.measureText(cap).width;
+      ctx.strokeStyle = theme.accent;
+      ctx.globalAlpha = .34;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo((W - tw) / 2, H - 42);
+      ctx.lineTo((W + tw) / 2, H - 42);
+      ctx.stroke();
+      ctx.restore();
+
+      // footer
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,.5)';
+      ctx.font = '600 11px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('StudioBooth Photo Booth', 58, H - 20);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = 'rgba(0,0,0,.34)';
+      ctx.fillText(new Date().toLocaleDateString('id-ID'), W - 58, H - 20);
+      ctx.restore();
+
+      // stickers
+      const stickerPositions = computeStickerPositions(W, H);
+      stickerPositions.forEach((st, idx) => {
+        ctx.save();
+        ctx.translate(st.x + 17, st.y + 17);
+        ctx.rotate((st.rot * Math.PI) / 180);
+        ctx.beginPath();
+        ctx.fillStyle = 'rgba(255,255,255,.88)';
+        ctx.strokeStyle = theme.accent;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = 'rgba(0,0,0,.10)';
+        ctx.shadowBlur = 8;
+        ctx.arc(0, 0, st.s / 2 + 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = theme.accent;
+        ctx.font = '700 24px "Plus Jakarta Sans", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const glyph = STICKERS.find(s => s.id === st.id)?.icon || '✦';
+        ctx.fillText(glyph, 0, 2);
+        ctx.restore();
+      });
+
+      return canvas;
+    }
+
+    function renderAll(){
+      applyVideoFilter();
+      renderCanvas(els.previewCanvas);
+      updateSelectedStickerChips();
+    }
+
+    function updateSelectedStickerChips(){
+      els.selectedStickerChips.innerHTML = state.stickers.length
+        ? state.stickers.map(id => {
+            const s = STICKERS.find(x => x.id === id);
+            return `<span class="sticker-chip active">${s?.icon || '✦'} ${s?.label || id}</span>`;
+          }).join('')
+        : `<span class="sticker-chip">Belum ada stiker dipilih</span>`;
+    }
+
+    function updateShotBadge(){
+      const remain = Math.max(0, state.layout - state.photos.length);
+      els.shotBadge.textContent = state.shooting
+        ? `Foto ${Math.min(state.photos.length + 1, state.layout)}/${state.layout}`
+        : state.photos.length
+          ? `${state.photos.length}/${state.layout} foto siap`
+          : `Siap ${state.layout}x foto`;
+      els.sessionStatus.textContent = state.shooting
+        ? `Mengambil foto ${Math.min(state.photos.length + 1, state.layout)} dari ${state.layout}`
+        : state.photos.length
+          ? `Sesi selesai. ${state.photos.length} foto siap diunduh.`
+          : `Siap memulai sesi foto`;
+      const slots = [...els.miniShots.children];
+      slots.forEach((box, i) => {
+        box.innerHTML = '';
+        const img = state.photos[i];
+        if (img) {
+          const im = document.createElement('img');
+          im.src = img.src;
+          box.appendChild(im);
+        } else {
+          box.textContent = `Shot ${i + 1}`;
+        }
+      });
+    }
+
+    function setTimer(sec){
+      state.timer = sec;
+      [...document.querySelectorAll('.timer-chip')].forEach(btn => btn.classList.toggle('active', Number(btn.dataset.timer) === sec));
+      updateShotBadge();
+    }
+
+    async function startCamera(){
+      if (state.stream) return true;
+      try {
+        state.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+        els.video.srcObject = state.stream;
+        await els.video.play().catch(()=>{});
+        updateStatus('Kamera aktif. Pilih layout lalu tekan shutter.');
+        renderAll();
+        return true;
+      } catch (err) {
+        state.stream = null;
+        await alertMessage(
+          err && err.name === 'NotAllowedError'
+            ? 'Izin kamera ditolak. Klik ikon kunci di address bar lalu izinkan kamera, kemudian coba lagi.'
+            : 'Kamera tidak bisa dibuka. Pastikan kamera tersedia dan tidak dipakai aplikasi lain.'
+        );
+        return false;
       }
     }
 
-    if(!bestTriplet){
-      bestTriplet = pool.slice(0, 3).sort((a, b) => a.y0 - b.y0);
+    function stopCamera(){
+      if (state.stream) {
+        state.stream.getTracks().forEach(t => t.stop());
+        state.stream = null;
+      }
+      els.video.srcObject = null;
+      updateStatus('Kamera dimatikan.');
     }
 
-    slots = bestTriplet.map(cl => ({
-      x: cl.x0,
-      y: cl.y0,
-      w: cl.x1 - cl.x0 + 1,
-      h: cl.y1 - cl.y0 + 1
-    }));
-  }
+    function captureFrame(){
+      const vw = els.video.videoWidth;
+      const vh = els.video.videoHeight;
+      if (!vw || !vh) return null;
 
-  return { canvas: renderCanvas, slots, hasTransparency };
-}
+      const cvs = els.captureCanvas;
+      cvs.width = vw;
+      cvs.height = vh;
+      const ctx = cvs.getContext('2d');
 
-buildTplGrid();
-updateShotBadge();
-renderAll();
-</script>
+      ctx.save();
+      ctx.filter = `brightness(${state.brightness}) contrast(${state.contrast}) saturate(${state.saturation}) ${FILTERS[state.filter]?.css || FILTERS.normal.css}`;
+      ctx.translate(vw, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(els.video, 0, 0, vw, vh);
+      ctx.restore();
+
+      const img = new Image();
+      img.src = cvs.toDataURL('image/jpeg', 0.96);
+      return new Promise(resolve => {
+        img.onload = () => resolve(img);
+      });
+    }
+
+    async function runCountdown(){
+      if (state.shooting) return;
+      if (!(await startCamera())) return;
+      state.photos = [];
+      updateShotBadge();
+      renderAll();
+      state.shooting = true;
+      els.countdown.style.display = 'grid';
+      for (let n = state.timer; n >= 1; n--) {
+        els.countdownNum.textContent = n;
+        await sleep(1000);
+      }
+      els.countdownNum.textContent = '📸';
+      await sleep(260);
+      els.countdown.style.display = 'none';
+
+      const total = state.layout;
+      for (let i = 0; i < total; i++) {
+        updateStatus(`Mengambil foto ${i + 1} dari ${total}`);
+        state.photos.push(await captureFrame());
+        updateShotBadge();
+        renderAll();
+        if (i < total - 1) await sleep(3000);
+      }
+      state.shooting = false;
+      updateShotBadge();
+      renderAll();
+      updateStatus('Sesi selesai. Preview sudah siap.');
+    }
+
+    function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+    async function downloadResult(){
+      if (!state.photos.length) {
+        await alertMessage('Belum ada foto yang diambil. Tekan shutter dulu.');
+        return;
+      }
+      const canvas = document.createElement('canvas');
+      renderCanvas(canvas);
+      const a = document.createElement('a');
+      a.download = `studiobooth-${state.layout}foto-${Date.now()}.png`;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    }
+
+    function retake(){
+      state.photos = [];
+      state.shooting = false;
+      updateShotBadge();
+      renderAll();
+      updateStatus('Sesi direset. Ambil foto ulang kapan saja.');
+    }
+
+    function alertMessage(text){
+      return openModal('Perhatian', text, {ok:'Mengerti', cancel:'Tutup'});
+    }
+
+    // Event bindings
+    document.getElementById('startBtn').addEventListener('click', async () => {
+      showSection('boothSection');
+      setTool('layout');
+      updateShotBadge();
+      await startCamera();
+      renderAll();
+    });
+    document.querySelector('a[href="#boothSection"]').addEventListener(
+    'click',
+    (e)=>{
+      e.preventDefault();
+
+      showSection('showcaseSection');
+    });
+
+    [...document.querySelectorAll('.timer-chip')].forEach(btn => {
+      btn.addEventListener('click', () => setTimer(Number(btn.dataset.timer)));
+    });
+
+    document.querySelectorAll('.tool-tab').forEach(btn => {
+      btn.addEventListener('click', () => setTool(btn.dataset.tool));
+    });
+
+    els.shutterBtn.addEventListener('click', runCountdown);
+    els.restartBtn.addEventListener('click', async () => {
+      stopCamera();
+      await startCamera();
+    });
+    els.stopBtn.addEventListener('click', stopCamera);
+    els.downloadBtn.addEventListener('click', downloadResult);
+    els.retakeBtn.addEventListener('click', retake);
+    els.captionInput.addEventListener('input', e => {
+      state.caption = e.target.value || 'best moment';
+      renderAll();
+    });
+
+    // keyboard shortcuts
+    document.addEventListener('keydown', e => {
+      if (els.modalBackdrop.classList.contains('show')) return;
+      if (e.key === 'Escape' && state.shooting) {
+        state.shooting = false;
+        els.countdown.style.display = 'none';
+        updateStatus('Pengambilan dibatalkan.');
+      }
+      if (e.key === 'Enter' && document.getElementById('boothSection').classList.contains('active')) {
+        if (!state.shooting) runCountdown();
+      }
+    });
+
+    // initial render
+    setTool('layout');
+    setTimer(3);
+    updateShotBadge();
+    renderAll();
+
+    // keep canvas in sync on resize if on booth page
+    window.addEventListener('resize', () => {
+      if (document.getElementById('boothSection').classList.contains('active')) {
+        renderAll();
+      }
+    });
+  </script>
 </body>
 </html>
