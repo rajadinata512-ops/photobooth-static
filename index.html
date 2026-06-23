@@ -557,6 +557,44 @@
     .mini-shot img{width:100%;height:100%;object-fit:cover}
 
     .result-card{padding:16px}
+
+    /* Themed scrollbar for the result panel — replaces the default
+       browser scrollbar that clashed with the dark/gold theme */
+    .result-scroll{
+      scrollbar-width:thin;
+      scrollbar-color:rgba(200,150,62,.45) transparent;
+    }
+    .result-scroll::-webkit-scrollbar{width:6px}
+    .result-scroll::-webkit-scrollbar-track{background:transparent}
+    .result-scroll::-webkit-scrollbar-thumb{
+      background:rgba(200,150,62,.4);
+      border-radius:999px;
+    }
+    .result-scroll::-webkit-scrollbar-thumb:hover{background:rgba(200,150,62,.65)}
+
+    /* Layout-picker pill group in the result card header — same visual
+       language as .timer-bar/.timer-chip so it reads as one family */
+    .rlp-group{
+      display:flex;gap:3px;flex-shrink:0;
+      padding:3px;border-radius:999px;
+      background:rgba(255,255,255,.035);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .rlp-btn{
+      padding:6px 10px;border-radius:999px;
+      background:transparent;
+      border:1px solid transparent;
+      color:var(--muted);
+      font-weight:800;font-size:11px;
+      white-space:nowrap;
+      transition:.2s;
+      user-select:none;
+    }
+    .rlp-btn.active{
+      background:rgba(200,150,62,.18);
+      border-color:rgba(200,150,62,.4);
+      color:var(--gold2);
+    }
     .result-title{
       display:flex;align-items:center;justify-content:space-between;gap:12px;
       margin-bottom:12px;
@@ -940,28 +978,100 @@
       text-align:center;padding:4px;
     }
 
-    /* Range slider styling */
+    /* Range slider styling — global for glow intensity */
     input[type="range"]{
       -webkit-appearance:none;
       appearance:none;
-      height:5px;
+      height:6px;
       border-radius:999px;
       background:rgba(255,255,255,.1);
       outline:none;
+      cursor:pointer;
     }
     input[type="range"]::-webkit-slider-thumb{
       -webkit-appearance:none;
-      width:16px;height:16px;
+      width:20px;height:20px;
       border-radius:50%;
-      background:linear-gradient(180deg,var(--gold2),var(--gold));
-      box-shadow:0 2px 8px rgba(200,150,62,.4);
+      background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.4);
       cursor:pointer;
     }
     input[type="range"]::-moz-range-thumb{
-      width:16px;height:16px;border:none;
+      width:20px;height:20px;border:none;
+      border-radius:50%;
+      background:#fff;
+      cursor:pointer;
+    }
+
+    /* ===== ELEGANT SLIDER — dark luxury theme ===== */
+    .adj-slider-block{
+      padding:14px 16px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(200,150,62,.12);
+      margin-bottom:10px;
+    }
+    .adj-slider-head{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:12px;
+    }
+    .adj-slider-label{
+      font-size:12px;font-weight:700;
+      color:var(--muted);
+      text-transform:uppercase;letter-spacing:.1em;
+    }
+    .adj-slider-val{
+      font-size:13px;font-weight:800;
+      color:var(--gold2);
+      font-variant-numeric:tabular-nums;
+    }
+    /* Track wrapper */
+    .adj-slider-track{
+      position:relative;
+      height:6px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      margin-bottom:6px;
+    }
+    .adj-slider-fill{
+      position:absolute;
+      left:0;top:0;bottom:0;
+      border-radius:999px;
+      background:linear-gradient(90deg, var(--gold), var(--gold2));
+      pointer-events:none;
+    }
+    /* Native range — visible but fully styled */
+    .adj-slider-input{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      opacity:0;
+      cursor:ew-resize;
+      margin:0;padding:0;
+      -webkit-appearance:none;
+      appearance:none;
+      z-index:10;
+    }
+    .adj-slider-thumb{
+      position:absolute;
+      top:50%;
+      width:18px;height:18px;
       border-radius:50%;
       background:linear-gradient(180deg,var(--gold2),var(--gold));
-      cursor:pointer;
+      box-shadow:0 2px 10px rgba(200,150,62,.45), 0 0 0 2px rgba(200,150,62,.2);
+      transform:translate(-50%,-50%);
+      pointer-events:none;
+      transition:transform .1s ease, box-shadow .1s ease;
+    }
+    .adj-slider-block:hover .adj-slider-thumb,
+    .adj-slider-block:focus-within .adj-slider-thumb{
+      transform:translate(-50%,-50%) scale(1.2);
+      box-shadow:0 3px 16px rgba(200,150,62,.55), 0 0 0 3px rgba(200,150,62,.28);
+    }
+    .adj-slider-hints{
+      display:flex;justify-content:space-between;
+      font-size:10px;color:rgba(255,255,255,.18);font-weight:600;
     }
 
     /* modal */
@@ -1703,19 +1813,7 @@
                 </svg>
                 Bersinar
               </button>
-              <button class="tool-tab" data-tool="frame">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="4" y="4" width="16" height="16" rx="4"></rect>
-                  <rect x="8" y="8" width="8" height="8" rx="2"></rect>
-                </svg>
-                Frame
-              </button>
-              <button class="tool-tab" data-tool="sticker">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 3h3a4 4 0 0 1 4 4v3a1 1 0 0 1-1 1h-3a4 4 0 0 0-4 4v3a1 1 0 0 1-1 1h-3a4 4 0 0 1-4-4v-3a4 4 0 0 1 4-4h3a4 4 0 0 0 4-4z"></path>
-                </svg>
-                Stiker
-              </button>
+
             </div>
 
             <div class="panel-title" id="toolTitle">Pilih Layout</div>
@@ -1759,38 +1857,66 @@
             </div>
           </main>
 
-          <aside class="card result-card">
-            <div class="result-title">
+          <aside class="card result-card" style="padding:0;overflow:hidden;background:rgba(13,10,20,.96);border:1px solid rgba(200,150,62,.18);">
+
+            <!-- Header -->
+            <div style="padding:14px 16px 10px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;">
               <div>
-                <h3>Preview Hasil</h3>
-                <small>Live render sesuai layout yang dipilih</small>
+                <div style="font-size:13px;font-weight:800;color:var(--text);">Preview Hasil</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:1px;">Live render · siap diunduh</div>
+              </div>
+              <!-- layout picker mini -->
+              <div class="rlp-group" id="resultLayoutPicker">
+                <!-- populated by renderResultPanel() -->
               </div>
             </div>
 
-            <div class="result-strip-layout">
-              <div class="canvas-wrap">
-                <canvas id="previewCanvas" class="result-canvas"></canvas>
+            <!-- Main: filmstrip + panel -->
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 200px;min-height:360px;">
+
+              <!-- Film strip (foto-foto) -->
+              <div class="result-scroll" style="padding:14px 10px 14px 14px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:520px;" id="filmStripWrap">
+                <!-- populated by rebuildResultThumbnails -->
               </div>
-              <div class="result-thumbnails" id="resultThumbnails">
-                <!-- populated by JS -->
+
+              <!-- Right panel: frame + stiker langsung -->
+              <div class="result-scroll" style="border-left:1px solid rgba(255,255,255,.06);padding:14px 14px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;max-height:520px;">
+
+                <!-- Frame color -->
+                <div>
+                  <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;">Warna Frame</div>
+                  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;flex-wrap:wrap;" id="rpFrameSwatches">
+                    <!-- populated by renderResultPanel() -->
+                  </div>
+                </div>
+
+                <!-- Caption -->
+                <div>
+                  <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">Caption</div>
+                  <input id="captionInput" type="text" maxlength="24" value=""
+                    style="width:100%;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text);font-size:12px;font-weight:700;outline:none;">
+                </div>
+
+                <!-- Stiker -->
+                <div>
+                  <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+                    <span>Stiker</span>
+                    <span id="stickerCount" style="font-size:9px;background:rgba(200,150,62,.15);color:var(--gold2);padding:2px 7px;border-radius:999px;letter-spacing:0;">0/8</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;max-height:230px;overflow-y:auto;padding-right:2px;" id="rpStickerGrid">
+                    <!-- populated by renderResultPanel() -->
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div style="display:flex;flex-direction:column;gap:7px;margin-top:auto;">
+                  <button class="btn download-btn" id="downloadBtn" disabled style="width:100%;padding:11px;font-size:13px;">⬇ Download</button>
+                  <button class="btn retake-btn" id="retakeBtn" disabled style="width:100%;padding:9px;font-size:12px;">↺ Ambil Ulang</button>
+                </div>
+
               </div>
             </div>
 
-            <div class="caption-box">
-              <label for="captionInput">Caption</label>
-              <input id="captionInput" type="text" maxlength="24" value="best moment">
-            </div>
-
-            <div class="action-row">
-              <button class="btn download-btn" id="downloadBtn" disabled>Download</button>
-              <button class="btn retake-btn" id="retakeBtn" disabled>Ambil Ulang</button>
-            </div>
-
-            <div class="sticker-chips" id="selectedStickerChips"></div>
-
-            <div class="footer-note">
-              Hasil download mengikuti tema StudioBooth: dark luxury, gold accent, dan frame elegan.
-            </div>
           </aside>
         </div>
       </div>
@@ -1809,6 +1935,7 @@
   </div>
 
   <canvas id="captureCanvas" style="display:none"></canvas>
+  <canvas id="previewCanvas" style="display:none"></canvas>
 
   <script>
     const els = {
@@ -1826,17 +1953,17 @@
       shutterBtn: document.getElementById('shutterBtn'),
       restartBtn: document.getElementById('restartBtn'),
       stopBtn: document.getElementById('stopBtn'),
-      downloadBtn: document.getElementById('downloadBtn'),
-      retakeBtn: document.getElementById('retakeBtn'),
+      get downloadBtn(){ return document.getElementById('downloadBtn'); },
+      get retakeBtn(){ return document.getElementById('retakeBtn'); },
       sessionStatus: document.getElementById('sessionStatus'),
       shotBadge: document.getElementById('shotBadge'),
-      captionInput: document.getElementById('captionInput'),
-      resultThumbnails: document.getElementById('resultThumbnails'),
+      get captionInput(){ return document.getElementById('captionInput'); },
+      get resultThumbnails(){ return document.getElementById('resultThumbnails'); },
       miniShots: document.getElementById('miniShots'),
       toolPanel: document.getElementById('toolPanel'),
       toolTitle: document.getElementById('toolTitle'),
       toolDesc: document.getElementById('toolDesc'),
-      selectedStickerChips: document.getElementById('selectedStickerChips'),
+      get selectedStickerChips(){ return document.getElementById('selectedStickerChips'); },
       modalBackdrop: document.getElementById('modalBackdrop'),
       modalTitle: document.getElementById('modalTitle'),
       modalText: document.getElementById('modalText'),
@@ -1863,9 +1990,9 @@
     };
 
     const LAYOUTS = {
-      2: { w: 800, h: 900 },
-      3: { w: 800, h: 1050 },
-      4: { w: 800, h: 1320 }
+      2: { w: 560, h: 900 },
+      3: { w: 560, h: 1240 },
+      4: { w: 560, h: 1560 }
     };
 
     const FILTERS = {
@@ -1886,21 +2013,71 @@
       lavender:{ accent: '#A08ED0', title: 'Lavender' },
       forest:  { accent: '#6B9E7A', title: 'Forest' },
       midnight:{ accent: '#7389D8', title: 'Midnight' },
-      noir:    { accent: '#8F8F98', title: 'Noir' }
+      noir:    { accent: '#8F8F98', title: 'Noir' },
+      ticket:  { accent: '#7A1F1F', title: 'Snap Ticket' },
+      airmail: { accent: '#1B3A6B', title: 'Airmail' },
+      kodak:   { accent: '#E4A800', title: 'Kodak Film' }
     };
 
-    const STICKERS = [
-      { id:'heart', label:'Heart', icon:'❤' },
-      { id:'star', label:'Star', icon:'✦' },
-      { id:'flower', label:'Flower', icon:'❀' },
-      { id:'sparkle', label:'Sparkle', icon:'✧' },
-      { id:'bow', label:'Bow', icon:'🎀' },
-      { id:'coffee', label:'Coffee', icon:'☕' },
-      { id:'camera', label:'Camera', icon:'📸' },
-      { id:'moon', label:'Moon', icon:'☾' },
-      { id:'music', label:'Music', icon:'♫' },
-      { id:'gem', label:'Gem', icon:'◆' }
+    const STICKER_CATEGORIES = [
+      { id:'all',     label:'Semua' },
+      { id:'love',    label:'❤ Love' },
+      { id:'sparkle', label:'✦ Sparkle' },
+      { id:'nature',  label:'🌸 Alam' },
+      { id:'fun',     label:'🎀 Fun' },
+      { id:'food',    label:'☕ Café' },
     ];
+
+    const STICKERS = [
+      { id:'heart',    label:'Heart',    icon:'❤',  cat:'love' },
+      { id:'pinkheart',label:'Pink',     icon:'🩷',  cat:'love' },
+      { id:'purpleheart',label:'Purple', icon:'💜', cat:'love' },
+      { id:'yellowheart',label:'Yellow', icon:'💛', cat:'love' },
+      { id:'blueheart',label:'Blue',     icon:'💙', cat:'love' },
+      { id:'whiteheart',label:'White',   icon:'🤍', cat:'love' },
+      { id:'hearts2',  label:'Hearts',   icon:'💕', cat:'love' },
+      { id:'heartbow', label:'Ribbon',   icon:'💝', cat:'love' },
+      { id:'heartarrow',label:'Cupid',   icon:'💘', cat:'love' },
+      { id:'star',     label:'Star',     icon:'✦',  cat:'sparkle' },
+      { id:'sparkle',  label:'Sparkle',  icon:'✨', cat:'sparkle' },
+      { id:'star2',    label:'Blink',    icon:'🌟', cat:'sparkle' },
+      { id:'comet',    label:'Comet',    icon:'💫', cat:'sparkle' },
+      { id:'moon',     label:'Moon',     icon:'🌙', cat:'sparkle' },
+      { id:'crescent', label:'Crescent', icon:'☾',  cat:'sparkle' },
+      { id:'diamond2', label:'Crystal',  icon:'💎', cat:'sparkle' },
+      { id:'bolt',     label:'Bolt',     icon:'⚡', cat:'sparkle' },
+      { id:'rainbow',  label:'Rainbow',  icon:'🌈', cat:'sparkle' },
+      { id:'flower',   label:'Flower',   icon:'❀',  cat:'nature' },
+      { id:'sakura',   label:'Sakura',   icon:'🌸', cat:'nature' },
+      { id:'hibiscus', label:'Hibiscus', icon:'🌺', cat:'nature' },
+      { id:'sunflower',label:'Sunflower',icon:'🌻', cat:'nature' },
+      { id:'rose',     label:'Rose',     icon:'🌹', cat:'nature' },
+      { id:'clover',   label:'Clover',   icon:'🍀', cat:'nature' },
+      { id:'leaf',     label:'Leaf',     icon:'🌿', cat:'nature' },
+      { id:'butterfly',label:'Butterfly',icon:'🦋', cat:'nature' },
+      { id:'mushroom', label:'Mushroom', icon:'🍄', cat:'nature' },
+      { id:'cloud',    label:'Cloud',    icon:'☁',  cat:'nature' },
+      { id:'bow',      label:'Bow',      icon:'🎀', cat:'fun' },
+      { id:'crown',    label:'Crown',    icon:'👑', cat:'fun' },
+      { id:'gem',      label:'Gem',      icon:'◆',  cat:'fun' },
+      { id:'music',    label:'Music',    icon:'♫',  cat:'fun' },
+      { id:'camera',   label:'Camera',   icon:'📸', cat:'fun' },
+      { id:'balloon',  label:'Balloon',  icon:'🎈', cat:'fun' },
+      { id:'gift',     label:'Gift',     icon:'🎁', cat:'fun' },
+      { id:'tada',     label:'Party',    icon:'🎉', cat:'fun' },
+      { id:'bear',     label:'Bear',     icon:'🧸', cat:'fun' },
+      { id:'kiss',     label:'Kiss',     icon:'💋', cat:'fun' },
+      { id:'coffee',   label:'Coffee',   icon:'☕', cat:'food' },
+      { id:'boba',     label:'Boba',     icon:'🧋', cat:'food' },
+      { id:'cherry',   label:'Cherry',   icon:'🍒', cat:'food' },
+      { id:'strawberry',label:'Strawberry',icon:'🍓',cat:'food' },
+      { id:'lollipop', label:'Lollipop', icon:'🍭', cat:'food' },
+      { id:'cake',     label:'Cake',     icon:'🎂', cat:'food' },
+      { id:'cookie',   label:'Cookie',   icon:'🍪', cat:'food' },
+      { id:'icecream', label:'Ice Cream',icon:'🍦', cat:'food' },
+    ];
+
+    let activeStickerCat = 'all';
 
     // Glow colors for the Bersinar panel
     const GLOW_COLORS = [
@@ -2000,18 +2177,31 @@
               <input id="glowIntensityRange" type="range" min="0" max="1" step="0.01" value="${state.glowIntensity||0}" style="width:100%">
             </div>
             <div class="glow-section-label" style="margin-top:14px">Penyesuaian Lanjutan</div>
-            <div class="range-row">
-              <label><span>Brightness</span><span>${Math.round(state.brightness*100)}%</span></label>
-              <input id="brightnessRange" type="range" min="0.72" max="1.38" step="0.01" value="${state.brightness}">
-            </div>
-            <div class="range-row" style="margin-top:10px">
-              <label><span>Contrast</span><span>${Math.round(state.contrast*100)}%</span></label>
-              <input id="contrastRange" type="range" min="0.82" max="1.25" step="0.01" value="${state.contrast}">
-            </div>
-            <div class="range-row" style="margin-top:10px">
-              <label><span>Saturation</span><span>${Math.round(state.saturation*100)}%</span></label>
-              <input id="saturationRange" type="range" min="0.72" max="1.28" step="0.01" value="${state.saturation}">
-            </div>
+
+            ${[
+              { id:'brightnessRange', label:'Brightness', min:.72, max:1.38, val:state.brightness, key:'brightness' },
+              { id:'contrastRange',   label:'Contrast',   min:.82, max:1.25, val:state.contrast,   key:'contrast'   },
+              { id:'saturationRange', label:'Saturation', min:.72, max:1.28, val:state.saturation,  key:'saturation' },
+            ].map(s => {
+              const pct = ((s.val - s.min) / (s.max - s.min)) * 100;
+              return `
+              <div class="adj-slider-block">
+                <div class="adj-slider-head">
+                  <span class="adj-slider-label">${s.label}</span>
+                  <span class="adj-slider-val" id="val_${s.id}">${Math.round(s.val * 100)}%</span>
+                </div>
+                <div class="adj-slider-track">
+                  <div class="adj-slider-fill" id="fill_${s.id}" style="width:${pct}%"></div>
+                  <div class="adj-slider-thumb" id="thumb_${s.id}" style="left:calc(${pct}% * (100% - 18px) / 100% + 9px)"></div>
+                  <input class="adj-slider-input" id="${s.id}" type="range"
+                    min="${s.min}" max="${s.max}" step="0.01" value="${s.val}"
+                    data-bs-key="${s.key}" data-bs-min="${s.min}" data-bs-max="${s.max}">
+                </div>
+                <div class="adj-slider-hints">
+                  <span>Rendah</span><span>Normal</span><span>Tinggi</span>
+                </div>
+              </div>`;
+            }).join('')}
           `;
         }
       },
@@ -2028,6 +2218,9 @@
             ['midnight','#7389D8','Midnight'],
             ['noir','#8F8F98','Noir'],
             ['blush','#E8A8B8','Blush'],
+            ['ticket','#7A1F1F','🎫 Ticket'],
+            ['airmail','#1B3A6B','✈ Airmail'],
+            ['kodak','#E4A800','🎞 Kodak'],
           ];
           return `
             <div class="frame-swatch-grid">
@@ -2043,20 +2236,35 @@
         }
       },
       sticker: {
-        title: 'Stiker Estetik',
-        desc: 'Pilih hingga 4 stiker. Stiker aktif muncul di sudut hasil foto.',
+        title: 'Stiker',
+        desc: 'Pilih stiker untuk ditempel di hasil foto. Bisa pilih sampai 8 stiker sekaligus.',
         render() {
+          const filtered = activeStickerCat === 'all' ? STICKERS : STICKERS.filter(s => s.cat === activeStickerCat);
           return `
-            <div class="sticker-grid-premium">
-              ${STICKERS.map(s => `
-                <button class="sticker-btn-premium ${state.stickers.includes(s.id)?'active':''}" data-sticker="${s.id}">
-                  <span class="stk-check">✓</span>
-                  <span class="stk-icon">${s.icon}</span>
-                  <span class="stk-name">${s.label}</span>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;">
+              ${STICKER_CATEGORIES.map(c => `
+                <button onclick="activeStickerCat='${c.id}';setTool('sticker')"
+                  style="padding:5px 9px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer;
+                  background:${activeStickerCat===c.id?'rgba(200,150,62,.22)':'rgba(255,255,255,.04)'};
+                  border:1.5px solid ${activeStickerCat===c.id?'rgba(200,150,62,.5)':'rgba(255,255,255,.08)'};
+                  color:${activeStickerCat===c.id?'var(--gold2)':'var(--muted)'};white-space:nowrap;"
+                >${c.label}</button>
+              `).join('')}
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-height:260px;overflow-y:auto;padding-right:4px;">
+              ${filtered.map(s => `
+                <button class="sticker-btn-premium ${state.stickers.includes(s.id)?'active':''}" data-sticker="${s.id}"
+                  style="padding:8px 4px;border-radius:12px;
+                  background:${state.stickers.includes(s.id)?'rgba(200,150,62,.18)':'rgba(255,255,255,.04)'};
+                  border:1.5px solid ${state.stickers.includes(s.id)?'rgba(200,150,62,.45)':'rgba(255,255,255,.07)'};
+                  cursor:pointer;text-align:center;transition:.15s;position:relative;">
+                  <span class="stk-icon" style="font-size:26px">${s.icon}</span>
+                  <span class="stk-name" style="font-size:9px;color:${state.stickers.includes(s.id)?'var(--gold2)':'var(--muted)'}">${s.label}</span>
+                  <span class="stk-check" style="${state.stickers.includes(s.id)?'':'display:none'}">✓</span>
                 </button>
               `).join('')}
             </div>
-            <div class="helper" style="margin-top:10px">Maks. 4 stiker aktif. Stiker tampil di keempat sudut hasil foto dengan orientasi miring elegan.</div>
+            <div class="helper" style="margin-top:10px">Maks. 8 stiker aktif. Stiker tersebar di foto secara otomatis.</div>
           `;
         }
       }
@@ -2142,23 +2350,26 @@
         applyVideoFilter();
       });
 
-      const brightness = els.toolPanel.querySelector('#brightnessRange');
-      const contrast = els.toolPanel.querySelector('#contrastRange');
-      const saturation = els.toolPanel.querySelector('#saturationRange');
-      if (brightness) brightness.addEventListener('input', e => {
-        state.brightness = Number(e.target.value);
-        applyVideoFilter();
-        refreshActivePanelOnly();
-      });
-      if (contrast) contrast.addEventListener('input', e => {
-        state.contrast = Number(e.target.value);
-        applyVideoFilter();
-        refreshActivePanelOnly();
-      });
-      if (saturation) saturation.addEventListener('input', e => {
-        state.saturation = Number(e.target.value);
-        applyVideoFilter();
-        refreshActivePanelOnly();
+      // Elegant adj-sliders — brightness, contrast, saturation
+      els.toolPanel.querySelectorAll('.adj-slider-input[data-bs-key]').forEach(input => {
+        const key = input.dataset.bsKey;
+        const min = parseFloat(input.dataset.bsMin);
+        const max = parseFloat(input.dataset.bsMax);
+        const fillEl  = document.getElementById('fill_'  + input.id);
+        const thumbEl = document.getElementById('thumb_' + input.id);
+        const valEl   = document.getElementById('val_'   + input.id);
+
+        const sync = (val) => {
+          const pct = ((val - min) / (max - min)) * 100;
+          if (fillEl)  fillEl.style.width = pct + '%';
+          if (thumbEl) thumbEl.style.left = `calc(${pct}% * (100% - 18px) / 100% + 9px)`;
+          if (valEl)   valEl.textContent  = Math.round(val * 100) + '%';
+          state[key] = val;
+          applyVideoFilter();
+        };
+
+        input.addEventListener('input', e => sync(Number(e.target.value)));
+        input.addEventListener('change', () => renderAll());
       });
 
       els.toolPanel.querySelectorAll('[data-frame]').forEach(btn => {
@@ -2175,8 +2386,8 @@
           if (state.stickers.includes(id)) {
             state.stickers = state.stickers.filter(x => x !== id);
           } else {
-            if (state.stickers.length >= 4) {
-              alertMessage('Maksimal 4 stiker aktif supaya hasil tetap rapi.');
+            if (state.stickers.length >= 8) {
+              alertMessage('Maksimal 8 stiker aktif.');
               return;
             }
             state.stickers.push(id);
@@ -2247,133 +2458,800 @@
 
     function computeStickerPositions(W, H){
       const positions = [
-        { x: 28, y: 28, s: 34, rot: -8 },
-        { x: W - 62, y: 32, s: 34, rot: 6 },
-        { x: 30, y: H - 66, s: 34, rot: 6 },
-        { x: W - 66, y: H - 68, s: 34, rot: -6 }
+        { x: 22,    y: 22,    s: 34, rot: -12 },
+        { x: W-58,  y: 26,    s: 34, rot: 9 },
+        { x: 24,    y: H-64,  s: 34, rot: 8 },
+        { x: W-62,  y: H-66,  s: 34, rot: -9 },
+        { x: W/2-17,y: 22,    s: 28, rot: -4 },
+        { x: W/2-17,y: H-60,  s: 28, rot: 4 },
+        { x: 22,    y: H/2-17,s: 28, rot: -6 },
+        { x: W-54,  y: H/2-17,s: 28, rot: 6 },
       ];
-      return state.stickers.slice(0, 4).map((id, i) => ({ id, ...positions[i] }));
+      return state.stickers.slice(0, 8).map((id, i) => ({ id, ...positions[i] }));
+    }
+
+    // ── Aesthetic template themes ──────────────────────────────────────────────
+    // Each theme defines how the photo strip card looks.
+    // Inspired by real photobooth strip templates (film strips, ticket styles).
+    const TEMPLATE_THEMES = {
+      gold: {
+        bg: '#FAF6EE', cardBg: '#FFFDF8',
+        borderColor: '#C8963E', borderWidth: 16,
+        headerBg: '#C8963E', headerText: '#FFFDF8',
+        captionColor: '#3A2A10', footerColor: 'rgba(58,42,16,.45)',
+        ornamentColor: '#C8963E', dotColor: '#C8963E',
+        slotRadius: 10, slotGap: 12
+      },
+      rosegold: {
+        bg: '#FDF1EE', cardBg: '#FFF8F7',
+        borderColor: '#C98B7C', borderWidth: 16,
+        headerBg: '#C98B7C', headerText: '#FFF8F7',
+        captionColor: '#3A1A14', footerColor: 'rgba(58,26,20,.4)',
+        ornamentColor: '#C98B7C', dotColor: '#C98B7C',
+        slotRadius: 10, slotGap: 12
+      },
+      cream: {
+        bg: '#F7F3E8', cardBg: '#FFFEF8',
+        borderColor: '#C4A96A', borderWidth: 14,
+        headerBg: '#EBD9C2', headerText: '#3A2A10',
+        captionColor: '#3A2A10', footerColor: 'rgba(58,42,16,.38)',
+        ornamentColor: '#C4A96A', dotColor: '#C4A96A',
+        slotRadius: 8, slotGap: 10
+      },
+      lavender: {
+        bg: '#F0EDF8', cardBg: '#FAF8FF',
+        borderColor: '#A08ED0', borderWidth: 16,
+        headerBg: '#A08ED0', headerText: '#FAF8FF',
+        captionColor: '#1E1440', footerColor: 'rgba(30,20,64,.4)',
+        ornamentColor: '#A08ED0', dotColor: '#A08ED0',
+        slotRadius: 10, slotGap: 12
+      },
+      forest: {
+        bg: '#EDF4EC', cardBg: '#F8FEF7',
+        borderColor: '#6B9E7A', borderWidth: 16,
+        headerBg: '#6B9E7A', headerText: '#F8FEF7',
+        captionColor: '#1A3220', footerColor: 'rgba(26,50,32,.4)',
+        ornamentColor: '#6B9E7A', dotColor: '#6B9E7A',
+        slotRadius: 10, slotGap: 12
+      },
+      midnight: {
+        bg: '#0E0E1C', cardBg: '#14142A',
+        borderColor: '#7389D8', borderWidth: 16,
+        headerBg: '#1E1E38', headerText: '#C0CAFF',
+        captionColor: '#C0CAFF', footerColor: 'rgba(192,202,255,.35)',
+        ornamentColor: '#7389D8', dotColor: '#7389D8',
+        slotRadius: 10, slotGap: 12
+      },
+      noir: {
+        bg: '#161616', cardBg: '#1E1E1E',
+        borderColor: '#8F8F98', borderWidth: 14,
+        headerBg: '#2A2A2A', headerText: '#E0E0E0',
+        captionColor: '#E0E0E0', footerColor: 'rgba(224,224,224,.35)',
+        ornamentColor: '#8F8F98', dotColor: '#8F8F98',
+        slotRadius: 6, slotGap: 8
+      },
+      blush: {
+        bg: '#FDF0F4', cardBg: '#FFF7FA',
+        borderColor: '#E8A8B8', borderWidth: 16,
+        headerBg: '#E8A8B8', headerText: '#FFF7FA',
+        captionColor: '#3A1020', footerColor: 'rgba(58,16,32,.38)',
+        ornamentColor: '#E8A8B8', dotColor: '#E8A8B8',
+        slotRadius: 10, slotGap: 12
+      },
+      ticket: { style: 'ticket',
+        bg: '#F4EED7', accent: '#7A1F1F', accentLight: '#9E2C2C',
+        cream: '#F4EED7', text: '#3A0A0A', muted: 'rgba(80,20,20,.42)'
+      },
+      airmail: { style: 'airmail',
+        bg: '#FBF7ED', navy: '#1B3A6B', red: '#C23B22',
+        text: '#1A2640', muted: 'rgba(27,58,107,.42)', stamp: '#8B6914'
+      },
+      kodak: { style: 'kodak',
+        bg: '#111111', yellow: '#E4A800', film: '#1A1A1A',
+        text: '#F5F0E0', muted: 'rgba(245,240,224,.45)', red: '#E83A28'
+      }
+    };
+
+    function drawPerforationStrip(ctx, x, y, length, vertical, dotColor){
+      // Draws film-strip perforation dots along one side
+      const dotR = 5;
+      const spacing = 22;
+      const count = Math.floor(length / spacing);
+      const offset = (length - (count - 1) * spacing) / 2;
+      ctx.save();
+      ctx.fillStyle = dotColor;
+      ctx.globalAlpha = 0.28;
+      for (let i = 0; i < count; i++) {
+        ctx.beginPath();
+        if (vertical) {
+          ctx.arc(x, y + offset + i * spacing, dotR, 0, Math.PI * 2);
+        } else {
+          ctx.arc(x + offset + i * spacing, y, dotR, 0, Math.PI * 2);
+        }
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawCornerOrnament(ctx, cx, cy, size, rot, color){
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot * Math.PI / 180);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.55;
+      ctx.font = `${size}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('✦', 0, 0);
+      ctx.restore();
+    }
+
+    // ── Specialized aesthetic renderers ───────────────────────────────────────
+
+    function drawPhotoSlots(ctx, slots, photos, radius){
+      slots.forEach((slot, idx) => {
+        const img = photos[idx];
+        ctx.save();
+        drawRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, radius);
+        ctx.clip();
+        if (img) {
+          const ir = img.width / img.height, fr = slot.w / slot.h;
+          let sx, sy, sw, sh;
+          if (ir > fr) { sh = img.height; sw = sh * fr; sx = (img.width - sw)/2; sy = 0; }
+          else { sw = img.width; sh = sw / fr; sx = 0; sy = (img.height - sh)/2; }
+          ctx.drawImage(img, sx, sy, sw, sh, slot.x, slot.y, slot.w, slot.h);
+          const vig = ctx.createRadialGradient(slot.x+slot.w/2,slot.y+slot.h/2,slot.w*.25,slot.x+slot.w/2,slot.y+slot.h/2,slot.w*.72);
+          vig.addColorStop(0,'rgba(0,0,0,0)'); vig.addColorStop(1,'rgba(0,0,0,.2)');
+          ctx.fillStyle=vig; ctx.fillRect(slot.x,slot.y,slot.w,slot.h);
+        } else {
+          ctx.fillStyle='rgba(0,0,0,.08)'; ctx.fillRect(slot.x,slot.y,slot.w,slot.h);
+          ctx.fillStyle='rgba(200,200,200,.6)'; ctx.font='700 15px sans-serif';
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText(`Shot ${idx+1}`,slot.x+slot.w/2,slot.y+slot.h/2);
+        }
+        ctx.restore();
+        if (img && state.glowColor && state.glowColor !== 'none' && state.glowIntensity > 0) {
+          const gc = GLOW_COLORS.find(g => g.id === state.glowColor);
+          if (gc) {
+            ctx.save();
+            drawRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, radius);
+            ctx.clip();
+            const grd = ctx.createRadialGradient(slot.x+slot.w*.5,slot.y+slot.h*.45,0,slot.x+slot.w*.5,slot.y+slot.h*.45,Math.max(slot.w,slot.h)*.6);
+            const alpha = (state.glowIntensity*.55).toFixed(3);
+            grd.addColorStop(0,gc.color+Math.round(alpha*255).toString(16).padStart(2,'0'));
+            grd.addColorStop(1,'transparent');
+            ctx.globalCompositeOperation='screen'; ctx.fillStyle=grd;
+            ctx.fillRect(slot.x,slot.y,slot.w,slot.h);
+            ctx.restore();
+          }
+        }
+      });
+    }
+
+    function renderCanvas_Ticket(canvas, photos){
+      const { w:W, h:H } = calcOutputSize();
+      canvas.width=W; canvas.height=H;
+      const ctx = canvas.getContext('2d');
+      const T = TEMPLATE_THEMES.ticket;
+      const n = state.layout;
+      const cap = (state.caption||'best moment').trim()||'best moment';
+
+      // Background — aged parchment
+      ctx.fillStyle = T.bg; ctx.fillRect(0,0,W,H);
+      // Subtle noise-like texture via tiny rects
+      ctx.save();
+      for(let i=0;i<1800;i++){
+        ctx.globalAlpha=Math.random()*.04+.01;
+        ctx.fillStyle=Math.random()>.5?'#8B6000':'#2A0000';
+        ctx.fillRect(Math.random()*W,Math.random()*H,Math.random()*3+1,Math.random()*2+1);
+      }
+      ctx.restore();
+
+      // Outer card with shadow
+      const pad=22;
+      ctx.save(); ctx.shadowColor='rgba(80,10,10,.25)'; ctx.shadowBlur=32; ctx.shadowOffsetY=10;
+      ctx.fillStyle='#FDF6E3';
+      drawRoundedRect(ctx,pad,pad,W-pad*2,H-pad*2,18); ctx.fill();
+      ctx.restore();
+
+      // Thick wine-red border
+      ctx.save();
+      ctx.strokeStyle=T.accent; ctx.lineWidth=14;
+      drawRoundedRect(ctx,pad,pad,W-pad*2,H-pad*2,18); ctx.stroke();
+      // Inner thin hairline
+      ctx.strokeStyle=T.accent; ctx.lineWidth=1.5; ctx.globalAlpha=.3;
+      drawRoundedRect(ctx,pad+20,pad+20,W-pad*2-40,H-pad*2-40,12); ctx.stroke();
+      ctx.restore();
+
+      // Left perforation strip
+      const perfW=38, perfX=pad+14;
+      ctx.save(); ctx.fillStyle=T.bg;
+      ctx.fillRect(pad,pad+18,perfW,H-pad*2-36);
+      ctx.restore();
+      // Perforation holes
+      const holeR=9, holeSpacing=26;
+      const perfAreaH=H-pad*2-60;
+      const holeCount=Math.floor(perfAreaH/holeSpacing);
+      const holeStart=pad+30;
+      ctx.save();
+      for(let i=0;i<holeCount;i++){
+        const hy=holeStart+i*holeSpacing;
+        ctx.beginPath(); ctx.arc(perfX+perfW/2,hy,holeR,0,Math.PI*2);
+        ctx.fillStyle=T.bg; ctx.fill();
+        ctx.strokeStyle=T.accent; ctx.lineWidth=1; ctx.globalAlpha=.4; ctx.stroke();
+      }
+      ctx.restore();
+
+      // Right perforation strip (mirror)
+      const perfXR=W-pad-perfW-14;
+      ctx.save(); ctx.fillStyle=T.bg;
+      ctx.fillRect(W-pad-perfW,pad+18,perfW,H-pad*2-36);
+      ctx.restore();
+      ctx.save();
+      for(let i=0;i<holeCount;i++){
+        const hy=holeStart+i*holeSpacing;
+        ctx.beginPath(); ctx.arc(perfXR+perfW/2,hy,holeR,0,Math.PI*2);
+        ctx.fillStyle=T.bg; ctx.fill();
+        ctx.strokeStyle=T.accent; ctx.lineWidth=1; ctx.globalAlpha=.4; ctx.stroke();
+      }
+      ctx.restore();
+
+      // Header area — arch label
+      const innerX=pad+perfW+18, innerW=W-pad*2-perfW*2-36;
+      const headerY=pad+28, headerH=72;
+
+      // Arch top border
+      ctx.save();
+      ctx.strokeStyle=T.accent; ctx.lineWidth=2;
+      ctx.beginPath();
+      ctx.moveTo(innerX,headerY+headerH);
+      ctx.lineTo(innerX,headerY+18);
+      ctx.quadraticCurveTo(innerX,headerY,innerX+20,headerY);
+      ctx.lineTo(innerX+innerW-20,headerY);
+      ctx.quadraticCurveTo(innerX+innerW,headerY,innerX+innerW,headerY+18);
+      ctx.lineTo(innerX+innerW,headerY+headerH);
+      ctx.stroke();
+      ctx.restore();
+
+      // Header text
+      ctx.save();
+      ctx.font='italic 800 30px "Georgia", serif';
+      ctx.fillStyle=T.accent; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('StudioBooth', W/2, headerY+headerH/2-5);
+      ctx.font='700 11px sans-serif'; ctx.letterSpacing='.18em';
+      ctx.fillStyle=T.accentLight; ctx.globalAlpha=.8;
+      ctx.fillText('PHOTO BOOTH', W/2, headerY+headerH/2+16);
+      ctx.restore();
+
+      // Small train icon (SVG-like drawn with canvas paths)
+      const tx=W/2, ty=headerY+headerH+18, tScale=0.7;
+      ctx.save(); ctx.fillStyle=T.accent; ctx.globalAlpha=.7;
+      ctx.translate(tx,ty); ctx.scale(tScale,tScale);
+      // Body
+      ctx.fillRect(-40,-14,80,22); ctx.fillStyle='#FDF6E3';
+      // Windows
+      for(let w=-1;w<=1;w++){ ctx.fillRect(w*22-8,-11,14,12); }
+      // Smokestack
+      ctx.fillStyle=T.accent; ctx.fillRect(-30,-26,12,14);
+      ctx.fillRect(-34,-30,20,8);
+      // Wheels
+      for(let wx of[-28,-8,12,28]){
+        ctx.beginPath(); ctx.arc(wx,10,9,0,Math.PI*2);
+        ctx.fillStyle=T.accent; ctx.fill();
+        ctx.beginPath(); ctx.arc(wx,10,5,0,Math.PI*2);
+        ctx.fillStyle='#FDF6E3'; ctx.fill();
+      }
+      ctx.restore();
+
+      // ── Photo slots (square)
+      const contentTop=headerY+headerH+52;
+      const footerH=96;
+      const contentH=H-contentTop-footerH;
+      const slotGap=14;
+      const slotH=(contentH-slotGap*(n-1))/n;
+      const slotSize_t=Math.min(innerW,slotH);
+      const slotX_t=innerX+(innerW-slotSize_t)/2;
+      const totalH_t=n*slotSize_t+(n-1)*slotGap;
+      const offsetY_t=contentTop+(contentH-totalH_t)/2;
+      const slots=Array.from({length:n},(_,i)=>({x:slotX_t,y:offsetY_t+i*(slotSize_t+slotGap),w:slotSize_t,h:slotSize_t}));
+
+      // Slot backgrounds
+      slots.forEach(slot=>{
+        ctx.save();
+        ctx.shadowColor='rgba(0,0,0,.22)'; ctx.shadowBlur=12; ctx.shadowOffsetY=4;
+        ctx.fillStyle='#0A0A0A';
+        drawRoundedRect(ctx,slot.x,slot.y,slot.w,slot.h,8); ctx.fill();
+        ctx.restore();
+        // Thin accent border
+        ctx.save(); ctx.strokeStyle=T.accent; ctx.lineWidth=2; ctx.globalAlpha=.35;
+        drawRoundedRect(ctx,slot.x,slot.y,slot.w,slot.h,8); ctx.stroke();
+        ctx.restore();
+      });
+      drawPhotoSlots(ctx,slots,photos,8);
+
+      // ── Footer — "TRAIN TICKET ★ ★ ★"
+      const footerY=H-footerH+12;
+      ctx.save();
+      ctx.strokeStyle=T.accent; ctx.lineWidth=1.2; ctx.globalAlpha=.3;
+      ctx.setLineDash([6,6]);
+      ctx.beginPath();
+      ctx.moveTo(innerX+10,footerY-6); ctx.lineTo(innerX+innerW-10,footerY-6);
+      ctx.stroke(); ctx.restore();
+
+      ctx.save();
+      ctx.font='900 20px "Georgia",serif'; ctx.fillStyle=T.accent;
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.letterSpacing='.22em';
+      ctx.fillText(cap.toUpperCase(), W/2, footerY+14);
+      ctx.font='700 15px serif'; ctx.globalAlpha=.7;
+      ctx.fillText('★   ★   ★', W/2, footerY+36);
+      ctx.restore();
+
+      // Footer micro text
+      ctx.save(); ctx.font='600 10px sans-serif'; ctx.fillStyle=T.muted;
+      ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+      ctx.fillText('StudioBooth Photo Booth',innerX,H-pad-8);
+      ctx.textAlign='right';
+      ctx.fillText(new Date().toLocaleDateString('id-ID'),innerX+innerW,H-pad-8);
+      ctx.restore();
+
+      // Stickers
+      const stickerPositions=computeStickerPositions(W,H);
+      stickerPositions.forEach(st=>{
+        ctx.save(); ctx.translate(st.x+17,st.y+17); ctx.rotate(st.rot*Math.PI/180);
+        ctx.beginPath(); ctx.fillStyle='rgba(253,246,227,.95)';
+        ctx.strokeStyle=T.accent; ctx.lineWidth=2;
+        ctx.shadowColor='rgba(0,0,0,.14)'; ctx.shadowBlur=8;
+        ctx.arc(0,0,st.s/2+4,0,Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.shadowBlur=0; ctx.fillStyle=T.accent;
+        ctx.font='700 22px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(STICKERS.find(s=>s.id===st.id)?.icon||'✦',0,1);
+        ctx.restore();
+      });
+      return canvas;
+    }
+
+    function renderCanvas_Airmail(canvas, photos){
+      const { w:W, h:H } = calcOutputSize();
+      canvas.width=W; canvas.height=H;
+      const ctx = canvas.getContext('2d');
+      const T = TEMPLATE_THEMES.airmail;
+      const n = state.layout;
+      const cap = (state.caption||'best moment').trim()||'best moment';
+
+      // Background — warm white
+      ctx.fillStyle=T.bg; ctx.fillRect(0,0,W,H);
+
+      // Airmail diagonal stripe border (classic red/blue alternating)
+      const stripeW=28;
+      ctx.save();
+      // Draw diagonal stripes around border region
+      function drawAirmailStripes(x,y,w,h,sw){
+        ctx.save();
+        ctx.beginPath();
+        // Border band path (outer rect minus inner rect)
+        ctx.rect(x,y,w,h);
+        const innerPad=sw;
+        ctx.rect(x+innerPad,y+innerPad,w-innerPad*2,h-innerPad*2);
+        ctx.clip('evenodd');
+        const colors=[T.navy,T.red,'#FFFFFF',T.navy,T.red,'#FFFFFF'];
+        const diagSpacing=sw*1.6;
+        const diagCount=Math.ceil((w+h)/diagSpacing)+4;
+        for(let i=-4;i<diagCount;i++){
+          ctx.beginPath();
+          const ox=i*diagSpacing;
+          ctx.moveTo(x+ox,y); ctx.lineTo(x+ox+h,y+h);
+          ctx.lineTo(x+ox+h+diagSpacing,y+h); ctx.lineTo(x+ox+diagSpacing,y);
+          ctx.closePath();
+          ctx.fillStyle=colors[((i%colors.length)+colors.length)%colors.length];
+          ctx.globalAlpha=colors[((i%colors.length)+colors.length)%colors.length]==='#FFFFFF'?.55:.8;
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+      drawAirmailStripes(0,0,W,H,stripeW);
+      ctx.restore();
+
+      // Inner card (white)
+      const pad=stripeW+8;
+      ctx.save(); ctx.shadowColor='rgba(27,58,107,.18)'; ctx.shadowBlur=20; ctx.shadowOffsetY=6;
+      ctx.fillStyle='#FFFFFF';
+      drawRoundedRect(ctx,pad,pad,W-pad*2,H-pad*2,8); ctx.fill();
+      ctx.restore();
+
+      const innerX=pad+16, innerW=W-pad*2-32;
+
+      // Header — stamp style
+      const headerY=pad+14, headerH=80;
+      // Dotted stamp border for header
+      ctx.save(); ctx.setLineDash([4,4]);
+      ctx.strokeStyle=T.navy; ctx.lineWidth=1.8; ctx.globalAlpha=.55;
+      drawRoundedRect(ctx,innerX,headerY,innerW,headerH,4); ctx.stroke();
+      ctx.restore();
+      // Diagonal cancel lines (postmark style)
+      ctx.save(); ctx.strokeStyle=T.navy; ctx.lineWidth=1; ctx.globalAlpha=.18;
+      for(let i=-2;i<8;i++){
+        ctx.beginPath();
+        ctx.moveTo(innerX+i*22,headerY); ctx.lineTo(innerX+i*22+headerH,headerY+headerH);
+        ctx.stroke();
+      }
+      ctx.restore();
+      // Header text
+      ctx.save();
+      ctx.font='900 22px "Georgia",serif'; ctx.fillStyle=T.navy;
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.letterSpacing='.14em';
+      ctx.fillText('STUDIO BOOTH', W/2, headerY+headerH/2-6);
+      ctx.font='700 11px sans-serif'; ctx.fillStyle=T.red; ctx.globalAlpha=.9;
+      ctx.fillText('✈  PHOTO BOOTH  ✈', W/2, headerY+headerH/2+14);
+      ctx.restore();
+
+      // Postmark circle decoration
+      ctx.save();
+      ctx.strokeStyle=T.navy; ctx.lineWidth=2.5; ctx.globalAlpha=.22;
+      ctx.beginPath(); ctx.arc(innerX+innerW-54,headerY+headerH/2,34,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(innerX+innerW-54,headerY+headerH/2,26,0,Math.PI*2); ctx.stroke();
+      ctx.font='700 7px sans-serif'; ctx.fillStyle=T.navy; ctx.globalAlpha=.3;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('PHOTO MAIL', innerX+innerW-54, headerY+headerH/2);
+      ctx.restore();
+
+      // ── Photo slots (square)
+      const contentTop=headerY+headerH+18;
+      const footerH=90;
+      const contentH=H-contentTop-footerH;
+      const slotGap=12;
+      const slotH=(contentH-slotGap*(n-1))/n;
+      const slotSize_a=Math.min(innerW,slotH);
+      const slotX_a=innerX+(innerW-slotSize_a)/2;
+      const totalH_a=n*slotSize_a+(n-1)*slotGap;
+      const offsetY_a=contentTop+(contentH-totalH_a)/2;
+      const slots=Array.from({length:n},(_,i)=>({x:slotX_a,y:offsetY_a+i*(slotSize_a+slotGap),w:slotSize_a,h:slotSize_a}));
+
+      // Stamp-perforation border per slot
+      slots.forEach(slot=>{
+        ctx.save();
+        ctx.setLineDash([6,4]);
+        ctx.strokeStyle=T.navy; ctx.lineWidth=1.8; ctx.globalAlpha=.4;
+        drawRoundedRect(ctx,slot.x-3,slot.y-3,slot.w+6,slot.h+6,4); ctx.stroke();
+        ctx.restore();
+        // White bg for empty slots
+        if(!photos[slots.indexOf(slot)]){
+          ctx.save();
+          ctx.fillStyle='rgba(240,245,255,.7)';
+          drawRoundedRect(ctx,slot.x,slot.y,slot.w,slot.h,4); ctx.fill();
+          ctx.restore();
+        }
+      });
+      drawPhotoSlots(ctx,slots,photos,4);
+
+      // Small "Ticket to Happiness" stamp sticker on side of slot 2
+      if(n>=2){
+        const st2=slots[1];
+        ctx.save();
+        ctx.translate(st2.x+st2.w-10, st2.y+slotGap/2+8);
+        ctx.rotate(.12);
+        ctx.fillStyle='#D4B896'; ctx.globalAlpha=.9;
+        roundRect_fill(ctx,0,0,90,42,4);
+        ctx.strokeStyle=T.stamp; ctx.lineWidth=1.2;
+        roundRect_stroke(ctx,0,0,90,42,4);
+        ctx.font='700 9px Georgia,serif'; ctx.fillStyle=T.stamp; ctx.globalAlpha=1;
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText('TICKET TO',45,14);
+        ctx.fillText('HAPPINESS',45,27);
+        ctx.restore();
+      }
+
+      // ── Footer caption
+      const footerY=H-footerH+10;
+      ctx.save();
+      ctx.setLineDash([5,5]); ctx.strokeStyle=T.navy; ctx.lineWidth=1; ctx.globalAlpha=.25;
+      ctx.beginPath(); ctx.moveTo(innerX,footerY-4); ctx.lineTo(innerX+innerW,footerY-4); ctx.stroke();
+      ctx.restore();
+
+      ctx.save();
+      ctx.font='italic 700 26px Georgia,serif'; ctx.fillStyle=T.navy;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(cap,W/2,footerY+22);
+      ctx.restore();
+
+      // Postmark circle bottom-left
+      ctx.save(); ctx.strokeStyle=T.navy; ctx.lineWidth=1.8; ctx.globalAlpha=.18;
+      ctx.beginPath(); ctx.arc(innerX+40,footerY+40,32,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(innerX+40,footerY+40,23,0,Math.PI*2); ctx.stroke();
+      ctx.font='600 7px sans-serif'; ctx.fillStyle=T.navy; ctx.globalAlpha=.22;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('LUCKY IN LOVE', innerX+40, footerY+40);
+      ctx.restore();
+
+      // Footer micro text
+      ctx.save(); ctx.font='600 10px sans-serif'; ctx.fillStyle='rgba(27,58,107,.38)';
+      ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+      ctx.fillText('StudioBooth Photo Booth',innerX,H-pad-8);
+      ctx.textAlign='right';
+      ctx.fillText(new Date().toLocaleDateString('id-ID'),innerX+innerW,H-pad-8);
+      ctx.restore();
+
+      // Stickers
+      const stickerPositions=computeStickerPositions(W,H);
+      stickerPositions.forEach(st=>{
+        ctx.save(); ctx.translate(st.x+17,st.y+17); ctx.rotate(st.rot*Math.PI/180);
+        ctx.beginPath(); ctx.fillStyle='rgba(251,247,237,.95)';
+        ctx.strokeStyle=T.navy; ctx.lineWidth=2;
+        ctx.shadowColor='rgba(0,0,0,.12)'; ctx.shadowBlur=8;
+        ctx.arc(0,0,st.s/2+4,0,Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.shadowBlur=0; ctx.fillStyle=T.navy;
+        ctx.font='700 22px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(STICKERS.find(s=>s.id===st.id)?.icon||'✦',0,1);
+        ctx.restore();
+      });
+      return canvas;
+    }
+
+    function renderCanvas_Kodak(canvas, photos){
+      const { w:W, h:H } = calcOutputSize();
+      canvas.width=W; canvas.height=H;
+      const ctx = canvas.getContext('2d');
+      const T = TEMPLATE_THEMES.kodak;
+      const n = state.layout;
+      const cap = (state.caption||'best moment').trim()||'best moment';
+
+      // Black background
+      ctx.fillStyle=T.bg; ctx.fillRect(0,0,W,H);
+
+      // Yellow top and bottom bars (Kodak film style)
+      const barH=80;
+      ctx.fillStyle=T.yellow; ctx.fillRect(0,0,W,barH);
+      ctx.fillStyle=T.yellow; ctx.fillRect(0,H-barH,W,barH);
+
+      // Film sprockets on yellow bars (top)
+      ctx.save(); ctx.fillStyle='#111111';
+      const spW=22, spH=16, spGap=30;
+      const spCount=Math.floor(W/spGap);
+      for(let i=0;i<spCount+1;i++){
+        const sx=(i*spGap)+(W%(spGap))/2-spW/2;
+        roundRect_fill(ctx,sx,(barH/2)-(spH/2),spW,spH,3);
+        roundRect_fill(ctx,sx,H-barH+(barH/2)-(spH/2),spW,spH,3);
+      }
+      ctx.restore();
+
+      // KODAK text on top bar
+      ctx.save();
+      ctx.font='900 32px "Arial Black",sans-serif'; ctx.fillStyle='#111111';
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.letterSpacing='.18em';
+      ctx.fillText('StudioBooth', W/2, barH/2);
+      ctx.restore();
+
+      // Red stripe accents beside text on top bar
+      ctx.save(); ctx.fillStyle=T.red; ctx.globalAlpha=.7;
+      ctx.fillRect(W/2-160,barH*.2,12,barH*.6);
+      ctx.fillRect(W/2+148,barH*.2,12,barH*.6);
+      ctx.restore();
+
+      // Dark film inner area
+      const filmPad=18;
+      ctx.save(); ctx.fillStyle=T.film;
+      ctx.fillRect(filmPad,barH+6,W-filmPad*2,H-barH*2-12);
+      ctx.restore();
+
+      // Film frame number on left
+      ctx.save(); ctx.font='700 11px "Courier New",monospace';
+      ctx.fillStyle='rgba(228,168,0,.4)'; ctx.textAlign='center';
+      for(let i=0;i<n;i++){
+        ctx.save(); ctx.translate(filmPad+9,barH+20+(H-barH*2-40)/n*(i+.5));
+        ctx.rotate(-Math.PI/2);
+        ctx.fillText(`${(i+1).toString().padStart(2,'0')}A`,0,0);
+        ctx.restore();
+      }
+      ctx.restore();
+
+      // ── Photo slots (square)
+      const contentX=filmPad+28, contentTop=barH+14;
+      const contentH=H-barH*2-28;
+      const contentW=W-contentX*2;
+      const slotGap=10;
+      const slotH=(contentH-slotGap*(n-1))/n;
+      const slotSize_k=Math.min(contentW,slotH);
+      const slotX_k=contentX+(contentW-slotSize_k)/2;
+      const totalH_k=n*slotSize_k+(n-1)*slotGap;
+      const offsetY_k=contentTop+(contentH-totalH_k)/2;
+      const slots=Array.from({length:n},(_,i)=>({
+        x:slotX_k,y:offsetY_k+i*(slotSize_k+slotGap),w:slotSize_k,h:slotSize_k
+      }));
+
+      // Slot shadow
+      slots.forEach(slot=>{
+        ctx.save(); ctx.shadowColor='rgba(228,168,0,.25)'; ctx.shadowBlur=14;
+        ctx.fillStyle='#000';
+        drawRoundedRect(ctx,slot.x,slot.y,slot.w,slot.h,6); ctx.fill();
+        ctx.restore();
+        ctx.save(); ctx.strokeStyle=T.yellow; ctx.lineWidth=1.5; ctx.globalAlpha=.3;
+        drawRoundedRect(ctx,slot.x,slot.y,slot.w,slot.h,6); ctx.stroke();
+        ctx.restore();
+      });
+      drawPhotoSlots(ctx,slots,photos,6);
+
+      // Bottom bar text
+      ctx.save();
+      ctx.font='italic 800 26px Georgia,serif'; ctx.fillStyle='#111111';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(cap, W/2, H-barH/2-6);
+      ctx.font='700 11px sans-serif'; ctx.fillStyle='rgba(17,17,17,.6)'; ctx.letterSpacing='.14em';
+      ctx.fillText(new Date().toLocaleDateString('id-ID'),W/2,H-barH/2+14);
+      ctx.restore();
+
+      // Stickers
+      const stickerPositions=computeStickerPositions(W,H);
+      stickerPositions.forEach(st=>{
+        ctx.save(); ctx.translate(st.x+17,st.y+17); ctx.rotate(st.rot*Math.PI/180);
+        ctx.beginPath(); ctx.fillStyle='rgba(228,168,0,.92)';
+        ctx.strokeStyle='#111'; ctx.lineWidth=2;
+        ctx.shadowColor='rgba(0,0,0,.2)'; ctx.shadowBlur=8;
+        ctx.arc(0,0,st.s/2+4,0,Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.shadowBlur=0; ctx.fillStyle='#111';
+        ctx.font='700 22px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(STICKERS.find(s=>s.id===st.id)?.icon||'✦',0,1);
+        ctx.restore();
+      });
+      return canvas;
+    }
+
+    // Helper: roundRect fill/stroke used by new renderers
+    function roundRect_fill(ctx,x,y,w,h,r){
+      drawRoundedRect(ctx,x,y,w,h,r); ctx.fill();
+    }
+    function roundRect_stroke(ctx,x,y,w,h,r){
+      drawRoundedRect(ctx,x,y,w,h,r); ctx.stroke();
     }
 
     function renderCanvas(canvas, photos = state.photos){
+      const tpl = TEMPLATE_THEMES[state.frame] || TEMPLATE_THEMES.gold;
+      if (tpl.style === 'ticket')  { renderCanvas_Ticket(canvas, photos);  return canvas; }
+      if (tpl.style === 'airmail') { renderCanvas_Airmail(canvas, photos); return canvas; }
+      if (tpl.style === 'kodak')   { renderCanvas_Kodak(canvas, photos);   return canvas; }
       const theme = getFrameTheme();
       const { w: W, h: H } = calcOutputSize();
       canvas.width = W;
       canvas.height = H;
       const ctx = canvas.getContext('2d');
 
-      // background
-      const bg = ctx.createLinearGradient(0, 0, W, H);
-      bg.addColorStop(0, '#F6F1EA');
-      bg.addColorStop(1, '#FFFDF8');
-      ctx.fillStyle = bg;
+      // ── 1. Card background ──────────────────────────────────────────────────
+      ctx.fillStyle = tpl.bg;
       ctx.fillRect(0, 0, W, H);
 
-      // outer glow / card
+      // Card white inner (slightly inset)
+      const pad = 18;
       ctx.save();
       ctx.shadowColor = 'rgba(0,0,0,.18)';
-      ctx.shadowBlur = 24;
-      ctx.shadowOffsetY = 10;
-      ctx.fillStyle = '#FFFFFF';
-      drawRoundedRect(ctx, 22, 22, W - 44, H - 44, 30);
+      ctx.shadowBlur = 28;
+      ctx.shadowOffsetY = 8;
+      ctx.fillStyle = tpl.cardBg;
+      drawRoundedRect(ctx, pad, pad, W - pad * 2, H - pad * 2, 22);
       ctx.fill();
       ctx.restore();
 
-      // frame border
+      // ── 2. Thick accent border ───────────────────────────────────────────────
       ctx.save();
-      ctx.lineWidth = 18;
-      ctx.strokeStyle = theme.accent;
-      drawRoundedRect(ctx, 22, 22, W - 44, H - 44, 30);
+      ctx.lineWidth = tpl.borderWidth;
+      ctx.strokeStyle = tpl.borderColor;
+      drawRoundedRect(ctx, pad, pad, W - pad * 2, H - pad * 2, 22);
       ctx.stroke();
 
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = 'rgba(0,0,0,.08)';
-      drawRoundedRect(ctx, 38, 38, W - 76, H - 76, 24);
+      // Thin inner hairline
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = tpl.borderColor;
+      ctx.globalAlpha = 0.22;
+      drawRoundedRect(ctx, pad + tpl.borderWidth + 6, pad + tpl.borderWidth + 6,
+        W - (pad + tpl.borderWidth + 6) * 2, H - (pad + tpl.borderWidth + 6) * 2, 14);
       ctx.stroke();
       ctx.restore();
 
-      // header area
-      ctx.save();
-      ctx.fillStyle = 'rgba(0,0,0,.05)';
-      drawRoundedRect(ctx, 48, 48, W - 96, 72, 18);
-      ctx.fill();
+      // ── 3. Film perforation dots on both sides ──────────────────────────────
+      const perfX_L = pad + 8;
+      const perfX_R = W - pad - 8;
+      const perfY_start = pad + tpl.borderWidth + 16;
+      const perfH = H - (pad + tpl.borderWidth + 16) * 2;
+      drawPerforationStrip(ctx, perfX_L, perfY_start, perfH, true, tpl.dotColor);
+      drawPerforationStrip(ctx, perfX_R, perfY_start, perfH, true, tpl.dotColor);
 
-      ctx.font = 'italic 28px "Cormorant Garamond", serif';
-      ctx.fillStyle = '#231C16';
+      // ── 4. Header bar ────────────────────────────────────────────────────────
+      const headerY = pad + tpl.borderWidth + 14;
+      const headerH2 = 64;
+      const innerX = pad + tpl.borderWidth + 18;
+      const innerW = W - (pad + tpl.borderWidth + 18) * 2;
+
+      ctx.save();
+      ctx.fillStyle = tpl.headerBg;
+      ctx.globalAlpha = 0.92;
+      drawRoundedRect(ctx, innerX, headerY, innerW, headerH2, 12);
+      ctx.fill();
+      ctx.restore();
+
+      // Header text: brand left, layout count right
+      ctx.save();
+      ctx.font = 'italic 700 26px "Cormorant Garamond", serif';
+      ctx.fillStyle = tpl.headerText;
       ctx.textAlign = 'left';
-      ctx.fillText('StudioBooth', 68, 94);
+      ctx.textBaseline = 'middle';
+      ctx.fillText('StudioBooth', innerX + 18, headerY + headerH2 / 2);
 
-      ctx.font = '600 18px "Plus Jakarta Sans", sans-serif';
-      ctx.fillStyle = theme.accent;
+      ctx.font = '800 13px "Plus Jakarta Sans", sans-serif';
+      ctx.letterSpacing = '0.08em';
       ctx.textAlign = 'right';
-      ctx.fillText(`${state.layout} Foto`, W - 68, 94);
+      ctx.fillText(`${state.layout} FOTO`, innerX + innerW - 18, headerY + headerH2 / 2);
       ctx.restore();
 
-      const headerH = 132;
-      const footerH = 132;
-      const usableH = H - headerH - footerH;
-      const gap = 18;
-      const slotH = (usableH - gap * (state.layout - 1)) / state.layout;
-      const slotW = W - 108;
-      const slotX = 54;
+      // ── 5. Photo slots (square, centered) ───────────────────────────────────
+      const contentTop = headerY + headerH2 + 16;
+      const footerH2 = 148;
+      const contentH = H - contentTop - footerH2;
+      const gap = tpl.slotGap;
+      const slotH = (contentH - gap * (state.layout - 1)) / state.layout;
+      const slotSize = Math.min(innerW, slotH); // square
+      const slotX = innerX + (innerW - slotSize) / 2; // centered
+      const totalSlotsH = state.layout * slotSize + (state.layout - 1) * gap;
+      const slotsOffsetY = contentTop + (contentH - totalSlotsH) / 2;
       const slots = Array.from({length: state.layout}, (_, i) => ({
         x: slotX,
-        y: headerH + i * (slotH + gap),
-        w: slotW,
-        h: slotH
+        y: slotsOffsetY + i * (slotSize + gap),
+        w: slotSize,
+        h: slotSize
       }));
 
-      // slots and photos
       const crop = state.photos;
       slots.forEach((slot, idx) => {
+        const img = crop[idx];
+        const r = tpl.slotRadius;
+
+        // Slot shadow / empty bg
         ctx.save();
-        ctx.fillStyle = 'rgba(0,0,0,.035)';
-        drawRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, 18);
-        ctx.fill();
+        if (!img) {
+          ctx.fillStyle = 'rgba(0,0,0,.06)';
+          drawRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, r);
+          ctx.fill();
+        }
         ctx.restore();
 
+        // Photo or placeholder
         ctx.save();
-        drawRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, 18);
+        drawRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, r);
         ctx.clip();
 
-        const img = crop[idx];
         if (img) {
           const ir = img.width / img.height;
           const fr = slot.w / slot.h;
           let sx, sy, sw, sh;
           if (ir > fr) {
-            sh = img.height;
-            sw = sh * fr;
-            sx = (img.width - sw) / 2;
-            sy = 0;
+            sh = img.height; sw = sh * fr;
+            sx = (img.width - sw) / 2; sy = 0;
           } else {
-            sw = img.width;
-            sh = sw / fr;
-            sx = 0;
-            sy = (img.height - sh) / 2;
+            sw = img.width; sh = sw / fr;
+            sx = 0; sy = (img.height - sh) / 2;
           }
           ctx.drawImage(img, sx, sy, sw, sh, slot.x, slot.y, slot.w, slot.h);
-        } else {
-          const slotBg = ctx.createLinearGradient(slot.x, slot.y, slot.x + slot.w, slot.y + slot.h);
-          slotBg.addColorStop(0, 'rgba(255,255,255,.92)');
-          slotBg.addColorStop(1, 'rgba(245,240,235,.95)');
-          ctx.fillStyle = slotBg;
+
+          // Subtle vignette on photo
+          const vig = ctx.createRadialGradient(
+            slot.x + slot.w / 2, slot.y + slot.h / 2, slot.w * 0.28,
+            slot.x + slot.w / 2, slot.y + slot.h / 2, slot.w * 0.72
+          );
+          vig.addColorStop(0, 'rgba(0,0,0,0)');
+          vig.addColorStop(1, 'rgba(0,0,0,.18)');
+          ctx.fillStyle = vig;
           ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
-          ctx.strokeStyle = 'rgba(0,0,0,.05)';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(slot.x + 1, slot.y + 1, slot.w - 2, slot.h - 2);
-          ctx.fillStyle = 'rgba(0,0,0,.18)';
-          ctx.font = '600 18px "Plus Jakarta Sans", sans-serif';
+        } else {
+          // Aesthetic empty slot
+          ctx.fillStyle = 'rgba(240,237,232,.9)';
+          ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
+          ctx.fillStyle = 'rgba(0,0,0,.12)';
+          ctx.font = '700 15px "Plus Jakarta Sans", sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(`Shot ${idx + 1}`, slot.x + slot.w / 2, slot.y + slot.h / 2 + 6);
+          ctx.textBaseline = 'middle';
+          ctx.fillText(`Shot ${idx + 1}`, slot.x + slot.w / 2, slot.y + slot.h / 2);
         }
-        // glow overlay on photo slot
+
+        // Glow overlay
         if (img && state.glowColor && state.glowColor !== 'none' && state.glowIntensity > 0) {
           const gc = GLOW_COLORS.find(g => g.id === state.glowColor);
           if (gc) {
-            ctx.save();
-            drawRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, 18);
-            ctx.clip();
             const grd = ctx.createRadialGradient(
               slot.x + slot.w * 0.5, slot.y + slot.h * 0.45, 0,
               slot.x + slot.w * 0.5, slot.y + slot.h * 0.45, Math.max(slot.w, slot.h) * 0.6
@@ -2384,84 +3262,147 @@
             ctx.globalCompositeOperation = 'screen';
             ctx.fillStyle = grd;
             ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
-            ctx.restore();
           }
         }
-
         ctx.restore();
 
-        // inner line
+        // Slot border stroke
         ctx.save();
-        ctx.strokeStyle = 'rgba(0,0,0,.07)';
-        ctx.lineWidth = 1.6;
-        drawRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, 18);
+        ctx.strokeStyle = tpl.borderColor;
+        ctx.globalAlpha = img ? 0.18 : 0.1;
+        ctx.lineWidth = 1.5;
+        drawRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, r);
         ctx.stroke();
         ctx.restore();
       });
 
-      // decorative frame ornaments
+      // ── 6. Ornaments & card corner icons ────────────────────────────────────
+      // Small ✦ between each pair of slots
+      for (let i = 0; i < state.layout - 1; i++) {
+        const betweenY = slots[i].y + slots[i].h + gap / 2;
+        drawCornerOrnament(ctx, slotX - 14, betweenY, 13, 0, tpl.ornamentColor);
+        drawCornerOrnament(ctx, slotX + slotSize + 14, betweenY, 13, 0, tpl.ornamentColor);
+      }
+
+      // Card corner icons (BeautyPlus-style decorative icons inside border)
+      const cornerIcons = ['💎','❤️','🌙','✨'];
+      const cornerPositions = [
+        { x: pad+tpl.borderWidth+20, y: pad+tpl.borderWidth+22 },
+        { x: W/2,                    y: pad+tpl.borderWidth+22 },
+        { x: W-pad-tpl.borderWidth-20, y: pad+tpl.borderWidth+22 },
+        { x: pad+tpl.borderWidth+20, y: H-pad-tpl.borderWidth-22 },
+        { x: W-pad-tpl.borderWidth-20, y: H-pad-tpl.borderWidth-22 },
+      ];
+      const cIcons = ['💎','❤️','🌙','♡','✦'];
+      cornerPositions.forEach((pos, i) => {
+        ctx.save();
+        ctx.font = '16px serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.globalAlpha = 0.7;
+        ctx.fillText(cIcons[i], pos.x, pos.y);
+        ctx.restore();
+      });
+
+      // ── 7. Footer — BeautyPlus-style branding section ────────────────────────
+      const footerTop = H - footerH2 + 6;
+      const cap = (state.caption || 'best moment').trim() || 'best moment';
+
+      // ── Decorative divider line with center ornament
+      const divY = footerTop + 12;
       ctx.save();
-      ctx.font = '22px serif';
-      ctx.fillStyle = theme.accent;
-      ctx.globalAlpha = .52;
-      ctx.textAlign = 'center';
-      ctx.fillText('✦', W / 2, 116);
-      ctx.fillText('✦', W / 2, H - 96);
-      ctx.fillText('✦', 36, H / 2);
-      ctx.fillText('✦', W - 36, H / 2);
+      ctx.strokeStyle = tpl.ornamentColor;
+      ctx.globalAlpha = 0.3;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(innerX + 10, divY); ctx.lineTo(W/2 - 16, divY); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(W/2 + 16, divY); ctx.lineTo(innerX + innerW - 10, divY); ctx.stroke();
+      ctx.restore();
+      ctx.save();
+      ctx.font = '14px serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.globalAlpha = 0.6;
+      ctx.fillText('✦', W/2, divY);
       ctx.restore();
 
-      // caption
+      // ── Caption text (large italic script)
       ctx.save();
-      const cap = (state.caption || 'best moment').trim() || 'best moment';
-      ctx.fillStyle = '#19140F';
-      ctx.font = 'italic 54px "Cormorant Garamond", serif';
+      ctx.font = 'italic 44px "Cormorant Garamond", serif';
+      ctx.fillStyle = tpl.captionColor;
       ctx.textAlign = 'center';
-      ctx.fillText(cap, W / 2, H - 58);
-      const tw = ctx.measureText(cap).width;
-      ctx.strokeStyle = theme.accent;
-      ctx.globalAlpha = .34;
-      ctx.lineWidth = 1.2;
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText(cap, W / 2, footerTop + 56);
+      ctx.restore();
+
+      // ── Second decorative line below caption
+      const div2Y = footerTop + 68;
+      ctx.save();
+      ctx.strokeStyle = tpl.ornamentColor;
+      ctx.globalAlpha = 0.18;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 4]);
       ctx.beginPath();
-      ctx.moveTo((W - tw) / 2, H - 42);
-      ctx.lineTo((W + tw) / 2, H - 42);
+      ctx.moveTo(innerX + 24, div2Y); ctx.lineTo(innerX + innerW - 24, div2Y);
       ctx.stroke();
       ctx.restore();
 
-      // footer
+      // ── Brand logo row (like BeautyPlus watermark)
+      const brandY = footerTop + 88;
       ctx.save();
-      ctx.fillStyle = 'rgba(0,0,0,.5)';
-      ctx.font = '600 11px "Plus Jakarta Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('StudioBooth Photo Booth', 58, H - 20);
-      ctx.textAlign = 'right';
-      ctx.fillStyle = 'rgba(0,0,0,.34)';
-      ctx.fillText(new Date().toLocaleDateString('id-ID'), W - 58, H - 20);
+      ctx.font = 'italic 700 15px "Cormorant Garamond", serif';
+      ctx.fillStyle = tpl.captionColor;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      ctx.globalAlpha = 0.72;
+      ctx.fillText('StudioBooth', W/2, brandY);
       ctx.restore();
 
-      // stickers
+      // ── Tagline below brand
+      ctx.save();
+      ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
+      ctx.fillStyle = tpl.footerColor;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      ctx.globalAlpha = 0.7;
+      ctx.letterSpacing = '0.08em';
+      ctx.fillText('📸  capture your best moment', W/2, brandY + 15);
+      ctx.restore();
+
+      // ── Date bottom-right, photo count bottom-left
+      ctx.save();
+      ctx.font = '600 10px "Plus Jakarta Sans", sans-serif';
+      ctx.fillStyle = tpl.footerColor;
+      ctx.globalAlpha = 0.55;
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText(`${state.layout} foto`, innerX + 4, H - pad - 8);
+      ctx.textAlign = 'right';
+      ctx.fillText(new Date().toLocaleDateString('id-ID'), innerX + innerW - 4, H - pad - 8);
+      ctx.restore();
+
+      // ── 9. Stickers ─────────────────────────────────────────────────────────
       const stickerPositions = computeStickerPositions(W, H);
-      stickerPositions.forEach((st, idx) => {
+      stickerPositions.forEach((st) => {
         ctx.save();
         ctx.translate(st.x + 17, st.y + 17);
         ctx.rotate((st.rot * Math.PI) / 180);
+
+        // Circle badge
         ctx.beginPath();
-        ctx.fillStyle = 'rgba(255,255,255,.88)';
-        ctx.strokeStyle = theme.accent;
+        ctx.fillStyle = 'rgba(255,255,255,.92)';
+        ctx.strokeStyle = tpl.borderColor;
         ctx.lineWidth = 2;
-        ctx.shadowColor = 'rgba(0,0,0,.10)';
+        ctx.shadowColor = 'rgba(0,0,0,.14)';
         ctx.shadowBlur = 8;
         ctx.arc(0, 0, st.s / 2 + 4, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
         ctx.shadowBlur = 0;
-        ctx.fillStyle = theme.accent;
-        ctx.font = '700 24px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = tpl.borderColor;
+        ctx.font = '700 22px "Plus Jakarta Sans", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         const glyph = STICKERS.find(s => s.id === st.id)?.icon || '✦';
-        ctx.fillText(glyph, 0, 2);
+        ctx.fillText(glyph, 0, 1);
         ctx.restore();
       });
 
@@ -2473,40 +3414,178 @@
       renderCanvas(els.previewCanvas);
       updateSelectedStickerChips();
       rebuildResultThumbnails();
+      const stickerCountEl = document.getElementById('stickerCount');
+      if (stickerCountEl) stickerCountEl.textContent = state.stickers.length + '/8';
+      // Keep the Kisi/Layout sidebar card in sync with state.layout no matter
+      // which code path changed it — single source of truth, no stale highlight.
+      document.querySelectorAll('.layout-thumb[data-layout]').forEach(btn => {
+        btn.classList.toggle('active', Number(btn.dataset.layout) === state.layout);
+      });
+    }
+
+    function renderResultPanel(){
+      // Layout indicator (2 / 3 / 4 foto) — read-only, just reflects whatever
+      // is chosen in the "Kisi / Layout" panel. It's not a separate control,
+      // so it can never get out of sync with the actual session layout.
+      const picker = document.getElementById('resultLayoutPicker');
+      if (picker) {
+        picker.innerHTML = [2,3,4].map(n => `
+          <span class="rlp-btn${n===state.layout?' active':''}">${n} Foto</span>
+        `).join('');
+      }
+
+      // Frame color swatches
+      const swatches = document.getElementById('rpFrameSwatches');
+      if (swatches) {
+        const frameColors = [
+          ['gold','#C8963E'],['rosegold','#C98B7C'],['cream','#EBD9C2'],['lavender','#A08ED0'],
+          ['forest','#6B9E7A'],['midnight','#7389D8'],['noir','#8F8F98'],['blush','#E8A8B8'],
+          ['ticket','#7A1F1F'],['airmail','#1B3A6B'],['kodak','#E4A800']
+        ];
+        swatches.innerHTML = frameColors.map(([k,c]) => `
+          <button class="rp-frame-btn" data-frame="${k}"
+            style="width:100%;aspect-ratio:1;border-radius:50%;background:${c};border:2.5px solid ${state.frame===k?'#fff':'rgba(255,255,255,.15)'};box-shadow:${state.frame===k?'0 0 0 2px '+c+'88':'none'};cursor:pointer;transition:.15s;position:relative;"
+            title="${k}">
+            ${state.frame===k?`<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6)">✓</span>`:''}
+          </button>
+        `).join('');
+        swatches.querySelectorAll('.rp-frame-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.frame = btn.dataset.frame;
+            renderAll();
+          });
+        });
+      }
+
+      // Caption input — reflect state without clobbering the caret while typing
+      const captionEl = document.getElementById('captionInput');
+      if (captionEl && captionEl.value !== state.caption) {
+        captionEl.value = state.caption || 'best moment';
+      }
+
+      // Sticker grid — with categories
+      const stickerGrid = document.getElementById('rpStickerGrid');
+      if (stickerGrid) {
+        // Category tabs row
+        const rpStickerParent = stickerGrid.parentElement;
+        let catRow = rpStickerParent.querySelector('.rp-cat-row');
+        if (!catRow) {
+          catRow = document.createElement('div');
+          catRow.className = 'rp-cat-row';
+          catRow.style.cssText = 'display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;';
+          rpStickerParent.insertBefore(catRow, stickerGrid);
+        }
+        catRow.innerHTML = STICKER_CATEGORIES.map(c => `
+          <button class="rp-cat-btn" data-cat="${c.id}"
+            style="padding:4px 8px;border-radius:999px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;
+            background:${activeStickerCat===c.id?'rgba(200,150,62,.22)':'rgba(255,255,255,.04)'};
+            border:1.5px solid ${activeStickerCat===c.id?'rgba(200,150,62,.45)':'rgba(255,255,255,.08)'};
+            color:${activeStickerCat===c.id?'var(--gold2)':'rgba(145,131,175,.8)'};"
+          >${c.label}</button>
+        `).join('');
+        catRow.querySelectorAll('.rp-cat-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            activeStickerCat = btn.dataset.cat;
+            renderAll();
+          });
+        });
+
+        const filtered = activeStickerCat === 'all' ? STICKERS : STICKERS.filter(s => s.cat === activeStickerCat);
+        stickerGrid.innerHTML = filtered.map(s => `
+          <button class="rp-sticker-btn" data-sticker="${s.id}"
+            style="padding:6px 3px;border-radius:10px;background:${state.stickers.includes(s.id)?'rgba(200,150,62,.18)':'rgba(255,255,255,.04)'};
+            border:1.5px solid ${state.stickers.includes(s.id)?'rgba(200,150,62,.5)':'rgba(255,255,255,.08)'};
+            cursor:pointer;text-align:center;transition:.15s;position:relative;">
+            <span style="font-size:20px;display:block;line-height:1.1">${s.icon}</span>
+            <span style="font-size:9px;font-weight:700;color:${state.stickers.includes(s.id)?'var(--gold2)':'var(--muted)'};display:block;margin-top:2px">${s.label}</span>
+            ${state.stickers.includes(s.id)?`<span style="position:absolute;top:2px;right:2px;width:11px;height:11px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:900;color:#0D0A14">✓</span>`:''}
+          </button>
+        `).join('');
+        stickerGrid.querySelectorAll('.rp-sticker-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.dataset.sticker;
+            if (state.stickers.includes(id)) {
+              state.stickers = state.stickers.filter(x => x !== id);
+            } else {
+              if (state.stickers.length >= 8) return;
+              state.stickers.push(id);
+            }
+            renderAll();
+          });
+        });
+      }
     }
 
     function rebuildResultThumbnails(){
-      if (!els.resultThumbnails) return;
-      const count = state.layout;
-      const thumbs = els.resultThumbnails;
-      thumbs.innerHTML = '';
-      for (let i = 0; i < count; i++) {
-        const div = document.createElement('div');
-        div.className = 'result-thumb' + (i === 0 && state.photos[0] ? ' active' : '');
+      renderResultPanel();
+      const wrap = document.getElementById('filmStripWrap');
+      if (!wrap) return;
+      wrap.innerHTML = '';
+
+      const theme = getFrameTheme();
+      const accentColor = theme.accent;
+
+      for (let i = 0; i < state.layout; i++) {
         const img = state.photos[i];
+
+        // outer slot card
+        const card = document.createElement('div');
+        card.style.cssText = `
+          border-radius:16px;
+          overflow:hidden;
+          border:1.5px solid ${img ? accentColor + '55' : 'rgba(255,255,255,.08)'};
+          background:${img ? 'rgba(0,0,0,.4)' : 'rgba(255,255,255,.03)'};
+          position:relative;
+          flex-shrink:0;
+          transition:.2s ease;
+        `;
+
         if (img) {
+          // photo thumbnail
           const im = document.createElement('img');
           im.src = img.src;
-          div.appendChild(im);
-          div.addEventListener('click', () => {
-            thumbs.querySelectorAll('.result-thumb').forEach(t => t.classList.remove('active'));
-            div.classList.add('active');
-          });
+          im.style.cssText = 'width:100%;display:block;object-fit:cover;aspect-ratio:4/3;';
+
+          // overlay badge
+          const badge = document.createElement('div');
+          badge.style.cssText = `
+            position:absolute;bottom:0;left:0;right:0;
+            padding:6px 10px;
+            background:linear-gradient(0deg,rgba(0,0,0,.7),transparent);
+            font-size:10px;font-weight:800;
+            color:${accentColor};
+            letter-spacing:.06em;
+          `;
+          badge.textContent = `Shot ${i + 1}`;
+
+          card.appendChild(im);
+          card.appendChild(badge);
         } else {
-          div.classList.add('result-thumb-empty');
-          div.innerHTML = `<span style="font-size:16px;opacity:.35">📷</span>`;
+          // empty slot
+          const empty = document.createElement('div');
+          empty.style.cssText = `
+            aspect-ratio:4/3;
+            display:flex;flex-direction:column;
+            align-items:center;justify-content:center;
+            gap:6px;color:rgba(255,255,255,.2);
+          `;
+          empty.innerHTML = `
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            <span style="font-size:10px;font-weight:700">Shot ${i + 1}</span>
+          `;
+          card.appendChild(empty);
         }
-        thumbs.appendChild(div);
+
+        wrap.appendChild(card);
       }
     }
 
     function updateSelectedStickerChips(){
-      els.selectedStickerChips.innerHTML = state.stickers.length
-        ? state.stickers.map(id => {
-            const s = STICKERS.find(x => x.id === id);
-            return `<span class="sticker-chip active">${s?.icon || '✦'} ${s?.label || id}</span>`;
-          }).join('')
-        : `<span class="sticker-chip">Belum ada stiker dipilih</span>`;
+      const el = els.selectedStickerChips;
+      if (!el) return; // removed from new layout
     }
 
     function rebuildMiniShots(){
@@ -2549,8 +3628,8 @@
       });
       // Enable/disable action buttons based on photo state
       const hasPhotos = state.photos.length > 0;
-      els.downloadBtn.disabled = !hasPhotos;
-      els.retakeBtn.disabled = !hasPhotos;
+      if (els.downloadBtn) els.downloadBtn.disabled = !hasPhotos;
+      if (els.retakeBtn)   els.retakeBtn.disabled   = !hasPhotos;
     }
 
     function setTimer(sec){
@@ -2773,11 +3852,17 @@
       await startCamera();
     });
     els.stopBtn.addEventListener('click', stopCamera);
-    els.downloadBtn.addEventListener('click', downloadResult);
-    els.retakeBtn.addEventListener('click', retake);
-    els.captionInput.addEventListener('input', e => {
-      state.caption = e.target.value || 'best moment';
-      renderAll();
+
+    // Use event delegation for result-card dynamic buttons
+    document.addEventListener('click', e => {
+      if (e.target.closest('#downloadBtn')) downloadResult();
+      if (e.target.closest('#retakeBtn'))   retake();
+    });
+    document.addEventListener('input', e => {
+      if (e.target.id === 'captionInput') {
+        state.caption = e.target.value || 'best moment';
+        renderAll();
+      }
     });
 
     // keyboard shortcuts
