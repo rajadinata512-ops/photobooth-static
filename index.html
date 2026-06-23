@@ -654,6 +654,316 @@
       line-height:1.7;
     }
 
+    /* ===== UPGRADED TOOL PANELS ===== */
+
+    /* Layout panel — visual film-strip thumbnails */
+    .layout-grid-2col{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+    }
+    .layout-thumb{
+      position:relative;
+      padding:12px 10px 10px;
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+      border:1.5px solid rgba(255,255,255,.07);
+      color:var(--text);
+      text-align:center;
+      cursor:pointer;
+      transition:.2s ease;
+      overflow:hidden;
+    }
+    .layout-thumb:hover{
+      border-color:rgba(200,150,62,.28);
+      background:rgba(200,150,62,.06);
+    }
+    .layout-thumb.active{
+      border-color:rgba(200,150,62,.55);
+      background:linear-gradient(180deg, rgba(200,150,62,.18), rgba(200,150,62,.07));
+      box-shadow:0 0 0 3px rgba(200,150,62,.08), inset 0 0 22px rgba(200,150,62,.04);
+    }
+    .layout-thumb-badge{
+      position:absolute;top:8px;right:8px;
+      font-size:9px;font-weight:800;text-transform:uppercase;
+      letter-spacing:.1em;color:var(--gold2);
+      background:rgba(200,150,62,.18);border:1px solid rgba(200,150,62,.3);
+      padding:2px 6px;border-radius:999px;
+    }
+    .layout-thumb-film{
+      display:flex;flex-direction:column;gap:5px;
+      margin-bottom:8px;
+      padding:8px;
+      background:rgba(0,0,0,.22);
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.07);
+    }
+    .layout-thumb-slot{
+      border-radius:7px;
+      background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.09);
+    }
+    .layout-thumb-label{
+      font-size:12px;font-weight:800;color:var(--text);
+    }
+    .layout-thumb-sub{
+      font-size:10.5px;color:var(--muted);margin-top:2px;
+    }
+    .layout-thumb.active .layout-thumb-label{color:var(--gold2);}
+    .layout-thumb.active .layout-thumb-slot{
+      background:rgba(200,150,62,.16);
+      border-color:rgba(200,150,62,.28);
+    }
+
+    /* Filter panel — visual preview chips */
+    .filter-scroll{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+    }
+    .filter-visual-chip{
+      position:relative;
+      border-radius:16px;
+      overflow:hidden;
+      border:2px solid rgba(255,255,255,.07);
+      cursor:pointer;
+      transition:.2s ease;
+      background:rgba(255,255,255,.03);
+    }
+    .filter-visual-chip:hover{
+      border-color:rgba(200,150,62,.3);
+    }
+    .filter-visual-chip.active{
+      border-color:var(--gold2);
+      box-shadow:0 0 0 3px rgba(200,150,62,.12);
+    }
+    .filter-chip-preview{
+      height:60px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:26px;
+      overflow:hidden;
+      position:relative;
+    }
+    .filter-chip-check{
+      position:absolute;top:6px;right:6px;
+      width:18px;height:18px;border-radius:50%;
+      background:var(--gold);
+      display:none;align-items:center;justify-content:center;
+      font-size:10px;color:#0D0A14;font-weight:900;
+    }
+    .filter-visual-chip.active .filter-chip-check{display:flex}
+    .filter-chip-name{
+      padding:6px 8px;
+      font-size:11px;font-weight:700;
+      color:var(--text);text-align:center;
+      border-top:1px solid rgba(255,255,255,.07);
+      background:rgba(0,0,0,.18);
+    }
+    .filter-visual-chip.active .filter-chip-name{color:var(--gold2);}
+
+    /* Bersinar — color picker glow panel */
+    .glow-section-label{
+      font-size:11px;font-weight:800;text-transform:uppercase;
+      letter-spacing:.12em;color:var(--muted);
+      margin-bottom:10px;
+    }
+    .glow-color-grid{
+      display:flex;flex-wrap:wrap;gap:10px;
+      margin-bottom:16px;
+    }
+    .glow-color-btn{
+      width:36px;height:36px;border-radius:50%;
+      border:2.5px solid transparent;
+      cursor:pointer;
+      transition:.18s ease;
+      position:relative;
+      flex-shrink:0;
+    }
+    .glow-color-btn:hover{transform:scale(1.1)}
+    .glow-color-btn.active{
+      border-color:#fff;
+      box-shadow:0 0 0 3px rgba(200,150,62,.55), 0 0 16px rgba(200,150,62,.3);
+      transform:scale(1.12);
+    }
+    .glow-color-btn.active::after{
+      content:'✓';
+      position:absolute;inset:0;
+      display:flex;align-items:center;justify-content:center;
+      color:#fff;font-size:13px;font-weight:900;
+      text-shadow:0 1px 4px rgba(0,0,0,.5);
+    }
+    .glow-none-btn{
+      background:rgba(255,255,255,.06) !important;
+      border:1.5px solid rgba(255,255,255,.15) !important;
+    }
+    .glow-none-btn::before{
+      content:'';
+      position:absolute;
+      top:50%;left:50%;
+      width:24px;height:2px;
+      background:rgba(255,255,255,.45);
+      transform:translate(-50%,-50%) rotate(-45deg);
+      border-radius:2px;
+    }
+    .glow-intensity-row{
+      padding:14px;border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.07);
+      margin-bottom:10px;
+    }
+    .glow-intensity-label{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:10px;
+      font-size:12px;font-weight:700;color:var(--text);
+    }
+    .glow-preview-bar{
+      height:8px;border-radius:999px;
+      margin-bottom:12px;
+      background:linear-gradient(90deg, rgba(255,255,255,.04), rgba(200,150,62,.45));
+      overflow:hidden;
+    }
+    .glow-preview-fill{
+      height:100%;border-radius:999px;
+      background:linear-gradient(90deg, rgba(200,150,62,.5), var(--gold2));
+      transition:width .15s ease;
+    }
+
+    /* Frame — swatch with labels */
+    .frame-swatch-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+    }
+    .frame-swatch-btn{
+      border-radius:16px;
+      padding:12px 6px 9px;
+      background:rgba(255,255,255,.03);
+      border:1.5px solid rgba(255,255,255,.07);
+      cursor:pointer;
+      transition:.2s ease;
+      text-align:center;
+    }
+    .frame-swatch-btn:hover{
+      border-color:rgba(200,150,62,.25);
+    }
+    .frame-swatch-btn.active{
+      border-color:rgba(200,150,62,.52);
+      background:rgba(200,150,62,.1);
+      box-shadow:0 0 0 3px rgba(200,150,62,.07);
+    }
+    .frame-swatch-circle{
+      width:32px;height:32px;border-radius:50%;
+      margin:0 auto 6px;
+      box-shadow:0 4px 12px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.2);
+    }
+    .frame-swatch-name{
+      font-size:10px;font-weight:700;
+      color:var(--muted);
+    }
+    .frame-swatch-btn.active .frame-swatch-name{color:var(--gold2);}
+
+    /* Stiker — grid premium dengan emoji besar */
+    .sticker-grid-premium{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:8px;
+    }
+    .sticker-btn-premium{
+      border-radius:16px;
+      padding:10px 6px 8px;
+      background:rgba(255,255,255,.03);
+      border:1.5px solid rgba(255,255,255,.06);
+      cursor:pointer;
+      text-align:center;
+      transition:.18s ease;
+      position:relative;
+    }
+    .sticker-btn-premium:hover{
+      border-color:rgba(200,150,62,.22);
+      background:rgba(200,150,62,.05);
+    }
+    .sticker-btn-premium.active{
+      border-color:rgba(200,150,62,.52);
+      background:rgba(200,150,62,.12);
+      box-shadow:0 0 0 2px rgba(200,150,62,.08);
+    }
+    .sticker-btn-premium .stk-icon{
+      font-size:26px;
+      line-height:1;
+      margin-bottom:5px;
+      display:block;
+    }
+    .sticker-btn-premium .stk-name{
+      font-size:10px;font-weight:700;color:var(--muted);
+      display:block;
+    }
+    .sticker-btn-premium.active .stk-name{color:var(--gold2);}
+    .sticker-btn-premium .stk-check{
+      position:absolute;top:5px;right:5px;
+      width:14px;height:14px;border-radius:50%;
+      background:var(--gold);
+      color:#0D0A14;
+      font-size:8px;font-weight:900;
+      display:none;align-items:center;justify-content:center;
+    }
+    .sticker-btn-premium.active .stk-check{display:flex;}
+
+    /* Result panel — thumbnail strip di samping */
+    .result-strip-layout{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 68px;
+      gap:12px;
+      align-items:start;
+    }
+    .result-thumbnails{
+      display:flex;flex-direction:column;gap:8px;
+    }
+    .result-thumb{
+      width:64px;
+      aspect-ratio:4/3;
+      border-radius:10px;
+      overflow:hidden;
+      border:1.5px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.04);
+      cursor:pointer;
+      transition:.18s ease;
+      flex-shrink:0;
+    }
+    .result-thumb img{width:100%;height:100%;object-fit:cover;}
+    .result-thumb.active{
+      border-color:var(--gold2);
+      box-shadow:0 0 0 2px rgba(200,150,62,.2);
+    }
+    .result-thumb-empty{
+      display:flex;align-items:center;justify-content:center;
+      color:var(--muted);font-size:9px;font-weight:700;
+      text-align:center;padding:4px;
+    }
+
+    /* Range slider styling */
+    input[type="range"]{
+      -webkit-appearance:none;
+      appearance:none;
+      height:5px;
+      border-radius:999px;
+      background:rgba(255,255,255,.1);
+      outline:none;
+    }
+    input[type="range"]::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      width:16px;height:16px;
+      border-radius:50%;
+      background:linear-gradient(180deg,var(--gold2),var(--gold));
+      box-shadow:0 2px 8px rgba(200,150,62,.4);
+      cursor:pointer;
+    }
+    input[type="range"]::-moz-range-thumb{
+      width:16px;height:16px;border:none;
+      border-radius:50%;
+      background:linear-gradient(180deg,var(--gold2),var(--gold));
+      cursor:pointer;
+    }
+
     /* modal */
     .modal-backdrop{
       position:fixed;inset:0;z-index:50;
@@ -1457,8 +1767,13 @@
               </div>
             </div>
 
-            <div class="canvas-wrap">
-              <canvas id="previewCanvas" class="result-canvas"></canvas>
+            <div class="result-strip-layout">
+              <div class="canvas-wrap">
+                <canvas id="previewCanvas" class="result-canvas"></canvas>
+              </div>
+              <div class="result-thumbnails" id="resultThumbnails">
+                <!-- populated by JS -->
+              </div>
             </div>
 
             <div class="caption-box">
@@ -1516,6 +1831,7 @@
       sessionStatus: document.getElementById('sessionStatus'),
       shotBadge: document.getElementById('shotBadge'),
       captionInput: document.getElementById('captionInput'),
+      resultThumbnails: document.getElementById('resultThumbnails'),
       miniShots: document.getElementById('miniShots'),
       toolPanel: document.getElementById('toolPanel'),
       toolTitle: document.getElementById('toolTitle'),
@@ -1536,6 +1852,8 @@
       brightness: 1.04,
       contrast: 1.03,
       saturation: 1.02,
+      glowColor: 'none',
+      glowIntensity: 0,
       frame: 'gold',
       caption: 'best moment',
       stickers: [],
@@ -1584,53 +1902,113 @@
       { id:'gem', label:'Gem', icon:'◆' }
     ];
 
+    // Glow colors for the Bersinar panel
+    const GLOW_COLORS = [
+      { id:'none',   color:'none',    label:'Off' },
+      { id:'warm',   color:'#FF9A3C', label:'Warm' },
+      { id:'rose',   color:'#FF6E9A', label:'Rose' },
+      { id:'lavender',color:'#A085D8',label:'Lavender' },
+      { id:'cyan',   color:'#5BD8D8', label:'Cyan' },
+      { id:'pink',   color:'#F0A0C8', label:'Pink' },
+      { id:'gold',   color:'#E4B870', label:'Gold' },
+      { id:'orange', color:'#FF6C2F', label:'Orange' },
+      { id:'blue',   color:'#4D8EFF', label:'Blue' },
+      { id:'purple', color:'#C05CE8', label:'Purple' },
+      { id:'green',  color:'#3FC88A', label:'Forest' },
+    ];
+
+    const FILTER_ICONS = {
+      normal:'☀️', warm:'🌅', vintage:'📷', noir:'🎞️',
+      dreamy:'🌸', cream:'🤍', golden:'✨', forest:'🌿'
+    };
+
     const toolMeta = {
       layout: {
-        title: 'Pilih Layout',
-        desc: 'Tentukan jumlah foto yang akan diambil. Layout 3 foto jadi default yang paling serasi untuk strip photobooth.',
+        title: 'Kisi / Layout',
+        desc: 'Tentukan jumlah foto untuk satu sesi. Setiap layout menghasilkan strip dengan ukuran berbeda.',
         render() {
+          const configs = [
+            { n:2, label:'2 Foto', sub:'Ringkas & elegan', badge:null, slotH:28 },
+            { n:3, label:'3 Foto', sub:'Paling populer', badge:'⭐ Best', slotH:20 },
+            { n:4, label:'4 Foto', sub:'Strip panjang', badge:null, slotH:16 },
+          ];
           return `
-            <div class="panel-grid">
-              ${[2,3,4].map(n => `
-                <button class="layout-card ${state.layout===n?'active':''}" data-layout="${n}">
-                  <div class="layout-preview">${Array.from({length:n}).map(() => '<div class="slot"></div>').join('')}</div>
-                  <div class="layout-label">${n} Foto</div>
-                  <div class="layout-sub">${n===2?'Ringkas & elegan':n===3?'Paling populer':'Lebih panjang'}</div>
+            <div class="layout-grid-2col">
+              ${configs.map(c => `
+                <button class="layout-thumb ${state.layout===c.n?'active':''}" data-layout="${c.n}">
+                  ${c.badge ? `<div class="layout-thumb-badge">${c.badge}</div>` : ''}
+                  <div class="layout-thumb-film">
+                    ${Array.from({length:c.n}).map(() => `<div class="layout-thumb-slot" style="height:${c.slotH}px"></div>`).join('')}
+                  </div>
+                  <div class="layout-thumb-label">${c.label}</div>
+                  <div class="layout-thumb-sub">${c.sub}</div>
                 </button>
               `).join('')}
             </div>
-            <div class="helper">Layout yang dipilih juga menentukan jumlah foto yang akan diambil saat tombol shutter ditekan.</div>
+            <div class="helper" style="margin-top:10px">Layout menentukan jumlah shutter yang diambil. Setelah foto diambil, ganti layout akan reset sesi.</div>
           `;
         }
       },
       filter: {
         title: 'Filter Realtime',
-        desc: 'Pilih tone yang cocok dengan tema kamu. Filter ini berlaku di live camera dan hasil foto.',
+        desc: 'Filter berlaku live di kamera dan di hasil foto akhir.',
         render() {
           return `
-            <div class="filter-grid">
+            <div class="filter-scroll">
               ${Object.entries(FILTERS).map(([key, val]) => `
-                <button class="filter-chip ${state.filter===key?'active':''}" data-filter="${key}">${val.label}</button>
+                <button class="filter-visual-chip ${state.filter===key?'active':''}" data-filter="${key}">
+                  <div class="filter-chip-check">✓</div>
+                  <div class="filter-chip-preview" style="filter:${val.css}">
+                    <span style="font-size:32px">🧑</span>
+                  </div>
+                  <div class="filter-chip-name">${val.label}</div>
+                </button>
               `).join('')}
             </div>
-            <div class="helper">Filter yang paling cocok untuk tema dark luxury: Warm, Golden, Noir, dan Cream.</div>
+            <div class="helper" style="margin-top:10px">Tip: Warm & Golden cocok untuk nuansa mewah, Noir untuk dramatis, Dreamy untuk estetik soft.</div>
           `;
         }
       },
       brightness: {
         title: 'Bersinar',
-        desc: 'Atur brightness, contrast, dan saturation agar wajah lebih hidup tanpa merusak nuansa premium.',
+        desc: 'Pilih warna glow dan atur intensitas cahaya untuk efek premium.',
         render() {
+          const glowPct = Math.round(state.glowIntensity * 100);
           return `
+            <div style="margin-bottom:14px">
+              <div class="glow-section-label">Warna Glow</div>
+              <div class="glow-color-grid">
+                ${GLOW_COLORS.map(g => `
+                  <button
+                    class="glow-color-btn ${g.id==='none'?'glow-none-btn':''} ${(state.glowColor||'none')===g.id?'active':''}"
+                    data-glow="${g.id}"
+                    style="${g.color!=='none'?'background:'+g.color+';box-shadow:0 4px 12px '+g.color+'55':''}"
+                    title="${g.label}"
+                  ></button>
+                `).join('')}
+              </div>
+            </div>
+            <div class="glow-section-label">Intensitas</div>
+            <div class="glow-intensity-row">
+              <div class="glow-intensity-label">
+                <span>Kecerahan Glow</span>
+                <span style="color:var(--gold2)">${glowPct}%</span>
+              </div>
+              <div class="glow-preview-bar">
+                <div class="glow-preview-fill" id="glowFill" style="width:${glowPct}%"></div>
+              </div>
+              <input id="glowIntensityRange" type="range" min="0" max="1" step="0.01" value="${state.glowIntensity||0}" style="width:100%">
+            </div>
+            <div class="glow-section-label" style="margin-top:14px">Penyesuaian Lanjutan</div>
             <div class="range-row">
               <label><span>Brightness</span><span>${Math.round(state.brightness*100)}%</span></label>
               <input id="brightnessRange" type="range" min="0.72" max="1.38" step="0.01" value="${state.brightness}">
             </div>
-            <div class="range-row">
+            <div class="range-row" style="margin-top:10px">
               <label><span>Contrast</span><span>${Math.round(state.contrast*100)}%</span></label>
               <input id="contrastRange" type="range" min="0.82" max="1.25" step="0.01" value="${state.contrast}">
             </div>
-            <div class="range-row">
+            <div class="range-row" style="margin-top:10px">
               <label><span>Saturation</span><span>${Math.round(state.saturation*100)}%</span></label>
               <input id="saturationRange" type="range" min="0.72" max="1.28" step="0.01" value="${state.saturation}">
             </div>
@@ -1639,39 +2017,46 @@
       },
       frame: {
         title: 'Warna Frame',
-        desc: 'Frame yang dipakai saat hasil di-render. Tetap selaras dengan tema StudioBooth.',
+        desc: 'Frame diterapkan saat hasil foto di-render untuk diunduh.',
         render() {
           const frames = [
-            ['gold','#C8963E'],
-            ['rosegold','#C98B7C'],
-            ['cream','#EBD9C2'],
-            ['lavender','#A08ED0'],
-            ['forest','#6B9E7A'],
-            ['midnight','#7389D8'],
-            ['noir','#8F8F98']
+            ['gold','#C8963E','Gold'],
+            ['rosegold','#C98B7C','Rose Gold'],
+            ['cream','#EBD9C2','Cream'],
+            ['lavender','#A08ED0','Lavender'],
+            ['forest','#6B9E7A','Forest'],
+            ['midnight','#7389D8','Midnight'],
+            ['noir','#8F8F98','Noir'],
+            ['blush','#E8A8B8','Blush'],
           ];
           return `
-            <div class="swatches">
-              ${frames.map(([key, c]) => `<button class="swatch ${state.frame===key?'active':''}" data-frame="${key}" style="background:${c}"></button>`).join('')}
+            <div class="frame-swatch-grid">
+              ${frames.map(([key, c, name]) => `
+                <button class="frame-swatch-btn ${state.frame===key?'active':''}" data-frame="${key}">
+                  <div class="frame-swatch-circle" style="background:${c};border:2px solid rgba(255,255,255,.18)"></div>
+                  <div class="frame-swatch-name">${name}</div>
+                </button>
+              `).join('')}
             </div>
-            <div class="helper">Gold paling aman untuk kesan mewah. Cream dan Lavender cocok kalau mau lebih soft.</div>
+            <div class="helper" style="margin-top:10px">Gold & Rose Gold paling cocok untuk nuansa studio mewah. Cream & Blush untuk kesan soft aesthetic.</div>
           `;
         }
       },
       sticker: {
-        title: 'Stiker',
-        desc: 'Klik stiker untuk menambahkannya ke hasil. Pilihan yang aktif akan tampil di preview kanan.',
+        title: 'Stiker Estetik',
+        desc: 'Pilih hingga 4 stiker. Stiker aktif muncul di sudut hasil foto.',
         render() {
           return `
-            <div class="panel-grid" style="grid-template-columns:repeat(5,1fr)">
+            <div class="sticker-grid-premium">
               ${STICKERS.map(s => `
-                <button class="layout-card ${state.stickers.includes(s.id)?'active':''}" data-sticker="${s.id}" style="min-height:82px;text-align:center;padding:10px">
-                  <div style="font-size:28px;line-height:1.1">${s.icon}</div>
-                  <div class="layout-sub" style="margin-top:8px">${s.label}</div>
+                <button class="sticker-btn-premium ${state.stickers.includes(s.id)?'active':''}" data-sticker="${s.id}">
+                  <span class="stk-check">✓</span>
+                  <span class="stk-icon">${s.icon}</span>
+                  <span class="stk-name">${s.label}</span>
                 </button>
               `).join('')}
             </div>
-            <div class="helper">Maksimal 4 stiker aktif supaya hasil tetap rapi dan tidak menutupi foto.</div>
+            <div class="helper" style="margin-top:10px">Maks. 4 stiker aktif. Stiker tampil di keempat sudut hasil foto dengan orientasi miring elegan.</div>
           `;
         }
       }
@@ -1717,7 +2102,6 @@
         btn.addEventListener('click', () => {
           state.layout = Number(btn.dataset.layout);
           if (state.photos.length && state.photos.length !== state.layout) {
-            // Keep it smooth and predictable: reset the session when layout changes after shots exist.
             state.photos = [];
             rebuildMiniShots();
             updateStatus(`Layout diubah ke ${state.layout} foto. Sesi foto direset agar hasil tetap rapi.`);
@@ -1736,22 +2120,44 @@
         });
       });
 
+      // Glow color picker
+      els.toolPanel.querySelectorAll('[data-glow]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.glowColor = btn.dataset.glow;
+          setTool('brightness');
+          applyVideoFilter();
+          refreshActivePanelOnly();
+        });
+      });
+
+      // Glow intensity slider
+      const glowRange = els.toolPanel.querySelector('#glowIntensityRange');
+      if (glowRange) glowRange.addEventListener('input', e => {
+        state.glowIntensity = Number(e.target.value);
+        const fill = els.toolPanel.querySelector('#glowFill');
+        const pct = Math.round(state.glowIntensity * 100);
+        if (fill) fill.style.width = pct + '%';
+        const valLabel = els.toolPanel.querySelector('.glow-intensity-label span:last-child');
+        if (valLabel) valLabel.textContent = pct + '%';
+        applyVideoFilter();
+      });
+
       const brightness = els.toolPanel.querySelector('#brightnessRange');
       const contrast = els.toolPanel.querySelector('#contrastRange');
       const saturation = els.toolPanel.querySelector('#saturationRange');
       if (brightness) brightness.addEventListener('input', e => {
         state.brightness = Number(e.target.value);
-        renderAll();
+        applyVideoFilter();
         refreshActivePanelOnly();
       });
       if (contrast) contrast.addEventListener('input', e => {
         state.contrast = Number(e.target.value);
-        renderAll();
+        applyVideoFilter();
         refreshActivePanelOnly();
       });
       if (saturation) saturation.addEventListener('input', e => {
         state.saturation = Number(e.target.value);
-        renderAll();
+        applyVideoFilter();
         refreshActivePanelOnly();
       });
 
@@ -1796,6 +2202,25 @@
       const preset = FILTERS[state.filter]?.css || FILTERS.normal.css;
       els.video.style.filter = `brightness(${state.brightness}) contrast(${state.contrast}) saturate(${state.saturation}) ${preset}`;
       els.video.style.transform = 'scaleX(-1)';
+
+      // Apply glow overlay
+      let glowEl = document.getElementById('glowOverlay');
+      if (!glowEl) {
+        glowEl = document.createElement('div');
+        glowEl.id = 'glowOverlay';
+        glowEl.style.cssText = 'position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4;transition:background .2s ease,opacity .2s ease;';
+        els.video.parentElement.style.position = 'relative';
+        els.video.parentElement.appendChild(glowEl);
+      }
+      const gc = GLOW_COLORS.find(g => g.id === state.glowColor);
+      if (!gc || gc.id === 'none' || state.glowIntensity === 0) {
+        glowEl.style.background = 'none';
+        glowEl.style.opacity = '0';
+      } else {
+        const alpha = (state.glowIntensity * 0.52).toFixed(3);
+        glowEl.style.background = `radial-gradient(ellipse at center, ${gc.color}${Math.round(alpha*255).toString(16).padStart(2,'0')} 0%, transparent 75%)`;
+        glowEl.style.opacity = '1';
+      }
     }
 
     function calcOutputSize(){
@@ -1942,6 +2367,27 @@
           ctx.textAlign = 'center';
           ctx.fillText(`Shot ${idx + 1}`, slot.x + slot.w / 2, slot.y + slot.h / 2 + 6);
         }
+        // glow overlay on photo slot
+        if (img && state.glowColor && state.glowColor !== 'none' && state.glowIntensity > 0) {
+          const gc = GLOW_COLORS.find(g => g.id === state.glowColor);
+          if (gc) {
+            ctx.save();
+            drawRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, 18);
+            ctx.clip();
+            const grd = ctx.createRadialGradient(
+              slot.x + slot.w * 0.5, slot.y + slot.h * 0.45, 0,
+              slot.x + slot.w * 0.5, slot.y + slot.h * 0.45, Math.max(slot.w, slot.h) * 0.6
+            );
+            const alpha = (state.glowIntensity * 0.55).toFixed(3);
+            grd.addColorStop(0, gc.color + Math.round(alpha * 255).toString(16).padStart(2,'0'));
+            grd.addColorStop(1, 'transparent');
+            ctx.globalCompositeOperation = 'screen';
+            ctx.fillStyle = grd;
+            ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
+            ctx.restore();
+          }
+        }
+
         ctx.restore();
 
         // inner line
@@ -2026,6 +2472,32 @@
       applyVideoFilter();
       renderCanvas(els.previewCanvas);
       updateSelectedStickerChips();
+      rebuildResultThumbnails();
+    }
+
+    function rebuildResultThumbnails(){
+      if (!els.resultThumbnails) return;
+      const count = state.layout;
+      const thumbs = els.resultThumbnails;
+      thumbs.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const div = document.createElement('div');
+        div.className = 'result-thumb' + (i === 0 && state.photos[0] ? ' active' : '');
+        const img = state.photos[i];
+        if (img) {
+          const im = document.createElement('img');
+          im.src = img.src;
+          div.appendChild(im);
+          div.addEventListener('click', () => {
+            thumbs.querySelectorAll('.result-thumb').forEach(t => t.classList.remove('active'));
+            div.classList.add('active');
+          });
+        } else {
+          div.classList.add('result-thumb-empty');
+          div.innerHTML = `<span style="font-size:16px;opacity:.35">📷</span>`;
+        }
+        thumbs.appendChild(div);
+      }
     }
 
     function updateSelectedStickerChips(){
