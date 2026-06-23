@@ -178,12 +178,14 @@
 
     .hero-panel{
       position:relative;
+      align-self:stretch;
       border-radius:30px;
       border:1px solid rgba(200,150,62,.16);
       background:linear-gradient(135deg, rgba(255,255,255,.03), rgba(200,150,62,.03));
       box-shadow:var(--shadow);
       overflow:hidden;
       min-height:520px;
+      max-height:640px;
       padding:20px;
     }
     .hero-panel::before{
@@ -1139,6 +1141,9 @@
       .booth-grid{grid-template-columns:1fr}
       .hero{grid-template-columns:1fr}
       .hero-panel{min-height:420px}
+      .tool-card{order:2}
+      .stage-card{order:1}
+      .result-card{order:3}
     }
     @media (max-width: 720px){
       .nav .pill{display:none}
@@ -1587,9 +1592,67 @@
   }
 }
 
+
+    /* Hero film strip slots */
+    .hero-photo-slot{
+      position:relative;
+      flex:1;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid rgba(200,150,62,.18);
+      background:rgba(0,0,0,.3);
+      animation:heroSlotIn .55s ease both;
+      min-height:0;
+    }
+    @keyframes heroSlotIn{
+      from{opacity:0;transform:translateY(12px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    .hero-slot-label{
+      position:absolute;
+      bottom:8px;left:10px;
+      font-size:10px;font-weight:800;
+      color:rgba(255,255,255,.55);
+      letter-spacing:.1em;
+      text-transform:uppercase;
+    }
+
+    /* Mini-shot pop-in animation */
+    @keyframes shotPopin{
+      0%{transform:scale(.85);opacity:0}
+      70%{transform:scale(1.04)}
+      100%{transform:scale(1);opacity:1}
+    }
+    .mini-shot.filled{
+      animation:shotPopin .35s cubic-bezier(.22,.68,0,1.4) both;
+      border-color:rgba(200,150,62,.35);
+    }
+
+    /* Toast notification */
+    .toast{
+      position:fixed;
+      bottom:28px;left:50%;
+      transform:translateX(-50%) translateY(16px);
+      background:rgba(19,15,40,.96);
+      border:1px solid rgba(200,150,62,.35);
+      color:var(--gold2);
+      font-size:13px;font-weight:700;
+      padding:11px 20px;border-radius:999px;
+      box-shadow:0 8px 32px rgba(0,0,0,.45);
+      z-index:100;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .22s ease, transform .22s ease;
+      white-space:nowrap;
+    }
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
   </style>
 </head>
 <body>
+  <div class="toast" id="globalToast"></div>
   <div class="app">
     <section id="landingSection" class="section active">
       <div class="nav">
@@ -1624,8 +1687,29 @@
           </div>
 
           <div class="hero-panel">
-            <div class="hero-strip">
-              <img src="public/images/kamera.jpg" alt="StudioBooth preview">
+            <div class="hero-strip" style="flex-direction:column;gap:0;padding:14px;justify-content:flex-start;overflow:hidden;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <span style="font-size:11px;font-weight:800;color:var(--gold2);letter-spacing:.14em;text-transform:uppercase;opacity:.8;">Preview Strip</span>
+                <span style="font-size:11px;color:var(--muted);">3 foto · Noir filter</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;flex:1;min-height:0;">
+                <div class="hero-photo-slot" style="animation-delay:0s">
+                  <img src="public/images/model1.jpg" alt="foto 1" style="width:100%;height:100%;object-fit:cover;border-radius:14px;filter:grayscale(1) contrast(1.1);">
+                  <div class="hero-slot-label">Shot 1</div>
+                </div>
+                <div class="hero-photo-slot" style="animation-delay:.18s">
+                  <img src="public/images/model2.jpg" alt="foto 2" style="width:100%;height:100%;object-fit:cover;border-radius:14px;filter:grayscale(1) contrast(1.1);">
+                  <div class="hero-slot-label">Shot 2</div>
+                </div>
+                <div class="hero-photo-slot" style="animation-delay:.34s">
+                  <img src="public/images/model3.jpg" alt="foto 3" style="width:100%;height:100%;object-fit:cover;border-radius:14px;filter:grayscale(1) contrast(1.1);">
+                  <div class="hero-slot-label">Shot 3</div>
+                </div>
+              </div>
+              <div style="margin-top:14px;padding:12px 14px;border-radius:14px;background:rgba(200,150,62,.08);border:1px solid rgba(200,150,62,.2);display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:12px;color:var(--gold2);font-weight:700;">best moment</span>
+                <span style="font-size:11px;color:var(--muted);">StudioBooth &#169; 2025</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1936,6 +2020,7 @@
                 <div>
                   <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">Caption</div>
                   <input id="captionInput" type="text" maxlength="24" value=""
+                    placeholder="best moment"
                     style="width:100%;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text);font-size:12px;font-weight:700;outline:none;">
                 </div>
 
@@ -2429,7 +2514,7 @@
             state.stickers = state.stickers.filter(x => x !== id);
           } else {
             if (state.stickers.length >= 8) {
-              alertMessage('Maksimal 8 stiker aktif.');
+              showToast('Maksimal 8 stiker — hapus salah satu dulu.');
               return;
             }
             state.stickers.push(id);
@@ -3549,7 +3634,10 @@
             if (state.stickers.includes(id)) {
               state.stickers = state.stickers.filter(x => x !== id);
             } else {
-              if (state.stickers.length >= 8) return;
+              if (state.stickers.length >= 8) {
+                showToast('Maksimal 8 stiker — hapus salah satu dulu.');
+                return;
+              }
               state.stickers.push(id);
             }
             renderAll();
@@ -3658,13 +3746,23 @@
       if (currentSlots !== state.layout) rebuildMiniShots();
       const slots = [...els.miniShots.children];
       slots.forEach((box, i) => {
-        box.innerHTML = '';
         const img = state.photos[i];
         if (img) {
-          const im = document.createElement('img');
-          im.src = img.src;
-          box.appendChild(im);
+          if (!box.classList.contains('filled')) {
+            // New photo just came in — animate
+            box.innerHTML = '';
+            const im = document.createElement('img');
+            im.src = img.src;
+            box.appendChild(im);
+            box.classList.add('filled');
+            // Re-trigger animation
+            box.style.animation = 'none';
+            box.offsetHeight;
+            box.style.animation = '';
+          }
         } else {
+          box.innerHTML = '';
+          box.classList.remove('filled');
           box.textContent = `Shot ${i + 1}`;
         }
       });
@@ -3757,19 +3855,21 @@
         // Count down using selected timer
         for (let n = state.timer; n >= 1; n--) {
           if (!state.shooting) break;
-          // Re-trigger pulse animation each tick
-          els.countdownNum.textContent = n;
-          els.countdownNum.style.animation = 'none';
-          els.countdownNum.offsetHeight; // reflow to restart animation
-          els.countdownNum.style.animation = '';
+          // Re-trigger pulse animation via cloneNode (works on position:absolute child)
+          const oldBadge = els.countdownNum;
+          const newBadge = oldBadge.cloneNode(true);
+          newBadge.textContent = n;
+          oldBadge.parentNode.replaceChild(newBadge, oldBadge);
+          els.countdownNum = newBadge;
           els.countdownSub.textContent = n === 1 ? 'senyum! 😊' : n === 2 ? 'siap…' : 'bersiap…';
           await sleep(1000);
         }
 
         if (!state.shooting) { els.countdown.style.display = 'none'; break; }
 
-        // Snap moment
+        // Snap moment — use live ref (may have been cloneNode'd in loop)
         els.countdownNum.textContent = '✦';
+        void els.countdownNum.offsetHeight;
         els.countdownNum.classList.add('snap');
         els.countdownSub.textContent = 'jepret!';
         await sleep(180);
@@ -3784,6 +3884,12 @@
         state.photos.push(await captureFrame());
         updateShotBadge();
         renderAll();
+
+        // Inter-shot breather: show "Foto X tersimpan" for 600ms before next round
+        if (i < total - 1 && state.shooting) {
+          updateStatus(`Foto ${i + 1} tersimpan ✓ — bersiap foto ${i + 2}…`);
+          await sleep(600);
+        }
       }
 
       state.shooting = false;
@@ -3797,6 +3903,17 @@
       } else {
         updateStatus('Sesi dibatalkan.');
       }
+    }
+
+
+    let _toastTimer = null;
+    function showToast(msg, duration = 2400) {
+      const el = document.getElementById('globalToast');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(() => el.classList.remove('show'), duration);
     }
 
     function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
@@ -3826,6 +3943,11 @@
     function retake(){
       state.photos = [];
       state.shooting = false;
+      // Force-clear filled class so pop-in animates again next session
+      [...els.miniShots.children].forEach(slot => {
+        slot.classList.remove('filled');
+        slot.innerHTML = '';
+      });
       updateShotBadge();
       renderAll();
       updateStatus('Sesi direset. Ambil foto ulang kapan saja.');
