@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>StudioBooth — Photo Booth</title>
   <link rel="icon" type="image/png" href="public/images/kamera.jpg">
+  <!-- vladmandic/face-api: self-contained, TF bundled, models from same CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -813,7 +815,7 @@
       box-shadow:0 0 0 3px rgba(200,150,62,.12);
     }
     .filter-chip-preview{
-      height:60px;
+      height:72px;
       display:flex;align-items:center;justify-content:center;
       font-size:26px;
       overflow:hidden;
@@ -1961,7 +1963,10 @@
               </div>
 
               <div class="video-stage">
-                <video id="video" autoplay playsinline muted></video>
+                <div id="videoWrap" style="position:relative;width:100%;display:flex;justify-content:center;align-items:center;">
+                  <video id="video" autoplay playsinline muted style="width:100%;max-height:520px;aspect-ratio:4/3;object-fit:cover;border-radius:18px;background:#090812;transform:scaleX(-1);box-shadow:0 24px 52px rgba(0,0,0,.34);"></video>
+                  <canvas id="faceStickerCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:18px;pointer-events:none;z-index:3;"></canvas>
+                </div>
                 <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
                 <div class="countdown" id="countdown">
                   <div class="countdown-inner">
@@ -2118,7 +2123,8 @@
       modalTitle: document.getElementById('modalTitle'),
       modalText: document.getElementById('modalText'),
       modalCancel: document.getElementById('modalCancel'),
-      modalOk: document.getElementById('modalOk')
+      modalOk: document.getElementById('modalOk'),
+      faceStickerCanvas: document.getElementById('faceStickerCanvas')
     };
 
     const state = {
@@ -2136,8 +2142,19 @@
       stickers: [],
       photos: [],
       shooting: false,
-      stream: null
+      stream: null,
+      faceSticker: null  // active face AR sticker id
     };
+
+    // Face tracking state
+    let faceApiLoaded = false;
+    let faceApiLoading = false;
+    let faceTrackingRafId = null;
+    let faceDetectionIntervalId = null;
+    let faceTrackingActive = false;
+    let lastFacePredictions = [];
+
+    const MODELS_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
 
     const LAYOUTS = {
       2: { w: 560, h: 900 },
@@ -2229,6 +2246,338 @@
 
     let activeStickerCat = 'all';
 
+    // Face AR stickers — drawn over detected face landmarks
+    const FACE_STICKERS = [
+      {
+        id: 'bunny_ear',
+        label: 'Bunny Ear',
+        icon: '🐰',
+        desc: 'Telinga kelinci panjang yang menggemaskan',
+        draw(ctx, face, W, H) {
+          const { topLeft, bottomRight } = face;
+          const fx = topLeft[0], fy = topLeft[1];
+          const fw = bottomRight[0] - fx, fh = bottomRight[1] - fy;
+          const cx = fx + fw / 2;
+          const earW = fw * 0.28, earH = fh * 1.1;
+          // Shift anchor up so ears sit on top of head, not on forehead
+          const ey = fy - fh * 0.28;
+          const earY = ey - earH * 0.85;
+          // Left ear
+          ctx.save();
+          ctx.fillStyle = '#f8c8d4';
+          ctx.strokeStyle = '#e88ea8';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.ellipse(cx - fw * 0.22, earY + earH / 2, earW * 0.5, earH * 0.5, -0.15, 0, Math.PI * 2);
+          ctx.fill(); ctx.stroke();
+          // Inner left ear
+          ctx.fillStyle = '#ffaec9';
+          ctx.beginPath();
+          ctx.ellipse(cx - fw * 0.22, earY + earH / 2, earW * 0.25, earH * 0.35, -0.15, 0, Math.PI * 2);
+          ctx.fill();
+          // Right ear
+          ctx.fillStyle = '#f8c8d4';
+          ctx.strokeStyle = '#e88ea8';
+          ctx.beginPath();
+          ctx.ellipse(cx + fw * 0.22, earY + earH / 2, earW * 0.5, earH * 0.5, 0.15, 0, Math.PI * 2);
+          ctx.fill(); ctx.stroke();
+          // Inner right ear
+          ctx.fillStyle = '#ffaec9';
+          ctx.beginPath();
+          ctx.ellipse(cx + fw * 0.22, earY + earH / 2, earW * 0.25, earH * 0.35, 0.15, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      },
+      {
+        id: 'cat_ear',
+        label: 'Cat Ear',
+        icon: '🐱',
+        desc: 'Telinga kucing imut lucu',
+        draw(ctx, face, W, H) {
+          const { topLeft, bottomRight } = face;
+          const fx = topLeft[0], fy = topLeft[1];
+          const fw = bottomRight[0] - fx, fh = bottomRight[1] - fy;
+          const cx = fx + fw / 2;
+          const earSize = fw * 0.36;
+          // TinyFaceDetector box.y is at brow level; shift ears up to sit on top of head
+          const ey = fy - fh * 0.28;
+          ctx.save();
+          // Left cat ear
+          ctx.fillStyle = '#f9a8d4';
+          ctx.strokeStyle = '#ec4899';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx - fw * 0.38, ey + fh * 0.05);
+          ctx.lineTo(cx - fw * 0.12, ey + fh * 0.05);
+          ctx.lineTo(cx - fw * 0.25, ey - earSize * 0.8);
+          ctx.closePath();
+          ctx.fill(); ctx.stroke();
+          // Inner left ear
+          ctx.fillStyle = '#fce7f3';
+          ctx.beginPath();
+          ctx.moveTo(cx - fw * 0.33, ey + fh * 0.02);
+          ctx.lineTo(cx - fw * 0.17, ey + fh * 0.02);
+          ctx.lineTo(cx - fw * 0.25, ey - earSize * 0.55);
+          ctx.closePath();
+          ctx.fill();
+          // Right cat ear
+          ctx.fillStyle = '#f9a8d4';
+          ctx.strokeStyle = '#ec4899';
+          ctx.beginPath();
+          ctx.moveTo(cx + fw * 0.38, ey + fh * 0.05);
+          ctx.lineTo(cx + fw * 0.12, ey + fh * 0.05);
+          ctx.lineTo(cx + fw * 0.25, ey - earSize * 0.8);
+          ctx.closePath();
+          ctx.fill(); ctx.stroke();
+          // Inner right ear
+          ctx.fillStyle = '#fce7f3';
+          ctx.beginPath();
+          ctx.moveTo(cx + fw * 0.33, ey + fh * 0.02);
+          ctx.lineTo(cx + fw * 0.17, ey + fh * 0.02);
+          ctx.lineTo(cx + fw * 0.25, ey - earSize * 0.55);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+      },
+      {
+        id: 'napoo',
+        label: 'Napoo',
+        icon: '🐶',
+        desc: 'Hidung dan telinga anjing lucu',
+        draw(ctx, face, W, H) {
+          const { topLeft, bottomRight, landmarks } = face;
+          const fx = topLeft[0], fy = topLeft[1];
+          const fw = bottomRight[0] - fx, fh = bottomRight[1] - fy;
+          const cx = fx + fw / 2;
+          const cy = fy + fh / 2;
+          // Dog ears
+          ctx.save();
+          ctx.fillStyle = '#c4a265';
+          ctx.strokeStyle = '#8B5E3C';
+          ctx.lineWidth = 2;
+          const earW = fw * 0.28, earH = fh * 0.5;
+          // Left ear (droopy)
+          ctx.beginPath();
+          ctx.ellipse(fx - earW * 0.1, fy + fh * 0.15, earW * 0.45, earH * 0.7, 0.3, 0, Math.PI * 2);
+          ctx.fill(); ctx.stroke();
+          // Right ear (droopy)
+          ctx.beginPath();
+          ctx.ellipse(fx + fw + earW * 0.1, fy + fh * 0.15, earW * 0.45, earH * 0.7, -0.3, 0, Math.PI * 2);
+          ctx.fill(); ctx.stroke();
+          // Dog nose
+          const noseR = fw * 0.09;
+          const noseLm = landmarks && landmarks[2]; // nose landmark
+          const nx = noseLm ? noseLm[0] : cx;
+          const ny = noseLm ? noseLm[1] : cy + fh * 0.1;
+          ctx.fillStyle = '#1a1a2e';
+          ctx.beginPath();
+          ctx.ellipse(nx, ny, noseR, noseR * 0.7, 0, 0, Math.PI * 2);
+          ctx.fill();
+          // Nose shine
+          ctx.fillStyle = 'rgba(255,255,255,0.5)';
+          ctx.beginPath();
+          ctx.ellipse(nx - noseR * 0.3, ny - noseR * 0.2, noseR * 0.25, noseR * 0.18, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      },
+      {
+        id: 'heart_glasses',
+        label: 'Heart Glass',
+        icon: '🕶️',
+        desc: 'Kacamata hati estetik y2k',
+        draw(ctx, face, W, H) {
+          const { topLeft, bottomRight, landmarks } = face;
+          const fx = topLeft[0], fy = topLeft[1];
+          const fw = bottomRight[0] - fx, fh = bottomRight[1] - fy;
+          const cx = fx + fw / 2;
+          const eyeY = landmarks && landmarks[0] ? (landmarks[0][1] + landmarks[1][1]) / 2 : fy + fh * 0.35;
+          const eyeLx = landmarks && landmarks[0] ? landmarks[0][0] : cx - fw * 0.22;
+          const eyeRx = landmarks && landmarks[1] ? landmarks[1][0] : cx + fw * 0.22;
+          const heartS = fw * 0.19;
+
+          function drawHeart(hx, hy, size, color) {
+            ctx.save();
+            ctx.fillStyle = color;
+            ctx.globalAlpha = 0.85;
+            ctx.strokeStyle = '#c026d3';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(hx, hy + size * 0.25);
+            ctx.bezierCurveTo(hx, hy - size * 0.1, hx - size * 0.55, hy - size * 0.1, hx - size * 0.55, hy + size * 0.2);
+            ctx.bezierCurveTo(hx - size * 0.55, hy + size * 0.55, hx, hy + size * 0.8, hx, hy + size * 0.8);
+            ctx.bezierCurveTo(hx, hy + size * 0.8, hx + size * 0.55, hy + size * 0.55, hx + size * 0.55, hy + size * 0.2);
+            ctx.bezierCurveTo(hx + size * 0.55, hy - size * 0.1, hx, hy - size * 0.1, hx, hy + size * 0.25);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            ctx.restore();
+          }
+
+          ctx.save();
+          drawHeart(eyeLx, eyeY - heartS * 0.4, heartS, '#f472b6');
+          drawHeart(eyeRx, eyeY - heartS * 0.4, heartS, '#f472b6');
+          // Bridge
+          ctx.strokeStyle = '#c026d3';
+          ctx.lineWidth = 2;
+          ctx.globalAlpha = 0.9;
+          ctx.beginPath();
+          ctx.moveTo(eyeLx + heartS * 0.55, eyeY + heartS * 0.1);
+          ctx.lineTo(eyeRx - heartS * 0.55, eyeY + heartS * 0.1);
+          ctx.stroke();
+          // Arms
+          ctx.beginPath();
+          ctx.moveTo(eyeLx - heartS * 0.55, eyeY + heartS * 0.1);
+          ctx.lineTo(fx - 4, eyeY + heartS * 0.1);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(eyeRx + heartS * 0.55, eyeY + heartS * 0.1);
+          ctx.lineTo(bottomRight[0] + 4, eyeY + heartS * 0.1);
+          ctx.stroke();
+          ctx.restore();
+        }
+      },
+      {
+        id: 'flower_crown',
+        label: 'Flower Crown',
+        icon: '🌸',
+        desc: 'Mahkota bunga cantik di kepala',
+        draw(ctx, face, W, H) {
+          const { topLeft, bottomRight } = face;
+          const fx = topLeft[0], fy = topLeft[1];
+          const fw = bottomRight[0] - fx, fh = bottomRight[1] - fy;
+          const cx = fx + fw / 2;
+          const crownY = fy - fh * 0.05;
+          const count = 7;
+          const spacing = fw * 0.82 / (count - 1);
+          const startX = cx - fw * 0.41;
+          const flowers = ['#f472b6','#fb923c','#facc15','#a78bfa','#34d399','#f472b6','#fb7185'];
+          ctx.save();
+          for (let i = 0; i < count; i++) {
+            const bx = startX + i * spacing;
+            const by = crownY - (Math.sin((i / (count-1)) * Math.PI) * fh * 0.22);
+            const petalR = fw * 0.058;
+            const col = flowers[i];
+            for (let p = 0; p < 5; p++) {
+              const angle = (p / 5) * Math.PI * 2;
+              ctx.fillStyle = col;
+              ctx.globalAlpha = 0.92;
+              ctx.beginPath();
+              ctx.ellipse(
+                bx + Math.cos(angle) * petalR * 0.95,
+                by + Math.sin(angle) * petalR * 0.95,
+                petalR * 0.72, petalR * 0.5, angle, 0, Math.PI * 2
+              );
+              ctx.fill();
+            }
+            // Center yellow
+            ctx.fillStyle = '#fde68a';
+            ctx.globalAlpha = 1;
+            ctx.beginPath();
+            ctx.arc(bx, by, petalR * 0.44, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+      },
+      {
+        id: 'rainbow',
+        label: 'Rainbow',
+        icon: '🌈',
+        desc: 'Pelangi warna-warni di atas kepala',
+        draw(ctx, face, W, H) {
+          const { topLeft, bottomRight } = face;
+          const fx = topLeft[0], fy = topLeft[1];
+          const fw = bottomRight[0] - fx;
+          const cx = fx + fw / 2;
+          const ry = fy - fw * 0.15;
+          const rx = fw * 0.68;
+          const colors = ['#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6'];
+          ctx.save();
+          colors.forEach((c, i) => {
+            const r = rx - i * (fw * 0.055);
+            ctx.strokeStyle = c;
+            ctx.lineWidth = fw * 0.032;
+            ctx.globalAlpha = 0.88;
+            ctx.beginPath();
+            ctx.arc(cx, ry + rx * 0.5, r, -Math.PI, 0);
+            ctx.stroke();
+          });
+          ctx.restore();
+        }
+      },
+      {
+        id: 'star_eyes',
+        label: 'Star Eyes',
+        icon: '⭐',
+        desc: 'Mata bintang berkilau dramatis',
+        draw(ctx, face, W, H) {
+          const { topLeft, bottomRight, landmarks } = face;
+          const fx = topLeft[0], fy = topLeft[1];
+          const fw = bottomRight[0] - fx, fh = bottomRight[1] - fy;
+          const eyeY = landmarks && landmarks[0] ? (landmarks[0][1] + landmarks[1][1]) / 2 : fy + fh * 0.35;
+          const eyeLx = landmarks && landmarks[0] ? landmarks[0][0] : fx + fw * 0.28;
+          const eyeRx = landmarks && landmarks[1] ? landmarks[1][0] : fx + fw * 0.72;
+          const starS = fw * 0.17;
+          function drawStar(sx, sy, r, spikes, col) {
+            ctx.save();
+            ctx.fillStyle = col;
+            ctx.globalAlpha = 0.92;
+            const rot = -Math.PI / 2;
+            ctx.beginPath();
+            for (let i = 0; i < spikes * 2; i++) {
+              const ang = rot + (i * Math.PI) / spikes;
+              const rr = i % 2 === 0 ? r : r * 0.45;
+              ctx.lineTo(sx + Math.cos(ang) * rr, sy + Math.sin(ang) * rr);
+            }
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+          }
+          ctx.save();
+          drawStar(eyeLx, eyeY, starS, 5, '#facc15');
+          drawStar(eyeRx, eyeY, starS, 5, '#facc15');
+          // Sparkle around
+          ctx.fillStyle = '#fef9c3';
+          ctx.globalAlpha = 0.8;
+          [[eyeLx - starS * 0.85, eyeY - starS * 0.85],
+           [eyeLx + starS * 0.85, eyeY + starS * 0.7],
+           [eyeRx + starS * 0.85, eyeY - starS * 0.85],
+           [eyeRx - starS * 0.85, eyeY + starS * 0.7]].forEach(([px, py]) => {
+            ctx.beginPath();
+            ctx.arc(px, py, starS * 0.18, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          ctx.restore();
+        }
+      },
+      {
+        id: 'blush',
+        label: 'Anime Blush',
+        icon: '😊',
+        desc: 'Pipi merah muda seperti karakter anime',
+        draw(ctx, face, W, H) {
+          const { topLeft, bottomRight, landmarks } = face;
+          const fx = topLeft[0], fy = topLeft[1];
+          const fw = bottomRight[0] - fx, fh = bottomRight[1] - fy;
+          const cx = fx + fw / 2;
+          const blushY = fy + fh * 0.58;
+          const br = fw * 0.19;
+          ctx.save();
+          ctx.globalAlpha = 0.52;
+          const gradL = ctx.createRadialGradient(cx - fw * 0.26, blushY, 0, cx - fw * 0.26, blushY, br);
+          gradL.addColorStop(0, '#f9a8d4'); gradL.addColorStop(1, 'rgba(249,168,212,0)');
+          ctx.fillStyle = gradL;
+          ctx.beginPath(); ctx.ellipse(cx - fw * 0.26, blushY, br, br * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+          const gradR = ctx.createRadialGradient(cx + fw * 0.26, blushY, 0, cx + fw * 0.26, blushY, br);
+          gradR.addColorStop(0, '#f9a8d4'); gradR.addColorStop(1, 'rgba(249,168,212,0)');
+          ctx.fillStyle = gradR;
+          ctx.beginPath(); ctx.ellipse(cx + fw * 0.26, blushY, br, br * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        }
+      }
+    ];
+
     // Glow colors for the Bersinar panel
     const GLOW_COLORS = [
       { id:'none',   color:'none',    label:'Off' },
@@ -2247,6 +2596,30 @@
     const FILTER_ICONS = {
       normal:'☀️', warm:'🌅', vintage:'📷', noir:'🎞️',
       dreamy:'🌸', cream:'🤍', golden:'✨', forest:'🌿'
+    };
+
+    // Model image to use for filter preview (cycles through 3 models)
+    const FILTER_MODEL_IMAGES = {
+      normal:'public/images/model1.jpg',
+      warm:'public/images/model2.jpg',
+      vintage:'public/images/model3.jpg',
+      noir:'public/images/model1.jpg',
+      dreamy:'public/images/model2.jpg',
+      cream:'public/images/model3.jpg',
+      golden:'public/images/model1.jpg',
+      forest:'public/images/model2.jpg'
+    };
+
+    // Short descriptions for each filter
+    const FILTER_DESCS = {
+      normal:'Tampilan asli tanpa efek — warna dan cahaya alami.',
+      warm:'Nuansa hangat kemerahan, cocok untuk foto golden hour.',
+      vintage:'Warna retro sepia klasik, kesan foto tempo dulu.',
+      noir:'Hitam putih dramatis, kontras tinggi seperti film klasik.',
+      dreamy:'Lembut & terang, estetik dreamy soft-focus.',
+      cream:'Tone cream elegan, cahaya pucat yang mewah.',
+      golden:'Saturasi tinggi keemasan, cocok untuk konten premium.',
+      forest:'Hijau alam segar, nuansa outdoor & natural.'
     };
 
     const toolMeta = {
@@ -2278,19 +2651,29 @@
       },
       filter: {
         title: 'Filter Realtime',
-        desc: 'Filter berlaku live di kamera dan di hasil foto akhir.',
+        desc: 'Filter berlaku live di kamera dan di hasil foto akhir. Pilih filter dan lihat keterangan di bawah.',
         render() {
+          const selectedFilter = state.filter;
+          const filterDesc = FILTER_DESCS[selectedFilter] || '';
           return `
+            <div style="margin-bottom:10px;padding:10px 12px;border-radius:14px;background:rgba(200,150,62,.08);border:1px solid rgba(200,150,62,.18);">
+              <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--gold2);margin-bottom:4px;">${FILTERS[selectedFilter]?.label || 'Normal'}</div>
+              <div style="font-size:12px;color:var(--muted);line-height:1.55;">${filterDesc}</div>
+            </div>
             <div class="filter-scroll">
-              ${Object.entries(FILTERS).map(([key, val]) => `
+              ${Object.entries(FILTERS).map(([key, val]) => {
+                const modelImg = FILTER_MODEL_IMAGES[key] || 'public/images/model1.jpg';
+                return `
                 <button class="filter-visual-chip ${state.filter===key?'active':''}" data-filter="${key}">
                   <div class="filter-chip-check">✓</div>
-                  <div class="filter-chip-preview" style="filter:${val.css}">
-                    <span style="font-size:32px">🧑</span>
+                  <div class="filter-chip-preview" style="overflow:hidden;padding:0;position:relative;">
+                    <img src="${modelImg}" alt="${val.label}"
+                      style="width:100%;height:100%;object-fit:cover;display:block;filter:${val.css};pointer-events:none;">
+                    <div style="position:absolute;bottom:0;left:0;right:0;padding:3px 5px;background:rgba(0,0,0,.45);font-size:9px;font-weight:800;color:#fff;text-align:center;letter-spacing:.05em;">${FILTER_ICONS[key]||''} ${val.label}</div>
                   </div>
                   <div class="filter-chip-name">${val.label}</div>
                 </button>
-              `).join('')}
+              `}).join('')}
             </div>
             <div class="helper" style="margin-top:10px">Tip: Warm & Golden cocok untuk nuansa mewah, Noir untuk dramatis, Dreamy untuk estetik soft.</div>
           `;
@@ -2387,11 +2770,48 @@
       },
       sticker: {
         title: 'Stiker',
-        desc: 'Pilih stiker untuk ditempel di hasil foto. Bisa pilih sampai 8 stiker sekaligus.',
+        desc: 'Stiker Wajah AR tampil langsung di kamera. Stiker dekoratif ditempel di hasil foto.',
         render() {
           const filtered = activeStickerCat === 'all' ? STICKERS : STICKERS.filter(s => s.cat === activeStickerCat);
           return `
-            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;">
+            <!-- ── Face AR Sticker Section ─────────────────────── -->
+            <div style="margin-bottom:14px;">
+              <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--gold2);margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#34d399;box-shadow:0 0 8px #34d39988;animation:blink 1.8s infinite;"></span>
+                Stiker Wajah (Live Kamera)
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+                ${FACE_STICKERS.map(fs => `
+                  <button data-face-sticker="${fs.id}"
+                    title="${fs.desc}"
+                    style="padding:8px 4px;border-radius:12px;cursor:pointer;text-align:center;transition:.15s;position:relative;
+                    background:${state.faceSticker===fs.id?'rgba(52,211,153,.18)':'rgba(255,255,255,.04)'};
+                    border:1.5px solid ${state.faceSticker===fs.id?'rgba(52,211,153,.55)':'rgba(255,255,255,.07)'};">
+                    <span style="font-size:22px;display:block;line-height:1.1">${fs.icon}</span>
+                    <span style="font-size:9px;font-weight:700;display:block;margin-top:3px;color:${state.faceSticker===fs.id?'#34d399':'var(--muted)'};">${fs.label}</span>
+                    ${state.faceSticker===fs.id?`<span style="position:absolute;top:3px;right:3px;width:12px;height:12px;background:#34d399;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:900;color:#0D0A14">✓</span>`:''}
+                  </button>
+                `).join('')}
+                <!-- Clear button -->
+                <button data-face-sticker="__none__"
+                  style="padding:8px 4px;border-radius:12px;cursor:pointer;text-align:center;transition:.15s;
+                  background:${!state.faceSticker?'rgba(200,150,62,.14)':'rgba(255,255,255,.03)'};
+                  border:1.5px solid ${!state.faceSticker?'rgba(200,150,62,.45)':'rgba(255,255,255,.06)'};">
+                  <span style="font-size:18px;display:block;opacity:.6">✕</span>
+                  <span style="font-size:9px;font-weight:700;display:block;margin-top:3px;color:var(--muted);">Hapus</span>
+                </button>
+              </div>
+              <div style="margin-top:6px;font-size:11px;color:var(--muted);line-height:1.5;">
+                Klik stiker → tunggu toast <b style="color:#34d399">"Stiker wajah aktif!"</b> → stiker muncul. Butuh internet untuk load model (~2MB sekali). Pilih <b style="color:var(--text)">✕ Hapus</b> untuk matikan.
+              </div>
+            </div>
+
+            <!-- ── Divider ──────────────────────────────────────── -->
+            <div style="height:1px;background:rgba(255,255,255,.08);margin:4px 0 12px;"></div>
+            <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">Stiker Dekoratif (Foto)</div>
+
+            <!-- ── Decorative sticker categories ─────────────── -->
+            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">
               ${STICKER_CATEGORIES.map(c => `
                 <button onclick="activeStickerCat='${c.id}';setTool('sticker')"
                   style="padding:5px 9px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer;
@@ -2401,7 +2821,7 @@
                 >${c.label}</button>
               `).join('')}
             </div>
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-height:260px;overflow-y:auto;padding-right:4px;">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-height:200px;overflow-y:auto;padding-right:4px;">
               ${filtered.map(s => `
                 <button class="sticker-btn-premium ${state.stickers.includes(s.id)?'active':''}" data-sticker="${s.id}"
                   style="padding:8px 4px;border-radius:12px;
@@ -2572,6 +2992,20 @@
           }
           setTool('sticker');
           renderAll();
+        });
+      });
+
+      // Face AR sticker buttons
+      els.toolPanel.querySelectorAll('[data-face-sticker]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.faceSticker;
+          state.faceSticker = (id === '__none__') ? null : (state.faceSticker === id ? null : id);
+          if (state.faceSticker) {
+            startFaceTracking();
+          } else {
+            stopFaceTracking();
+          }
+          setTool('sticker');
         });
       });
     }
@@ -3591,6 +4025,204 @@
       return canvas;
     }
 
+    // ── Face Tracking (vladmandic/face-api — library + models same CDN) ──────
+
+    async function loadFaceApi() {
+      if (faceApiLoaded) return true;
+      if (faceApiLoading) return new Promise(res => {
+        const wait = setInterval(() => { if (!faceApiLoading) { clearInterval(wait); res(faceApiLoaded); } }, 200);
+      });
+      faceApiLoading = true;
+
+      try {
+        // vladmandic/face-api: tf is bundled, models served from same CDN
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODELS_URL);
+        console.log('[FaceAR] TinyFaceDetector loaded ✓');
+        try {
+          await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODELS_URL);
+          console.log('[FaceAR] Landmark68Tiny loaded ✓');
+        } catch(e) {
+          console.warn('[FaceAR] Landmark model skip, detection only:', e.message);
+        }
+        faceApiLoaded = true;
+        faceApiLoading = false;
+        return true;
+      } catch (e) {
+        console.error('[FaceAR] Model load FAILED:', e);
+        faceApiLoading = false;
+        showToast('❌ Model gagal dimuat: ' + (e.message || 'CDN error'));
+        return false;
+      }
+    }
+
+    async function startFaceTracking() {
+      if (faceTrackingActive) return;
+      showToast('⏳ Memuat model wajah…');
+      const ok = await loadFaceApi();
+      if (!ok) return;
+      faceTrackingActive = true;
+      showToast('✓ Stiker wajah aktif!');
+      console.log('[FaceAR] Tracking started, sticker:', state.faceSticker);
+      // Detection loop: async, runs every 100ms, only updates predictions
+      runFaceDetection(); // run once immediately
+      faceDetectionIntervalId = setInterval(runFaceDetection, 100);
+      // Render loop: pure sync RAF, reads cached predictions, never flickers
+      tickFaceStickerCanvas();
+    }
+
+    function stopFaceTracking() {
+      faceTrackingActive = false;
+      lastFacePredictions = [];
+      if (faceTrackingRafId) { cancelAnimationFrame(faceTrackingRafId); faceTrackingRafId = null; }
+      if (faceDetectionIntervalId) { clearInterval(faceDetectionIntervalId); faceDetectionIntervalId = null; }
+      const cvs = els.faceStickerCanvas;
+      if (cvs) { const ctx = cvs.getContext('2d'); ctx.clearRect(0, 0, cvs.width, cvs.height); }
+    }
+
+    // Compute the actual rendered rect of the video inside its element,
+    // accounting for object-fit:cover. Returns {scale, offsetX, offsetY}.
+    function getVideoCoverTransform(videoEl, canvasW, canvasH) {
+      const vw = videoEl.videoWidth  || canvasW;
+      const vh = videoEl.videoHeight || canvasH;
+      // object-fit:cover: scale up until both dimensions are covered
+      const scale = Math.max(canvasW / vw, canvasH / vh);
+      const renderW = vw * scale;
+      const renderH = vh * scale;
+      const offsetX = (canvasW - renderW) / 2; // negative means cropped
+      const offsetY = (canvasH - renderH) / 2;
+      return { scale, offsetX, offsetY, vw, vh };
+    }
+
+    // Detection loop — async, runs independently via setInterval
+    // Updates lastFacePredictions without ever touching the canvas
+    async function runFaceDetection() {
+      if (!faceTrackingActive || !faceApiLoaded) return;
+      const videoEl = els.video;
+      if (!videoEl || videoEl.readyState < 2 || !state.stream) return;
+      try {
+        const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.3 });
+        const hasLandmarks = faceapi.nets.faceLandmark68TinyNet.isLoaded;
+        let dets;
+        if (hasLandmarks) {
+          dets = await faceapi.detectAllFaces(videoEl, opts).withFaceLandmarks(true);
+        } else {
+          dets = await faceapi.detectAllFaces(videoEl, opts);
+        }
+        if (dets && dets.length > 0) lastFacePredictions = dets;
+      } catch(e) {
+        // keep last predictions on error
+      }
+    }
+
+    // Render loop — pure sync RAF, zero async, never flickers
+    function tickFaceStickerCanvas() {
+      if (!faceTrackingActive || !state.faceSticker) {
+        stopFaceTracking();
+        return;
+      }
+
+      const cvs = els.faceStickerCanvas;
+      const videoEl = els.video;
+      if (!cvs || !videoEl) {
+        faceTrackingRafId = requestAnimationFrame(tickFaceStickerCanvas);
+        return;
+      }
+
+      // Sync canvas pixel dimensions to its CSS rendered size
+      const rect = cvs.getBoundingClientRect();
+      const W = Math.round(rect.width);
+      const H = Math.round(rect.height);
+      if (W > 0 && H > 0 && (cvs.width !== W || cvs.height !== H)) {
+        cvs.width = W;
+        cvs.height = H;
+      }
+
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+      // Draw stickers using last known predictions — always from cached, no await
+      if (lastFacePredictions.length > 0 && videoEl.readyState >= 2) {
+        const W2 = cvs.width;
+        const H2 = cvs.height;
+        const { scale, offsetX, offsetY } = getVideoCoverTransform(videoEl, W2, H2);
+
+        // Convert video-native coords → canvas coords, then mirror for CSS scaleX(-1)
+        const toCanvasX = (x) => x * scale + offsetX;
+        const toCanvasY = (y) => y * scale + offsetY;
+        const mx = (x) => W2 - toCanvasX(x);  // mirror after cover-transform
+        const my = (y) => toCanvasY(y);
+
+        lastFacePredictions.forEach(det => {
+          const box = (det.detection || det).box;
+          const lms = det.landmarks;
+
+          const face = {
+            topLeft:     [mx(box.x + box.width), my(box.y)],
+            bottomRight: [mx(box.x),              my(box.y + box.height)],
+            landmarks: null
+          };
+
+          if (lms) {
+            const pts = lms.positions;
+            const avg = (arr) => ({ x: arr.reduce((s,p)=>s+p.x,0)/arr.length, y: arr.reduce((s,p)=>s+p.y,0)/arr.length });
+            const eL = avg(pts.slice(36,42));
+            const eR = avg(pts.slice(42,48));
+            const no = pts[30];
+            face.landmarks = [
+              [mx(eL.x), my(eL.y)],
+              [mx(eR.x), my(eR.y)],
+              [mx(no.x), my(no.y)]
+            ];
+          }
+
+          const stickerDef = FACE_STICKERS.find(fs => fs.id === state.faceSticker);
+          if (stickerDef) {
+            try { stickerDef.draw(ctx, face, W2, H2); } catch(e) { console.warn('[FaceAR] draw error:', e); }
+          }
+        });
+      }
+
+      faceTrackingRafId = requestAnimationFrame(tickFaceStickerCanvas);
+    }
+
+    // Bake last known face sticker into the captured photo
+    async function bakeLastFaceSticker(ctx, vw, vh) {
+      if (!state.faceSticker || lastFacePredictions.length === 0) return;
+      try {
+        // Capture canvas is vw×vh (native video space), ctx is clean (no transform).
+        // face-api coords are also in native video space → 1:1, just mirror X.
+        const mx = (x) => vw - x;
+        const my = (y) => y;
+
+        lastFacePredictions.forEach(det => {
+          const box = (det.detection || det).box;
+          const lms = det.landmarks;
+
+          const face = {
+            topLeft:     [mx(box.x + box.width), my(box.y)],
+            bottomRight: [mx(box.x),              my(box.y + box.height)],
+            landmarks: null
+          };
+
+          if (lms) {
+            const pts = lms.positions;
+            const avg = (arr) => ({ x: arr.reduce((s,p)=>s+p.x,0)/arr.length, y: arr.reduce((s,p)=>s+p.y,0)/arr.length });
+            const eL = avg(pts.slice(36,42));
+            const eR = avg(pts.slice(42,48));
+            const no = pts[30];
+            face.landmarks = [
+              [mx(eL.x), my(eL.y)],
+              [mx(eR.x), my(eR.y)],
+              [mx(no.x), my(no.y)]
+            ];
+          }
+
+          const stickerDef = FACE_STICKERS.find(fs => fs.id === state.faceSticker);
+          if (stickerDef) { try { stickerDef.draw(ctx, face, vw, vh); } catch(e) {} }
+        });
+      } catch(e) { console.warn('[FaceAR] bake error:', e); }
+    }
+
     function renderAll(){
       applyVideoFilter();
       renderCanvas(els.previewCanvas);
@@ -3842,6 +4474,8 @@
         await els.video.play().catch(()=>{});
         updateStatus('Kamera aktif. Pilih layout lalu tekan shutter.');
         renderAll();
+        // Resume face tracking if a face sticker was active
+        if (state.faceSticker) startFaceTracking();
         return true;
       } catch (err) {
         state.stream = null;
@@ -3855,6 +4489,7 @@
     }
 
     function stopCamera(){
+      stopFaceTracking();
       if (state.stream) {
         state.stream.getTracks().forEach(t => t.stop());
         state.stream = null;
@@ -3863,7 +4498,7 @@
       updateStatus('Kamera dimatikan.');
     }
 
-    function captureFrame(){
+    async function captureFrame(){
       const vw = els.video.videoWidth;
       const vh = els.video.videoHeight;
       if (!vw || !vh) return null;
@@ -3879,6 +4514,11 @@
       ctx.scale(-1, 1);
       ctx.drawImage(els.video, 0, 0, vw, vh);
       ctx.restore();
+
+      // Bake face sticker into the captured frame using last known positions
+      if (state.faceSticker) {
+        await bakeLastFaceSticker(ctx, vw, vh);
+      }
 
       const img = new Image();
       img.src = cvs.toDataURL('image/jpeg', 0.96);
