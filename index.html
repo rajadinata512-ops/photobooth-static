@@ -1708,7 +1708,7 @@
               </div>
               <div style="margin-top:14px;padding:12px 14px;border-radius:14px;background:rgba(200,150,62,.08);border:1px solid rgba(200,150,62,.2);display:flex;align-items:center;justify-content:space-between;">
                 <span style="font-size:12px;color:var(--gold2);font-weight:700;">best moment</span>
-                <span style="font-size:11px;color:var(--muted);">StudioBooth &#169; 2025</span>
+                <span style="font-size:11px;color:var(--muted);">StudioBooth StudioBooth &#169; 2026</span>
               </div>
             </div>
           </div>
@@ -1917,7 +1917,7 @@
                   <rect x="3" y="3" width="18" height="18" rx="4"></rect>
                   <path d="M3 9h18M3 15h18"></path>
                 </svg>
-                Kisi / Layout
+                Layout
               </button>
               <button class="tool-tab" data-tool="filter">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -1932,7 +1932,19 @@
                 </svg>
                 Bersinar
               </button>
-
+              <button class="tool-tab" data-tool="frame">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="3"></rect>
+                  <rect x="7" y="7" width="10" height="10" rx="1"></rect>
+                </svg>
+                Frame
+              </button>
+              <button class="tool-tab" data-tool="sticker">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3 L14 10 L21 12 L14 14 L12 21 L10 14 L3 12 L10 10 Z"/>
+                </svg>
+                Stiker
+              </button>
             </div>
 
             <div class="panel-title" id="toolTitle">Pilih Layout</div>
@@ -1991,9 +2003,16 @@
                 <div style="font-size:13px;font-weight:800;color:var(--text);">Preview Hasil</div>
                 <div style="font-size:11px;color:var(--muted);margin-top:1px;">Live render · siap diunduh</div>
               </div>
-              <!-- layout picker mini -->
-              <div class="rlp-group" id="resultLayoutPicker">
-                <!-- populated by renderResultPanel() -->
+              <div style="display:flex;align-items:center;gap:8px;">
+                <!-- Full preview toggle -->
+                <button id="togglePreviewBtn" onclick="toggleFullPreview()"
+                  style="padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer;
+                  background:rgba(200,150,62,.1);border:1px solid rgba(200,150,62,.25);color:var(--gold2);
+                  transition:.2s;white-space:nowrap;">🖼 Lihat Hasil</button>
+                <!-- layout picker mini -->
+                <div class="rlp-group" id="resultLayoutPicker">
+                  <!-- populated by renderResultPanel() -->
+                </div>
               </div>
             </div>
 
@@ -2002,6 +2021,10 @@
 
               <!-- Film strip (foto-foto) -->
               <div class="result-scroll" style="padding:14px 10px 14px 14px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:520px;" id="filmStripWrap">
+                <!-- Full preview canvas (togglable) -->
+                <div id="fullPreviewWrap" style="display:none;border-radius:16px;overflow:hidden;border:1px solid rgba(200,150,62,.25);background:rgba(0,0,0,.3);padding:8px;margin-bottom:4px;">
+                  <canvas id="livePreviewCanvas" style="width:100%;display:block;border-radius:10px;"></canvas>
+                </div>
                 <!-- populated by rebuildResultThumbnails -->
               </div>
 
@@ -2422,9 +2445,37 @@
       });
     }
 
+    let _fullPreviewVisible = false;
+    function toggleFullPreview() {
+      _fullPreviewVisible = !_fullPreviewVisible;
+      const wrap = document.getElementById('fullPreviewWrap');
+      const btn = document.getElementById('togglePreviewBtn');
+      if (wrap) wrap.style.display = _fullPreviewVisible ? 'block' : 'none';
+      if (btn) {
+        btn.textContent = _fullPreviewVisible ? '✕ Tutup' : '🖼 Lihat Hasil';
+        btn.style.background = _fullPreviewVisible ? 'rgba(200,150,62,.22)' : 'rgba(200,150,62,.1)';
+        btn.style.borderColor = _fullPreviewVisible ? 'rgba(200,150,62,.5)' : 'rgba(200,150,62,.25)';
+      }
+      if (_fullPreviewVisible) syncLivePreviewCanvas();
+    }
+
+    function syncLivePreviewCanvas() {
+      if (!_fullPreviewVisible) return;
+      const liveCanvas = document.getElementById('livePreviewCanvas');
+      if (!liveCanvas) return;
+      renderCanvas(liveCanvas, state.photos);
+    }
+
+    // Track last sidebar tab — all 5 tools now have sidebar tabs
+    const SIDEBAR_TOOLS = ['layout', 'filter', 'brightness', 'frame', 'sticker'];
+    let lastSidebarTool = 'layout';
+
     function setTool(tool){
       state.tool = tool;
-      [...document.querySelectorAll('.tool-tab')].forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
+      if (SIDEBAR_TOOLS.includes(tool)) {
+        lastSidebarTool = tool;
+        [...document.querySelectorAll('.tool-tab')].forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
+      }
       els.toolTitle.textContent = toolMeta[tool].title;
       els.toolDesc.textContent = toolMeta[tool].desc;
       els.toolPanel.innerHTML = toolMeta[tool].render();
@@ -2679,6 +2730,11 @@
       }
     };
 
+    // Safe letterSpacing setter — Firefox <99 ignores it, Chrome/Edge support it
+    function setLetterSpacing(ctx, value) {
+      try { ctx.letterSpacing = value; } catch(e) {}
+    }
+
     function drawPerforationStrip(ctx, x, y, length, vertical, dotColor){
       // Draws film-strip perforation dots along one side
       const dotR = 5;
@@ -2845,7 +2901,7 @@
       ctx.font='italic 800 30px "Georgia", serif';
       ctx.fillStyle=T.accent; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText('StudioBooth', W/2, headerY+headerH/2-5);
-      ctx.font='700 11px sans-serif'; ctx.letterSpacing='.18em';
+      ctx.font='700 11px sans-serif'; setLetterSpacing(ctx,'.18em');
       ctx.fillStyle=T.accentLight; ctx.globalAlpha=.8;
       ctx.fillText('PHOTO BOOTH', W/2, headerY+headerH/2+16);
       ctx.restore();
@@ -2907,7 +2963,7 @@
 
       ctx.save();
       ctx.font='900 20px "Georgia",serif'; ctx.fillStyle=T.accent;
-      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.letterSpacing='.22em';
+      ctx.textAlign='center'; ctx.textBaseline='middle'; setLetterSpacing(ctx,'.22em');
       ctx.fillText(cap.toUpperCase(), W/2, footerY+14);
       ctx.font='700 15px serif'; ctx.globalAlpha=.7;
       ctx.fillText('★   ★   ★', W/2, footerY+36);
@@ -3005,7 +3061,7 @@
       // Header text
       ctx.save();
       ctx.font='900 22px "Georgia",serif'; ctx.fillStyle=T.navy;
-      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.letterSpacing='.14em';
+      ctx.textAlign='center'; ctx.textBaseline='middle'; setLetterSpacing(ctx,'.14em');
       ctx.fillText('STUDIO BOOTH', W/2, headerY+headerH/2-6);
       ctx.font='700 11px sans-serif'; ctx.fillStyle=T.red; ctx.globalAlpha=.9;
       ctx.fillText('✈  PHOTO BOOTH  ✈', W/2, headerY+headerH/2+14);
@@ -3143,7 +3199,7 @@
       // KODAK text on top bar
       ctx.save();
       ctx.font='900 32px "Arial Black",sans-serif'; ctx.fillStyle='#111111';
-      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.letterSpacing='.18em';
+      ctx.textAlign='center'; ctx.textBaseline='middle'; setLetterSpacing(ctx,'.18em');
       ctx.fillText('StudioBooth', W/2, barH/2);
       ctx.restore();
 
@@ -3201,7 +3257,7 @@
       ctx.font='italic 800 26px Georgia,serif'; ctx.fillStyle='#111111';
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(cap, W/2, H-barH/2-6);
-      ctx.font='700 11px sans-serif'; ctx.fillStyle='rgba(17,17,17,.6)'; ctx.letterSpacing='.14em';
+      ctx.font='700 11px sans-serif'; ctx.fillStyle='rgba(17,17,17,.6)'; setLetterSpacing(ctx,'.14em');
       ctx.fillText(new Date().toLocaleDateString('id-ID'),W/2,H-barH/2+14);
       ctx.restore();
 
@@ -3301,7 +3357,7 @@
       ctx.fillText('StudioBooth', innerX + 18, headerY + headerH2 / 2);
 
       ctx.font = '800 13px "Plus Jakarta Sans", sans-serif';
-      ctx.letterSpacing = '0.08em';
+      setLetterSpacing(ctx,'0.08em');
       ctx.textAlign = 'right';
       ctx.fillText(`${state.layout} FOTO`, innerX + innerW - 18, headerY + headerH2 / 2);
       ctx.restore();
@@ -3412,7 +3468,6 @@
       }
 
       // Card corner icons (BeautyPlus-style decorative icons inside border)
-      const cornerIcons = ['💎','❤️','🌙','✨'];
       const cornerPositions = [
         { x: pad+tpl.borderWidth+20, y: pad+tpl.borderWidth+22 },
         { x: W/2,                    y: pad+tpl.borderWidth+22 },
@@ -3490,7 +3545,7 @@
       ctx.fillStyle = tpl.footerColor;
       ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
       ctx.globalAlpha = 0.7;
-      ctx.letterSpacing = '0.08em';
+      setLetterSpacing(ctx,'0.08em');
       ctx.fillText('📸  capture your best moment', W/2, brandY + 15);
       ctx.restore();
 
@@ -3539,6 +3594,7 @@
     function renderAll(){
       applyVideoFilter();
       renderCanvas(els.previewCanvas);
+      syncLivePreviewCanvas();
       updateSelectedStickerChips();
       rebuildResultThumbnails();
       const stickerCountEl = document.getElementById('stickerCount');
@@ -3985,6 +4041,7 @@
     window.setTool = setTool;
     window.startCamera = startCamera;
     window.renderAll = renderAll;
+    window.toggleFullPreview = toggleFullPreview;
 
     // Event bindings
     document.getElementById('startBtn').addEventListener('click', async () => {
