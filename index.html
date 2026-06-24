@@ -2250,136 +2250,297 @@
     const FACE_STICKERS = [
       {
         id: 'bunny_ear',
-        label: 'Bunny Ear',
+        label: 'Bunny Face',
         icon: '🐰',
-        desc: 'Telinga kelinci panjang yang menggemaskan',
-        draw(ctx, face, W, H) {
-          const { topLeft, bottomRight } = face;
-          const fx = topLeft[0], fy = topLeft[1];
-          const fw = bottomRight[0] - fx, fh = bottomRight[1] - fy;
-          const cx = fx + fw / 2;
-          const earW = fw * 0.28, earH = fh * 1.1;
-          // Shift anchor up so ears sit on top of head, not on forehead
-          const ey = fy - fh * 0.28;
-          const earY = ey - earH * 0.85;
-          // Left ear
-          ctx.save();
-          ctx.fillStyle = '#f8c8d4';
-          ctx.strokeStyle = '#e88ea8';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.ellipse(cx - fw * 0.22, earY + earH / 2, earW * 0.5, earH * 0.5, -0.15, 0, Math.PI * 2);
-          ctx.fill(); ctx.stroke();
-          // Inner left ear
-          ctx.fillStyle = '#ffaec9';
-          ctx.beginPath();
-          ctx.ellipse(cx - fw * 0.22, earY + earH / 2, earW * 0.25, earH * 0.35, -0.15, 0, Math.PI * 2);
-          ctx.fill();
-          // Right ear
-          ctx.fillStyle = '#f8c8d4';
-          ctx.strokeStyle = '#e88ea8';
-          ctx.beginPath();
-          ctx.ellipse(cx + fw * 0.22, earY + earH / 2, earW * 0.5, earH * 0.5, 0.15, 0, Math.PI * 2);
-          ctx.fill(); ctx.stroke();
-          // Inner right ear
-          ctx.fillStyle = '#ffaec9';
-          ctx.beginPath();
-          ctx.ellipse(cx + fw * 0.22, earY + earH / 2, earW * 0.25, earH * 0.35, 0.15, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
-      },
-      {
-        id: 'cat_ear',
-        label: 'Cat Ear',
-        icon: '🐱',
-        desc: 'Telinga kucing imut lucu',
-        draw(ctx, face, W, H) {
-          const { topLeft, bottomRight } = face;
-          const fx = topLeft[0], fy = topLeft[1];
-          const fw = bottomRight[0] - fx, fh = bottomRight[1] - fy;
-          const cx = fx + fw / 2;
-          const earSize = fw * 0.36;
-          // TinyFaceDetector box.y is at brow level; shift ears up to sit on top of head
-          const ey = fy - fh * 0.28;
-          ctx.save();
-          // Left cat ear
-          ctx.fillStyle = '#f9a8d4';
-          ctx.strokeStyle = '#ec4899';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(cx - fw * 0.38, ey + fh * 0.05);
-          ctx.lineTo(cx - fw * 0.12, ey + fh * 0.05);
-          ctx.lineTo(cx - fw * 0.25, ey - earSize * 0.8);
-          ctx.closePath();
-          ctx.fill(); ctx.stroke();
-          // Inner left ear
-          ctx.fillStyle = '#fce7f3';
-          ctx.beginPath();
-          ctx.moveTo(cx - fw * 0.33, ey + fh * 0.02);
-          ctx.lineTo(cx - fw * 0.17, ey + fh * 0.02);
-          ctx.lineTo(cx - fw * 0.25, ey - earSize * 0.55);
-          ctx.closePath();
-          ctx.fill();
-          // Right cat ear
-          ctx.fillStyle = '#f9a8d4';
-          ctx.strokeStyle = '#ec4899';
-          ctx.beginPath();
-          ctx.moveTo(cx + fw * 0.38, ey + fh * 0.05);
-          ctx.lineTo(cx + fw * 0.12, ey + fh * 0.05);
-          ctx.lineTo(cx + fw * 0.25, ey - earSize * 0.8);
-          ctx.closePath();
-          ctx.fill(); ctx.stroke();
-          // Inner right ear
-          ctx.fillStyle = '#fce7f3';
-          ctx.beginPath();
-          ctx.moveTo(cx + fw * 0.33, ey + fh * 0.02);
-          ctx.lineTo(cx + fw * 0.17, ey + fh * 0.02);
-          ctx.lineTo(cx + fw * 0.25, ey - earSize * 0.55);
-          ctx.closePath();
-          ctx.fill();
-          ctx.restore();
-        }
-      },
-      {
-        id: 'napoo',
-        label: 'Napoo',
-        icon: '🐶',
-        desc: 'Hidung dan telinga anjing lucu',
+        desc: 'Filter kelinci Instagram: telinga, hidung, kumis & pipi lucu',
         draw(ctx, face, W, H) {
           const { topLeft, bottomRight, landmarks } = face;
           const fx = topLeft[0], fy = topLeft[1];
           const fw = bottomRight[0] - fx, fh = bottomRight[1] - fy;
           const cx = fx + fw / 2;
           const cy = fy + fh / 2;
-          // Dog ears
           ctx.save();
-          ctx.fillStyle = '#c4a265';
-          ctx.strokeStyle = '#8B5E3C';
-          ctx.lineWidth = 2;
-          const earW = fw * 0.28, earH = fh * 0.5;
-          // Left ear (droopy)
+
+          // === EARS ===
+          const earW = fw * 0.22, earH = fh * 1.15;
+          const ey = fy - fh * 0.28;
+          const earY = ey - earH * 0.82;
+          const earLX = cx - fw * 0.2, earRX = cx + fw * 0.2;
+          const earCY = earY + earH / 2;
+          // Outer left ear
+          ctx.fillStyle = '#f8c8d4';
+          ctx.strokeStyle = '#e88ea8'; ctx.lineWidth = 2.5;
           ctx.beginPath();
-          ctx.ellipse(fx - earW * 0.1, fy + fh * 0.15, earW * 0.45, earH * 0.7, 0.3, 0, Math.PI * 2);
+          ctx.ellipse(earLX, earCY, earW * 0.48, earH * 0.5, -0.13, 0, Math.PI * 2);
           ctx.fill(); ctx.stroke();
-          // Right ear (droopy)
+          // Inner left ear
+          ctx.fillStyle = '#ff9bbf';
           ctx.beginPath();
-          ctx.ellipse(fx + fw + earW * 0.1, fy + fh * 0.15, earW * 0.45, earH * 0.7, -0.3, 0, Math.PI * 2);
+          ctx.ellipse(earLX, earCY + earH * 0.05, earW * 0.22, earH * 0.33, -0.13, 0, Math.PI * 2);
+          ctx.fill();
+          // Outer right ear
+          ctx.fillStyle = '#f8c8d4';
+          ctx.strokeStyle = '#e88ea8';
+          ctx.beginPath();
+          ctx.ellipse(earRX, earCY, earW * 0.48, earH * 0.5, 0.13, 0, Math.PI * 2);
           ctx.fill(); ctx.stroke();
-          // Dog nose
-          const noseR = fw * 0.09;
-          const noseLm = landmarks && landmarks[2]; // nose landmark
+          // Inner right ear
+          ctx.fillStyle = '#ff9bbf';
+          ctx.beginPath();
+          ctx.ellipse(earRX, earCY + earH * 0.05, earW * 0.22, earH * 0.33, 0.13, 0, Math.PI * 2);
+          ctx.fill();
+
+          // === BLUSH cheeks ===
+          const blushY = fy + fh * 0.6;
+          const blushR = fw * 0.175;
+          const gradL = ctx.createRadialGradient(cx - fw * 0.28, blushY, 0, cx - fw * 0.28, blushY, blushR);
+          gradL.addColorStop(0, 'rgba(255,150,180,0.72)'); gradL.addColorStop(1, 'rgba(255,150,180,0)');
+          ctx.fillStyle = gradL;
+          ctx.beginPath(); ctx.ellipse(cx - fw * 0.28, blushY, blushR, blushR * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+          const gradR = ctx.createRadialGradient(cx + fw * 0.28, blushY, 0, cx + fw * 0.28, blushY, blushR);
+          gradR.addColorStop(0, 'rgba(255,150,180,0.72)'); gradR.addColorStop(1, 'rgba(255,150,180,0)');
+          ctx.fillStyle = gradR;
+          ctx.beginPath(); ctx.ellipse(cx + fw * 0.28, blushY, blushR, blushR * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+
+          // === BUNNY NOSE (triangle pink) ===
+          const noseLm = landmarks && landmarks[2];
+          const nx = noseLm ? noseLm[0] : cx;
+          const ny = noseLm ? noseLm[1] : cy + fh * 0.08;
+          const noseR = fw * 0.055;
+          ctx.fillStyle = '#ff85b3';
+          ctx.strokeStyle = '#e05090'; ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(nx, ny - noseR * 0.7);
+          ctx.lineTo(nx - noseR, ny + noseR * 0.5);
+          ctx.lineTo(nx + noseR, ny + noseR * 0.5);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          // Nose shine
+          ctx.fillStyle = 'rgba(255,255,255,0.55)';
+          ctx.beginPath();
+          ctx.ellipse(nx - noseR * 0.28, ny - noseR * 0.15, noseR * 0.28, noseR * 0.18, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // === WHISKERS ===
+          ctx.strokeStyle = 'rgba(200,130,160,0.85)'; ctx.lineWidth = 1.6;
+          const wY = ny + fh * 0.04;
+          // Left whiskers
+          [[cx - fw*0.1, wY - fh*0.012, cx - fw*0.44, wY - fh*0.028],
+           [cx - fw*0.1, wY,            cx - fw*0.44, wY],
+           [cx - fw*0.1, wY + fh*0.015, cx - fw*0.44, wY + fh*0.03]].forEach(([x1,y1,x2,y2]) => {
+            ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+          });
+          // Right whiskers
+          [[cx + fw*0.1, wY - fh*0.012, cx + fw*0.44, wY - fh*0.028],
+           [cx + fw*0.1, wY,            cx + fw*0.44, wY],
+           [cx + fw*0.1, wY + fh*0.015, cx + fw*0.44, wY + fh*0.03]].forEach(([x1,y1,x2,y2]) => {
+            ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+          });
+
+          // === SPARKLE dots above ears ===
+          ctx.fillStyle = '#ffd6ea';
+          [[earLX - earW*0.6, earY - earH*0.08], [earRX + earW*0.6, earY - earH*0.08],
+           [earLX, earY - earH*0.22], [earRX, earY - earH*0.22]].forEach(([px,py],i) => {
+            ctx.globalAlpha = 0.9;
+            ctx.beginPath(); ctx.arc(px, py, fw*(i%2===0?0.018:0.012), 0, Math.PI*2); ctx.fill();
+          });
+
+          ctx.restore();
+        }
+      },
+      {
+        id: 'cat_ear',
+        label: 'Cat Face',
+        icon: '🐱',
+        desc: 'Filter kucing Instagram: telinga, eyeliner, hidung & kumis',
+        draw(ctx, face, W, H) {
+          const { topLeft, bottomRight, landmarks } = face;
+          const fx = topLeft[0], fy = topLeft[1];
+          const fw = bottomRight[0] - fx, fh = bottomRight[1] - fy;
+          const cx = fx + fw / 2;
+          const cy = fy + fh / 2;
+          const ey = fy - fh * 0.28;
+          const earSize = fw * 0.34;
+          ctx.save();
+
+          // === CAT EARS ===
+          // Left outer ear
+          ctx.fillStyle = '#f9a8d4'; ctx.strokeStyle = '#db2777'; ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(cx - fw * 0.40, ey + fh * 0.04);
+          ctx.lineTo(cx - fw * 0.10, ey + fh * 0.04);
+          ctx.lineTo(cx - fw * 0.25, ey - earSize * 0.88);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          // Left inner ear
+          ctx.fillStyle = '#fce7f3';
+          ctx.beginPath();
+          ctx.moveTo(cx - fw * 0.34, ey + fh * 0.01);
+          ctx.lineTo(cx - fw * 0.16, ey + fh * 0.01);
+          ctx.lineTo(cx - fw * 0.25, ey - earSize * 0.58);
+          ctx.closePath(); ctx.fill();
+          // Right outer ear
+          ctx.fillStyle = '#f9a8d4'; ctx.strokeStyle = '#db2777';
+          ctx.beginPath();
+          ctx.moveTo(cx + fw * 0.40, ey + fh * 0.04);
+          ctx.lineTo(cx + fw * 0.10, ey + fh * 0.04);
+          ctx.lineTo(cx + fw * 0.25, ey - earSize * 0.88);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          // Right inner ear
+          ctx.fillStyle = '#fce7f3';
+          ctx.beginPath();
+          ctx.moveTo(cx + fw * 0.34, ey + fh * 0.01);
+          ctx.lineTo(cx + fw * 0.16, ey + fh * 0.01);
+          ctx.lineTo(cx + fw * 0.25, ey - earSize * 0.58);
+          ctx.closePath(); ctx.fill();
+
+          // === EYELINER (cat-eye flick) ===
+          const eyeY = landmarks && landmarks[0] ? (landmarks[0][1]+landmarks[1][1])/2 : fy + fh * 0.36;
+          const eyeLx = landmarks && landmarks[0] ? landmarks[0][0] : cx - fw * 0.22;
+          const eyeRx = landmarks && landmarks[1] ? landmarks[1][0] : cx + fw * 0.22;
+          ctx.strokeStyle = '#1a0a0a'; ctx.lineWidth = fw * 0.025; ctx.lineCap = 'round';
+          // Left cat-eye flick
+          ctx.beginPath();
+          ctx.moveTo(eyeLx - fw * 0.14, eyeY + fh * 0.01);
+          ctx.quadraticCurveTo(eyeLx - fw * 0.06, eyeY - fh * 0.025, eyeLx + fw * 0.08, eyeY + fh * 0.005);
+          ctx.stroke();
+          ctx.beginPath(); // flick tip
+          ctx.moveTo(eyeLx - fw * 0.14, eyeY + fh * 0.01);
+          ctx.lineTo(eyeLx - fw * 0.2, eyeY - fh * 0.04);
+          ctx.stroke();
+          // Right cat-eye flick
+          ctx.beginPath();
+          ctx.moveTo(eyeRx + fw * 0.14, eyeY + fh * 0.01);
+          ctx.quadraticCurveTo(eyeRx + fw * 0.06, eyeY - fh * 0.025, eyeRx - fw * 0.08, eyeY + fh * 0.005);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(eyeRx + fw * 0.14, eyeY + fh * 0.01);
+          ctx.lineTo(eyeRx + fw * 0.2, eyeY - fh * 0.04);
+          ctx.stroke();
+
+          // === BLUSH cheeks ===
+          const blushY = fy + fh * 0.6;
+          const blushR = fw * 0.16;
+          [[cx - fw*0.3, '#ff85b3'], [cx + fw*0.3, '#ff85b3']].forEach(([bx, col]) => {
+            const g = ctx.createRadialGradient(bx, blushY, 0, bx, blushY, blushR);
+            g.addColorStop(0, 'rgba(255,133,179,0.65)'); g.addColorStop(1, 'rgba(255,133,179,0)');
+            ctx.fillStyle = g; ctx.globalAlpha = 1;
+            ctx.beginPath(); ctx.ellipse(bx, blushY, blushR, blushR * 0.55, 0, 0, Math.PI * 2); ctx.fill();
+          });
+
+          // === CAT NOSE (small triangle) ===
+          const noseLm = landmarks && landmarks[2];
+          const nx = noseLm ? noseLm[0] : cx;
+          const ny = noseLm ? noseLm[1] : cy + fh * 0.06;
+          const nr = fw * 0.045;
+          ctx.fillStyle = '#e879a0'; ctx.strokeStyle = '#c0507a'; ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(nx, ny - nr * 0.6);
+          ctx.lineTo(nx - nr, ny + nr * 0.5);
+          ctx.lineTo(nx + nr, ny + nr * 0.5);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+
+          // === WHISKERS ===
+          ctx.strokeStyle = 'rgba(80,40,60,0.75)'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+          const wY = ny + fh * 0.038;
+          [[-0.08,-0.012,-0.46,-0.03],[-0.08,0,-0.46,0],[-0.08,0.012,-0.46,0.03]].forEach(([ax,ay,bx,by]) => {
+            ctx.beginPath(); ctx.moveTo(cx+ax*fw, wY+ay*fh); ctx.lineTo(cx+bx*fw, wY+by*fh); ctx.stroke();
+          });
+          [[0.08,-0.012,0.46,-0.03],[0.08,0,0.46,0],[0.08,0.012,0.46,0.03]].forEach(([ax,ay,bx,by]) => {
+            ctx.beginPath(); ctx.moveTo(cx+ax*fw, wY+ay*fh); ctx.lineTo(cx+bx*fw, wY+by*fh); ctx.stroke();
+          });
+
+          ctx.restore();
+        }
+      },
+      {
+        id: 'napoo',
+        label: 'Dog Face',
+        icon: '🐶',
+        desc: 'Filter anjing Instagram: telinga floppy, hidung besar, kumis & lidah',
+        draw(ctx, face, W, H) {
+          const { topLeft, bottomRight, landmarks } = face;
+          const fx = topLeft[0], fy = topLeft[1];
+          const fw = bottomRight[0] - fx, fh = bottomRight[1] - fy;
+          const cx = fx + fw / 2;
+          const cy = fy + fh / 2;
+          ctx.save();
+
+          // === FLOPPY DOG EARS (hang beside face) ===
+          const earW = fw * 0.32, earH = fh * 0.68;
+          const earTop = fy + fh * 0.04;
+          ctx.strokeStyle = '#7a4a22'; ctx.lineWidth = 2.5;
+          // Left floppy ear
+          const lgL = ctx.createLinearGradient(fx - earW*0.4, earTop, fx - earW*0.4, earTop + earH);
+          lgL.addColorStop(0, '#d4956a'); lgL.addColorStop(1, '#a0622e');
+          ctx.fillStyle = lgL;
+          ctx.beginPath();
+          ctx.ellipse(fx - earW * 0.25, earTop + earH * 0.5, earW * 0.42, earH * 0.52, 0.25, 0, Math.PI * 2);
+          ctx.fill(); ctx.stroke();
+          // Right floppy ear
+          const lgR = ctx.createLinearGradient(fx + fw + earW*0.4, earTop, fx + fw + earW*0.4, earTop + earH);
+          lgR.addColorStop(0, '#d4956a'); lgR.addColorStop(1, '#a0622e');
+          ctx.fillStyle = lgR;
+          ctx.beginPath();
+          ctx.ellipse(fx + fw + earW * 0.25, earTop + earH * 0.5, earW * 0.42, earH * 0.52, -0.25, 0, Math.PI * 2);
+          ctx.fill(); ctx.stroke();
+
+          // === BLUSH cheeks ===
+          const blushY = fy + fh * 0.6;
+          [[cx - fw*0.3, blushY], [cx + fw*0.3, blushY]].forEach(([bx, by]) => {
+            const g = ctx.createRadialGradient(bx, by, 0, bx, by, fw * 0.16);
+            g.addColorStop(0, 'rgba(240,140,80,0.6)'); g.addColorStop(1, 'rgba(240,140,80,0)');
+            ctx.fillStyle = g;
+            ctx.beginPath(); ctx.ellipse(bx, by, fw*0.16, fw*0.1, 0, 0, Math.PI*2); ctx.fill();
+          });
+
+          // === DOG NOSE (big black oval) ===
+          const noseLm = landmarks && landmarks[2];
           const nx = noseLm ? noseLm[0] : cx;
           const ny = noseLm ? noseLm[1] : cy + fh * 0.1;
-          ctx.fillStyle = '#1a1a2e';
+          const noseW = fw * 0.14, noseH = fw * 0.09;
+          // Nose base
+          ctx.fillStyle = '#111111';
           ctx.beginPath();
-          ctx.ellipse(nx, ny, noseR, noseR * 0.7, 0, 0, Math.PI * 2);
+          ctx.ellipse(nx, ny, noseW, noseH, 0, 0, Math.PI * 2);
+          ctx.fill();
+          // Nose nostrils
+          ctx.fillStyle = '#333';
+          ctx.beginPath();
+          ctx.ellipse(nx - noseW*0.3, ny + noseH*0.1, noseW*0.2, noseH*0.45, 0, 0, Math.PI*2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.ellipse(nx + noseW*0.3, ny + noseH*0.1, noseW*0.2, noseH*0.45, 0, 0, Math.PI*2);
           ctx.fill();
           // Nose shine
-          ctx.fillStyle = 'rgba(255,255,255,0.5)';
+          ctx.fillStyle = 'rgba(255,255,255,0.55)';
           ctx.beginPath();
-          ctx.ellipse(nx - noseR * 0.3, ny - noseR * 0.2, noseR * 0.25, noseR * 0.18, 0, 0, Math.PI * 2);
+          ctx.ellipse(nx - noseW*0.28, ny - noseH*0.22, noseW*0.22, noseH*0.28, 0, 0, Math.PI*2);
           ctx.fill();
+
+          // === TONGUE (sticking out below mouth) ===
+          const mouthY = fy + fh * 0.82;
+          const tongueW = fw * 0.16, tongueH = fh * 0.14;
+          ctx.fillStyle = '#f87171';
+          ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.ellipse(cx, mouthY, tongueW, tongueH, 0, 0, Math.PI * 2);
+          ctx.fill(); ctx.stroke();
+          // Tongue center line
+          ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(cx, mouthY - tongueH * 0.5);
+          ctx.lineTo(cx, mouthY + tongueH * 0.4);
+          ctx.stroke();
+
+          // === WHISKERS ===
+          ctx.strokeStyle = 'rgba(60,40,20,0.7)'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+          const wY = ny + fh * 0.045;
+          [[-0.1,-0.01,-0.46,-0.02],[-0.1,0.01,-0.46,0.02],[-0.1,0.03,-0.44,0.06]].forEach(([ax,ay,bx,by]) => {
+            ctx.beginPath(); ctx.moveTo(cx+ax*fw, wY+ay*fh); ctx.lineTo(cx+bx*fw, wY+by*fh); ctx.stroke();
+          });
+          [[0.1,-0.01,0.46,-0.02],[0.1,0.01,0.46,0.02],[0.1,0.03,0.44,0.06]].forEach(([ax,ay,bx,by]) => {
+            ctx.beginPath(); ctx.moveTo(cx+ax*fw, wY+ay*fh); ctx.lineTo(cx+bx*fw, wY+by*fh); ctx.stroke();
+          });
+
           ctx.restore();
         }
       },
