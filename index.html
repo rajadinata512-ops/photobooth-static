@@ -61,6 +61,7 @@
       height:76px;
       display:flex;align-items:center;justify-content:space-between;
       border-bottom:1px solid rgba(200,150,62,.16);
+      -webkit-backdrop-filter:blur(16px);
       backdrop-filter:blur(16px);
       background:rgba(10,8,19,.74);
       position:sticky;top:0;z-index:30;
@@ -446,6 +447,7 @@
       position:absolute;inset:14px;
       display:none;place-items:center;
       background:rgba(0,0,0,.6);
+      -webkit-backdrop-filter:blur(12px);
       backdrop-filter:blur(12px);
       border-radius:18px;
       z-index:4;
@@ -1117,9 +1119,36 @@
     .modal-backdrop{
       position:fixed;inset:0;z-index:50;
       background:rgba(3,3,10,.72);
+      -webkit-backdrop-filter:blur(8px);
       backdrop-filter:blur(8px);
       display:none;align-items:center;justify-content:center;
       padding:20px;
+    }
+
+    .ios-save-overlay{
+      position:fixed;inset:0;z-index:60;
+      background:rgba(3,3,10,.86);
+      -webkit-backdrop-filter:blur(10px);
+      backdrop-filter:blur(10px);
+      display:none;align-items:center;justify-content:center;
+      padding:20px;
+    }
+    .ios-save-overlay.show{display:flex}
+    .ios-save-card{
+      width:100%;max-width:380px;
+      background:var(--bg2);
+      border:1px solid var(--gold3);
+      border-radius:18px;
+      padding:18px;
+      text-align:center;
+      box-shadow:0 24px 60px rgba(0,0,0,.5);
+    }
+    .ios-save-hint{
+      color:var(--text);font-size:13px;line-height:1.6;margin:0 0 14px;
+    }
+    .ios-save-card img{
+      width:100%;border-radius:12px;display:block;
+      -webkit-touch-callout:default; /* allow native long-press menu on iOS */
     }
     .modal-backdrop.show{display:flex}
     .modal{
@@ -2089,6 +2118,17 @@
     </div>
   </div>
 
+  <!-- iOS Safari can't trigger a true file download via <a download>; this overlay
+       lets the user long-press the image to save it to Photos / share sheet instead. -->
+  <div class="ios-save-overlay" id="iosSaveOverlay" aria-hidden="true">
+    <div class="ios-save-card">
+      <p class="ios-save-hint">Tahan gambar di bawah, lalu pilih <strong>“Add to Photos”</strong> / <strong>“Simpan Gambar”</strong> untuk menyimpan ke galeri kamu.</p>
+      <img id="iosSaveImg" alt="Hasil foto StudioBooth" />
+      <button class="btn btn-gold" id="iosSaveCloseBtn" style="width:100%;margin-top:14px;">Selesai</button>
+    </div>
+  </div>
+
+
   <canvas id="captureCanvas" style="display:none"></canvas>
   <canvas id="previewCanvas" style="display:none"></canvas>
 
@@ -2124,6 +2164,9 @@
       modalText: document.getElementById('modalText'),
       modalCancel: document.getElementById('modalCancel'),
       modalOk: document.getElementById('modalOk'),
+      iosSaveOverlay: document.getElementById('iosSaveOverlay'),
+      iosSaveImg: document.getElementById('iosSaveImg'),
+      iosSaveCloseBtn: document.getElementById('iosSaveCloseBtn'),
       faceStickerCanvas: document.getElementById('faceStickerCanvas')
     };
 
@@ -4868,6 +4911,28 @@
 
     function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
+    // Safari on iOS (all versions, including iOS 18+/26) does not honor the
+    // `download` attribute on <a> — clicking it just navigates instead of
+    // saving a file. The reliable cross-version fix is to show the image
+    // full-screen so the user can long-press → "Add to Photos" / "Simpan Gambar".
+    function isIOS(){
+      // Standard UA check + iPadOS 13+ workaround (iPad reports as "MacIntel" but has touch support)
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+
+    function openIOSSaveOverlay(dataUrl){
+      els.iosSaveImg.src = dataUrl;
+      els.iosSaveOverlay.classList.add('show');
+      els.iosSaveOverlay.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeIOSSaveOverlay(){
+      els.iosSaveOverlay.classList.remove('show');
+      els.iosSaveOverlay.setAttribute('aria-hidden', 'true');
+      els.iosSaveImg.src = '';
+    }
+
     async function downloadResult(){
       if (!state.photos.length) {
         await alertMessage('Belum ada foto yang diambil. Tekan shutter dulu.');
@@ -4875,9 +4940,16 @@
       }
       const canvas = document.createElement('canvas');
       renderCanvas(canvas);
+      const dataUrl = canvas.toDataURL('image/png');
+
+      if (isIOS()) {
+        openIOSSaveOverlay(dataUrl);
+        return;
+      }
+
       const a = document.createElement('a');
       a.download = `studiobooth-${state.layout}foto-${Date.now()}.png`;
-      a.href = canvas.toDataURL('image/png');
+      a.href = dataUrl;
       a.click();
       // Show download success feedback
       const btn = els.downloadBtn;
@@ -4972,6 +5044,8 @@
     document.addEventListener('click', e => {
       if (e.target.closest('#downloadBtn')) downloadResult();
       if (e.target.closest('#retakeBtn'))   retake();
+      if (e.target.closest('#iosSaveCloseBtn')) closeIOSSaveOverlay();
+      if (e.target === els.iosSaveOverlay) closeIOSSaveOverlay();
     });
     document.addEventListener('input', e => {
       if (e.target.id === 'captionInput') {
@@ -4983,6 +5057,7 @@
     // keyboard shortcuts
     document.addEventListener('keydown', e => {
       if (els.modalBackdrop.classList.contains('show')) return;
+      if (els.iosSaveOverlay.classList.contains('show')) return;
       if (e.key === 'Escape' && state.shooting) {
         state.shooting = false;
         els.shutterBtn.disabled = false;
